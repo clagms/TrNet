@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<trnetvisual:TrNetModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:trnetvisual="http://trnetvisual/1.0" id="Sample2">
+  <patterns incomingResults="//@results.0" outgoingOperands="//@operands.0" id="P2">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.0/@edges.0 //@patterns.0/@edges.2" name="A" id="A">
+      <attributes name="at1" attributeExternalCalculationCall="//@restrictions.0"/>
+    </nodes>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.0/@edges.0 //@patterns.0/@edges.1" name="B" id="B">
+      <attributes name="at2"/>
+    </nodes>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.0/@edges.2" outgoing="//@patterns.0/@edges.1" name="C" id="C">
+      <attributes name="at1"/>
+    </nodes>
+    <edges source="//@patterns.0/@nodes.0" target="//@patterns.0/@nodes.1" name="ab"/>
+    <edges source="//@patterns.0/@nodes.2" target="//@patterns.0/@nodes.1" name="cb"/>
+    <edges source="//@patterns.0/@nodes.0" target="//@patterns.0/@nodes.2" name="ac"/>
+  </patterns>
+  <operators xsi:type="trnetvisual:External" results="//@results.0" id="Op1"/>
+  <operators xsi:type="trnetvisual:External" operands="//@operands.0" id="Op2"/>
+  <restrictions xsi:type="trnetvisual:ExternalAttributeCalculationCall" id="Constant" qualifiedName="Constant" result="//@patterns.0/@nodes.0/@attributes.0"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.0"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.0" operator="//@operators.0"/>
+</trnetvisual:TrNetModel>

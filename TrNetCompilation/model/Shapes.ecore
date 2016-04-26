@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="shapes" nsURI="http://shapes/1.0" nsPrefix="shapes">
+  <eClassifiers xsi:type="ecore:EClass" name="Square" eSuperTypes="#//IdElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="squares" upperBound="-1"
+        eType="#//Square" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="pentagons" upperBound="-1"
+        eType="#//Pentagon"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="triangles" upperBound="-1"
+        eType="#//Triangle" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Circle" eSuperTypes="#//IdElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="squares" upperBound="-1"
+        eType="#//Square" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="pentagons" upperBound="-1"
+        eType="#//Pentagon" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Pentagon" eSuperTypes="#//IdElement"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Triangle" eSuperTypes="#//IdElement"/>
+  <eClassifiers xsi:type="ecore:EClass" name="IdElement" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+</ecore:EPackage>

@@ -1,0 +1,268 @@
+
+clearAllExpectedSizes();
+
+if (allStartPatternsHaveDefinedExpectedSizes()) {
+	generateExpectedSizesFromStartPatterns();
+} else {
+	estimateExpectedSizesInStartPatterns();
+	generateExpectedSizesFromStartPatterns();
+}
+
+/* DEBUG
+for (pattern in VisualModel!Pattern.all()){
+	pattern.println();
+	for (parent in getAllParentsSet(pattern)){
+		parent.println();
+	}
+	isUnfilled(pattern).println();
+	canBeFilled(pattern).println();
+}
+*/
+
+operation generateExpectedSizesFromStartPatterns(){
+	var changesHaveBeenMade = true;
+	
+	while (changesHaveBeenMade) {
+		changesHaveBeenMade = false;
+		for (pattern in getAllSuitedPatterns()){
+			
+			("Setting size of pattern " + pattern + " ...").println;
+			computeExpectedSize(pattern);
+			changesHaveBeenMade = true;
+			
+			("Expected size of pattern " + pattern + " set to " + pattern.expected_size).println;
+		}
+	}
+}
+
+operation computeExpectedSize(pattern) {
+	var expected_size = 0;
+	for (operator in getIncomingOperatorsSet(pattern)){
+		if (operator.isKindOf(VisualModel!External)){
+			throw("Unexpected unfilled pattern found: " + pattern);
+		} else if (operator.isKindOf(VisualModel!Combinator)){
+			if (operatorHasOneOperand(operator)){
+				if (operator.operands.first.isKindOf(VisualModel!AntiOperand)) {
+					throw ("Error: Anti Operands have to be combined with some other pattern. In " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!AnyOperand)){
+					expected_size = expected_size + operator.operands.first.pattern.expected_size;
+				} else if (operator.operands.first.isKindOf(VisualModel!SomeOperand)){
+					expected_size = expected_size + operator.operands.first.count;
+				} else if (operator.operands.first.isKindOf(VisualModel!OptionalOperand)){
+					expected_size = expected_size + operator.operands.first.pattern.expected_size;
+				} else {
+					throw("Unexpected kind of operand " + operator.operands.first);
+				}
+			} else if (operatorHasTwoOperands(operator)) {
+				
+				// AnyOperand combined with all
+				if (operator.operands.first.isKindOf(VisualModel!AnyOperand) and operator.operands.last.isKindOf(VisualModel!AnyOperand)) {
+					//expected_size = expected_size + operator.operands.first.pattern.expected_size*operator.operands.last.pattern.expected_size;
+					expected_size =  expected_size + (operator.operands.first.pattern.expected_size*operator.operands.last.pattern.expected_size); 
+				} else if (operator.operands.first.isKindOf(VisualModel!AnyOperand) and operator.operands.last.isKindOf(VisualModel!SomeOperand)){
+					expected_size = expected_size + operator.operands.first.pattern.expected_size*operator.operands.last.count;
+				} else if (operator.operands.first.isKindOf(VisualModel!AnyOperand) and operator.operands.last.isKindOf(VisualModel!AntiOperand)){
+					expected_size = expected_size + operator.operands.first.pattern.expected_size;
+				} else if (operator.operands.first.isKindOf(VisualModel!AnyOperand) and operator.operands.last.isKindOf(VisualModel!OptionalOperand)){
+					expected_size = expected_size + operator.operands.first.pattern.expected_size;
+				
+				// SomeOperand combined with all
+				} else if (operator.operands.first.isKindOf(VisualModel!SomeOperand) and operator.operands.last.isKindOf(VisualModel!AnyOperand)){
+					expected_size = expected_size + operator.operands.first.count*operator.operands.last.pattern.expected_size;
+				} else if (operator.operands.first.isKindOf(VisualModel!SomeOperand) and operator.operands.last.isKindOf(VisualModel!SomeOperand)){
+					expected_size = expected_size + operator.operands.first.count*operator.operands.last.count;
+				} else if (operator.operands.first.isKindOf(VisualModel!SomeOperand) and operator.operands.last.isKindOf(VisualModel!AntiOperand)){
+					expected_size = expected_size + operator.operands.first.count;
+				} else if (operator.operands.first.isKindOf(VisualModel!SomeOperand) and operator.operands.last.isKindOf(VisualModel!OptionalOperand)){
+					expected_size = expected_size + operator.operands.first.count;
+					
+				// AntiOperand combined with all
+				} else if (operator.operands.first.isKindOf(VisualModel!AntiOperand) and operator.operands.last.isKindOf(VisualModel!AnyOperand)){
+					expected_size = expected_size + operator.operands.last.pattern.expected_size;
+				} else if (operator.operands.first.isKindOf(VisualModel!AntiOperand) and operator.operands.last.isKindOf(VisualModel!SomeOperand)){
+					expected_size = expected_size + operator.operands.last.count;
+				} else if (operator.operands.first.isKindOf(VisualModel!AntiOperand) and operator.operands.last.isKindOf(VisualModel!AntiOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!AntiOperand) and operator.operands.last.isKindOf(VisualModel!OptionalOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				
+				// OptionalOperand combined with all
+				} else if (operator.operands.first.isKindOf(VisualModel!OptionalOperand) and operator.operands.last.isKindOf(VisualModel!AnyOperand)){
+					expected_size = expected_size + operator.operands.last.pattern.expected_size;
+				} else if (operator.operands.first.isKindOf(VisualModel!OptionalOperand) and operator.operands.last.isKindOf(VisualModel!SomeOperand)){
+					expected_size = expected_size + operator.operands.last.count;
+				} else if (operator.operands.first.isKindOf(VisualModel!OptionalOperand) and operator.operands.last.isKindOf(VisualModel!AntiOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!OptionalOperand) and operator.operands.last.isKindOf(VisualModel!OptionalOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				}
+			} else {
+				throw ("Error: Unexpected number of operands in operator " + operator);
+			}
+		} else if (operator.isKindOf(VisualModel!Union)){
+			if (operatorHasOneOperand(operator)){
+				if (operator.operands.first.isKindOf(VisualModel!AntiOperand)) {
+					throw ("Unexpected combination of operands in " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!AnyOperand)){
+					expected_size = expected_size + operator.operands.first.pattern.expected_size;
+				} else if (operator.operands.first.isKindOf(VisualModel!SomeOperand)){
+					expected_size = expected_size + operator.operands.first.count;
+				} else if (operator.operands.first.isKindOf(VisualModel!OptionalOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				} else {
+					throw("Unexpected kind of operand " + operator.operands.first);
+				}
+			/*} else if (operatorHasTwoOperands(operator)) {
+				
+				// AnyOperand combined with all
+				if (operator.operands.first.isKindOf(VisualModel!AnyOperand) and operator.operands.last.isKindOf(VisualModel!AnyOperand)) {
+					expected_size = expected_size + operator.operands.first.pattern.expected_size + operator.operands.last.pattern.expected_size;
+				} else if (operator.operands.first.isKindOf(VisualModel!AnyOperand) and operator.operands.last.isKindOf(VisualModel!SomeOperand)){
+					expected_size = expected_size + operator.operands.first.pattern.expected_size + operator.operands.last.count;
+				} else if (operator.operands.first.isKindOf(VisualModel!AnyOperand) and operator.operands.last.isKindOf(VisualModel!AntiOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!AnyOperand) and operator.operands.last.isKindOf(VisualModel!OptionalOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				
+				// SomeOperand combined with all
+				} else if (operator.operands.first.isKindOf(VisualModel!SomeOperand) and operator.operands.last.isKindOf(VisualModel!AnyOperand)){
+					expected_size = expected_size + operator.operands.first.count + operator.operands.last.pattern.expected_size;
+				} else if (operator.operands.first.isKindOf(VisualModel!SomeOperand) and operator.operands.last.isKindOf(VisualModel!SomeOperand)){
+					expected_size = expected_size + operator.operands.first.count + operator.operands.last.count;
+				} else if (operator.operands.first.isKindOf(VisualModel!SomeOperand) and operator.operands.last.isKindOf(VisualModel!AntiOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!SomeOperand) and operator.operands.last.isKindOf(VisualModel!OptionalOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+					
+				// AntiOperand combined with all
+				} else if (operator.operands.first.isKindOf(VisualModel!AntiOperand) and operator.operands.last.isKindOf(VisualModel!AnyOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!AntiOperand) and operator.operands.last.isKindOf(VisualModel!SomeOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!AntiOperand) and operator.operands.last.isKindOf(VisualModel!AntiOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!AntiOperand) and operator.operands.last.isKindOf(VisualModel!OptionalOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				
+				// OptionalOperand combined with all
+				} else if (operator.operands.first.isKindOf(VisualModel!OptionalOperand) and operator.operands.last.isKindOf(VisualModel!AnyOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!OptionalOperand) and operator.operands.last.isKindOf(VisualModel!SomeOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!OptionalOperand) and operator.operands.last.isKindOf(VisualModel!AntiOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!OptionalOperand) and operator.operands.last.isKindOf(VisualModel!OptionalOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				}
+			*/
+			} else {
+				throw ("Error: Unexpected number of operands in operator " + operator);
+			}
+		} else {
+			throw ("Error: Unexpected kind of operator in " + operator);
+		}
+	}
+	
+	pattern.expected_size = min(100.0d, expected_size); // save some space.
+	//pattern.expected_size = expected_size;
+}
+
+operation getAllSuitedPatterns() {
+	return VisualModel!Pattern.all().select(p| isUnfilled(p) and canBeFilled(p));
+}
+
+operation canBeFilled(pattern) {
+	return hasFilledParents(pattern);
+}
+
+operation hasFilledParents(pattern) {
+	return getAllParentsSet(pattern).forAll(p | isFilled(p));
+}
+
+operation isUnfilled(pattern) {
+	return (pattern.expected_size.isUndefined) or (pattern.expected_size==-1) or (pattern.expected_size==0); // TODO when the network is disconected (and hence, invalid) this goes in an infiniti cycle.
+}
+
+operation getAllParentsSet(pattern) {
+	var result = new Set;
+	
+	for (operator in getIncomingOperatorsSet(pattern)) {
+		result.addAll(getIncomingPatternsSet(operator));
+	}
+	
+	return result;
+}
+
+operation getIncomingPatternsSet(operator){
+	return operator.operands.collect(operand | operand.pattern).asSet();
+}
+
+operation getIncomingOperatorsSet(pattern) {
+	return pattern.incomingResults.collect(result | result.operator).asSet();
+}
+
+operation clearAllExpectedSizes(){
+	"Clearing sizes for all non start patterns...".println();
+	for (pattern in getAllNonStartingPatterns()) {
+		pattern.expected_size = -1.0d;
+		
+	}
+	"Clearing sizes for all non start patterns... DONE".println();
+}
+
+operation getAllNonStartingPatterns(){
+	return VisualModel!Pattern.all().select(e | not isAStartPattern(e));
+}
+
+operation estimateExpectedSizesInStartPatterns(){
+	"Estimating size for start patterns...".println();
+	
+	for (startPattern in getAllStartPatterns()){
+		("Size estimated for pattern " + startPattern).println();
+		startPattern.expected_size = 100.0d;
+	}
+	
+	"Estimating size for start patterns... DONE".println();
+	
+}
+
+operation allStartPatternsHaveDefinedExpectedSizes() {
+	return getAllStartPatterns().forAll(p | isFilled(p));
+}
+
+operation min(a,b) {
+	if (a>b) {
+		return b;
+	} else {
+		return a;
+	}
+}
+
+operation isFilled(pattern) {
+	return not isUnfilled(pattern);
+}
+
+operation getAllStartPatterns(){
+	return VisualModel!Pattern.all().select(e | isAStartPattern(e));
+}
+
+operation isAStartPattern(pattern) {
+	return not pattern.incomingResults.select(r | resultsComesFromAnExternalOperator(r)).isEmpty();
+}
+
+operation resultsComesFromAnExternalOperator(result) {
+	return result.operator.isKindOf(VisualModel!External);
+}
+
+operation operatorHasTwoOperands(operator){
+	return operator.operands.size() == 2;
+}
+operation operatorHasOneOperand(operator){
+	return operator.operands.size() == 1;
+}
+
+// tests
+
+for (startPattern in getAllStartPatterns()){
+	startPattern.println();
+}

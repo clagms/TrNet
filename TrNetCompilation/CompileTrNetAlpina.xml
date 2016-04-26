@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="CompileTrNetAlpina" default="main" basedir=".">
+
+	<target name="main">
+		
+		<property name="base.dir" location="." />
+		
+		<!-- 
+		We don't need this because our metamodels are in the registry as plugins.
+		<epsilon.emf.register file="TrNetVisual.ecore" />
+		<epsilon.emf.register file="TrNet.ecore" />
+		-->
+
+		<!-- Loads the models. The name of the models are important because they are used throughout the transformations -->
+		<epsilon.emf.loadModel name="VisualModel" aliases="TrNetModel,CoreModel" modelfile="model/SampleAnalysable1.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+		<epsilon.emf.loadModel name="ApnModel" modelfile="alpina/ApnTrNetIncomplete.apnmm" metamodeluri="http://alpina.unige.ch/apnmm" read="false" store="true" />
+		
+		
+		<!-- Generate IDs on the Visual Model -->
+		<epsilon.eol src="analysis/GenerateIds.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+
+		<!-- Generate Operand Indexes on the Visual Model-->
+		<epsilon.eol src="analysis/GenerateOperandIndexes.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+
+		<!-- Generate Expected Cardinalities on the Visual Model -->
+		<epsilon.eol src="analysis/GenerateExpectedSizes_Naive.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+
+		<!-- Validations on the Visual Model -->
+		<epsilon.evl src="validation/TrNetVisualValidation.evl">
+			<model ref="VisualModel" />
+		</epsilon.evl>
+
+		<!-- Generate the execution plan on the Visual Model -->
+		<epsilon.eol src="analysis/InferExecutionPlan.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+
+		<!-- Transforms Visual model into Alpina Model -->
+		<epsilon.etl src="alpina/TrNetVisual2Apn.etl">
+			<model ref="VisualModel" />
+			<model ref="ApnModel" />
+		</epsilon.etl>
+
+		<!-- Generate Tranformation Code -->
+		<epsilon.egl src="alpina/TrNet2Alpina.egl">
+			<model ref="VisualModel" />
+		</epsilon.egl>
+		
+		<!-- Correct Sort references -->
+		<java classname="alpina.FixSortReferences" classpath="bin">
+			<arg value="${base.dir}/alpina/generated/ApnTrNetComplete.apnmm"/>
+		</java>
+		
+	</target>
+
+</project>

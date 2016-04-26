@@ -1,0 +1,6 @@
+import "nat.adt"
+
+Adt CModel
+	Sorts CModel;
+	Generators
+		CModelNodeConstructor: nat -> CModel;

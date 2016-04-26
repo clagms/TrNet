@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<trnetvisual:TrNetModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:trnetvisual="http://trnetvisual/1.0" id="Class2RelationalImplicit">
+  <patterns incomingResults="//@results.1" outgoingOperands="//@operands.0" id="TrNetPat1">
+    <nodes xsi:type="trnetvisual:MandatoryNode" name="CModel" id="CModel0"/>
+  </patterns>
+  <patterns incomingResults="//@results.0" outgoingOperands="//@operands.1 //@operands.5 //@operands.7 //@operands.18 //@operands.30" id="TrNetPat2">
+    <nodes xsi:type="trnetvisual:MandatoryNode" name="Database" keepOut="//@restrictions.3 //@restrictions.5 //@restrictions.11 //@restrictions.18" id="Database0"/>
+  </patterns>
+  <patterns incomingResults="//@results.2" outgoingOperands="//@operands.2" id="TrNetPat17">
+    <nodes xsi:type="trnetvisual:MandatoryNode" name="CClass" keepOut="//@restrictions.0" id="CClass0">
+      <attributes externalAttributeCalculationCallRef="//@restrictions.77/@parameters.0 //@restrictions.78/@parameters.0" name="name"/>
+    </nodes>
+  </patterns>
+  <patterns incomingResults="//@results.3" outgoingOperands="//@operands.11 //@operands.14 //@operands.25 //@operands.6 //@operands.28 //@operands.36 //@operands.38 //@operands.40 //@operands.42 //@operands.44 //@operands.83" id="TrNetPat18">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.3/@edges.0" sameOut="//@restrictions.7" sameIn="//@restrictions.89" name="CClass" keepIn="//@restrictions.0" keepOut="//@restrictions.28" id="CClass0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.3/@edges.0" outgoing="//@patterns.3/@edges.1 //@patterns.3/@edges.2" name="Table" keepOut="//@restrictions.6 //@restrictions.16 //@restrictions.4 //@restrictions.29 //@restrictions.31 //@restrictions.33 //@restrictions.90" id="Table0">
+      <attributes name="name" attributeExternalCalculationCall="//@restrictions.77"/>
+    </nodes>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.3/@edges.1 //@patterns.3/@edges.2" name="Column" keepOut="//@restrictions.30 //@restrictions.32 //@restrictions.34" id="Column0">
+      <attributes name="name" attributeExternalCalculationCall="//@restrictions.78"/>
+    </nodes>
+    <edges source="//@patterns.3/@nodes.0" target="//@patterns.3/@nodes.1" name="trace"/>
+    <edges source="//@patterns.3/@nodes.1" target="//@patterns.3/@nodes.2" name="columns"/>
+    <edges source="//@patterns.3/@nodes.1" target="//@patterns.3/@nodes.2" name="primaryKeys"/>
+  </patterns>
+  <patterns incomingResults="//@results.5" outgoingOperands="//@operands.3" id="TrNetPat23">
+    <nodes xsi:type="trnetvisual:MandatoryNode" name="Datatype" keepOut="//@restrictions.1" id="Datatype0">
+      <attributes externalAttributeCalculationCallRef="//@restrictions.79/@parameters.0" name="name"/>
+    </nodes>
+  </patterns>
+  <patterns incomingResults="//@results.4" outgoingOperands="//@operands.4 //@operands.13 //@operands.15 //@operands.20 //@operands.24 //@operands.29 //@operands.80" id="TrNetPat24">
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.5/@edges.0" name="Type" keepOut="//@restrictions.2 //@restrictions.10 //@restrictions.12 //@restrictions.13 //@restrictions.17 //@restrictions.19 //@restrictions.84" id="Type0">
+      <attributes name="name" attributeExternalCalculationCall="//@restrictions.79"/>
+    </nodes>
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.5/@edges.0" sameOut="//@restrictions.9" name="Datatype" keepIn="//@restrictions.1" id="Datatype0">
+      <attributes externalConditionCallRef="//@operators.9/@conditions.0/@parameters.0 //@operators.10/@conditions.1/@parameters.0 //@operators.11/@conditions.1/@parameters.0" name="name"/>
+    </nodes>
+    <edges source="//@patterns.5/@nodes.1" target="//@patterns.5/@nodes.0" name="trace"/>
+  </patterns>
+  <patterns incomingResults="//@results.6 //@results.17 //@results.34" outgoingOperands="//@operands.8" id="TrNetPat3">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.6/@edges.0" name="Database" keepIn="//@restrictions.3 //@restrictions.22 //@restrictions.44" id="Database0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.6/@edges.0" name="Table" keepIn="//@restrictions.4 //@restrictions.23 //@restrictions.45" id="Table0"/>
+    <edges source="//@patterns.6/@nodes.0" target="//@patterns.6/@nodes.1" name="contents"/>
+  </patterns>
+  <patterns incomingResults="//@results.7" outgoingOperands="//@operands.9" id="TrNetPat4">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.7/@edges.0" name="Database" keepIn="//@restrictions.5" id="Database0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.7/@edges.0" name="Type" keepIn="//@restrictions.2" id="Type0"/>
+    <edges source="//@patterns.7/@nodes.0" target="//@patterns.7/@nodes.1" name="contents"/>
+  </patterns>
+  <patterns incomingResults="//@results.9" outgoingOperands="//@operands.10 //@operands.16 //@operands.23 //@operands.27" id="TrNetPat25">
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.8/@edges.0" sameOut="//@restrictions.8" sameIn="//@restrictions.15" name="Attribute" id="Attribute0">
+      <attributes externalConditionCallRef="//@operators.7/@conditions.0/@parameters.0 //@operators.10/@conditions.0/@parameters.0 //@operators.11/@conditions.0/@parameters.0 //@operators.8/@conditions.0/@parameters.0" name="isMany"/>
+      <attributes externalAttributeCalculationCallRef="//@restrictions.80/@parameters.0 //@restrictions.81/@parameters.0 //@restrictions.82/@parameters.0 //@restrictions.83/@parameters.0 //@restrictions.87/@parameters.0" name="name"/>
+    </nodes>
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.8/@edges.0" sameIn="//@restrictions.7" name="CClass" id="CClass0">
+      <attributes externalAttributeCalculationCallRef="//@restrictions.85/@parameters.0 //@restrictions.88/@parameters.0" name="name"/>
+    </nodes>
+    <edges source="//@patterns.8/@nodes.1" target="//@patterns.8/@nodes.0" name="attributes"/>
+  </patterns>
+  <patterns incomingResults="//@results.8" outgoingOperands="//@operands.46 //@operands.47 //@operands.48 //@operands.50 //@operands.79" id="TrNetPat19">
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.9/@edges.0" outgoing="//@patterns.9/@edges.1" name="Column" keepOut="//@restrictions.35 //@restrictions.39 //@restrictions.75" id="Column0">
+      <attributes name="name" attributeExternalCalculationCall="//@restrictions.82"/>
+    </nodes>
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.9/@edges.0" name="Table" keepIn="//@restrictions.6" keepOut="//@restrictions.36 //@restrictions.38" id="Table0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.9/@edges.1" name="Type" keepIn="//@restrictions.10" keepOut="//@restrictions.37 //@restrictions.76" id="Type0"/>
+    <edges source="//@patterns.9/@nodes.1" target="//@patterns.9/@nodes.0" name="columns"/>
+    <edges source="//@patterns.9/@nodes.0" target="//@patterns.9/@nodes.2" name="type"/>
+  </patterns>
+  <patterns incomingResults="//@results.10" outgoingOperands="//@operands.12 //@operands.17" id="TrNetPat26">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.10/@edges.0" sameIn="//@restrictions.8" name="Attribute" id="Attribute0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.10/@edges.0" sameIn="//@restrictions.9" name="Datatype" id="Datatype0"/>
+    <edges source="//@patterns.10/@nodes.0" target="//@patterns.10/@nodes.1" name="type"/>
+  </patterns>
+  <patterns incomingResults="//@results.11" outgoingOperands="//@operands.19 //@operands.51 //@operands.53 //@operands.54 //@operands.55 //@operands.56 //@operands.57 //@operands.58 //@operands.59 //@operands.60 //@operands.61 //@operands.62" id="TrNetPat5">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.11/@edges.0" name="Database" keepIn="//@restrictions.11" keepOut="//@restrictions.40 //@restrictions.44" id="Database0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.11/@edges.0" outgoing="//@patterns.11/@edges.1 //@patterns.11/@edges.2 //@patterns.11/@edges.3 //@patterns.11/@edges.4" name="Table" keepOut="//@restrictions.45 //@restrictions.46 //@restrictions.48 //@restrictions.50 //@restrictions.52 //@restrictions.56" id="Table0">
+      <attributes name="name" attributeExternalCalculationCall="//@restrictions.80"/>
+    </nodes>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.11/@edges.1 //@patterns.11/@edges.4" outgoing="//@patterns.11/@edges.5" name="Column" keepOut="//@restrictions.41 //@restrictions.47 //@restrictions.53 //@restrictions.54" id="Column0">
+      <attributes name="name" attributeExternalCalculationCall="//@restrictions.87"/>
+    </nodes>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.11/@edges.5" name="Type" keepIn="//@restrictions.12" keepOut="//@restrictions.42 //@restrictions.55" id="Type0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.11/@edges.2 //@patterns.11/@edges.3" name="Column" keepOut="//@restrictions.14 //@restrictions.43 //@restrictions.49 //@restrictions.51" id="Column1">
+      <attributes name="name" attributeExternalCalculationCall="//@restrictions.88"/>
+    </nodes>
+    <edges source="//@patterns.11/@nodes.0" target="//@patterns.11/@nodes.1" name="contents"/>
+    <edges source="//@patterns.11/@nodes.1" target="//@patterns.11/@nodes.2" name="columns"/>
+    <edges source="//@patterns.11/@nodes.1" target="//@patterns.11/@nodes.4" name="columns"/>
+    <edges source="//@patterns.11/@nodes.1" target="//@patterns.11/@nodes.4" name="primaryKeys"/>
+    <edges source="//@patterns.11/@nodes.1" target="//@patterns.11/@nodes.2" name="primaryKeys"/>
+    <edges source="//@patterns.11/@nodes.2" target="//@patterns.11/@nodes.3" name="type"/>
+  </patterns>
+  <patterns incomingResults="//@results.12 //@results.16 //@results.18" outgoingOperands="//@operands.21" id="TrNetPat6">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.12/@edges.0" name="Column" keepIn="//@restrictions.14 //@restrictions.20 //@restrictions.24" id="Column0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.12/@edges.0" name="Type" keepIn="//@restrictions.13 //@restrictions.21 //@restrictions.25" id="Type0"/>
+    <edges source="//@patterns.12/@nodes.0" target="//@patterns.12/@nodes.1" name="type"/>
+  </patterns>
+  <patterns incomingResults="//@results.13" outgoingOperands="//@operands.22 //@operands.26" id="TrNetPat27">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.13/@edges.0" sameOut="//@restrictions.15" name="Attribute" id="Attribute0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.13/@edges.0" name="CClass" id="CClass0">
+      <attributes externalAttributeCalculationCallRef="//@restrictions.86/@parameters.0" name="name"/>
+    </nodes>
+    <edges source="//@patterns.13/@nodes.0" target="//@patterns.13/@nodes.1" name="type"/>
+  </patterns>
+  <patterns incomingResults="//@results.14" outgoingOperands="//@operands.31 //@operands.66 //@operands.67 //@operands.68 //@operands.69" id="TrNetPat20">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.14/@edges.0" name="Table" keepIn="//@restrictions.16" keepOut="//@restrictions.57 //@restrictions.60" id="Table0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.14/@edges.0" outgoing="//@patterns.14/@edges.1" name="Column" keepOut="//@restrictions.20 //@restrictions.58 //@restrictions.61" id="Column0">
+      <attributes name="name" attributeExternalCalculationCall="//@restrictions.83"/>
+    </nodes>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.14/@edges.1" name="Type" keepIn="//@restrictions.17" keepOut="//@restrictions.21 //@restrictions.59" id="Type0"/>
+    <edges source="//@patterns.14/@nodes.0" target="//@patterns.14/@nodes.1" name="columns"/>
+    <edges source="//@patterns.14/@nodes.1" target="//@patterns.14/@nodes.2" name="type"/>
+  </patterns>
+  <patterns incomingResults="//@results.15" outgoingOperands="//@operands.32 //@operands.33 //@operands.34 //@operands.70 //@operands.71 //@operands.72 //@operands.73 //@operands.74 //@operands.75 //@operands.76 //@operands.77 //@operands.78" id="TrNetPat16">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.15/@edges.0" name="Database" keepIn="//@restrictions.18" keepOut="//@restrictions.22 //@restrictions.62" id="Database0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.15/@edges.1 //@patterns.15/@edges.2" outgoing="//@patterns.15/@edges.5" name="Column" keepOut="//@restrictions.24 //@restrictions.63 //@restrictions.68 //@restrictions.70" id="Column0">
+      <attributes name="name" attributeExternalCalculationCall="//@restrictions.85"/>
+    </nodes>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.15/@edges.3 //@patterns.15/@edges.4" outgoing="//@patterns.15/@edges.6" name="Column" keepOut="//@restrictions.26 //@restrictions.64 //@restrictions.72 //@restrictions.74" id="Column1">
+      <attributes name="name" attributeExternalCalculationCall="//@restrictions.86"/>
+    </nodes>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.15/@edges.0" outgoing="//@patterns.15/@edges.1 //@patterns.15/@edges.2 //@patterns.15/@edges.3 //@patterns.15/@edges.4" name="Table" keepOut="//@restrictions.23 //@restrictions.65 //@restrictions.67 //@restrictions.69 //@restrictions.71 //@restrictions.73" id="Table0">
+      <attributes name="name" attributeExternalCalculationCall="//@restrictions.81"/>
+    </nodes>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.15/@edges.5 //@patterns.15/@edges.6" name="Type" keepIn="//@restrictions.19" keepOut="//@restrictions.25 //@restrictions.27 //@restrictions.66" id="Type0"/>
+    <edges source="//@patterns.15/@nodes.0" target="//@patterns.15/@nodes.3" name="contents"/>
+    <edges source="//@patterns.15/@nodes.3" target="//@patterns.15/@nodes.1" name="columns"/>
+    <edges source="//@patterns.15/@nodes.3" target="//@patterns.15/@nodes.1" name="primaryKeys"/>
+    <edges source="//@patterns.15/@nodes.3" target="//@patterns.15/@nodes.2" name="columns"/>
+    <edges source="//@patterns.15/@nodes.3" target="//@patterns.15/@nodes.2" name="primaryKeys"/>
+    <edges source="//@patterns.15/@nodes.1" target="//@patterns.15/@nodes.4" name="type"/>
+    <edges source="//@patterns.15/@nodes.2" target="//@patterns.15/@nodes.4" name="type"/>
+  </patterns>
+  <patterns incomingResults="//@results.19 //@results.39 //@results.53" outgoingOperands="//@operands.35" id="TrNetPat999">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.16/@edges.0" name="Column" keepIn="//@restrictions.26 //@restrictions.54 //@restrictions.75" id="Column0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.16/@edges.0" name="Type" keepIn="//@restrictions.27 //@restrictions.55 //@restrictions.76" id="Type0"/>
+    <edges source="//@patterns.16/@nodes.0" target="//@patterns.16/@nodes.1" name="type"/>
+  </patterns>
+  <patterns incomingResults="//@results.20" outgoingOperands="//@operands.37" id="TrNetPat21">
+    <nodes xsi:type="trnetvisual:MandatoryNode" name="CClass" keepIn="//@restrictions.28" id="CClass0"/>
+  </patterns>
+  <patterns incomingResults="//@results.21 //@results.26 //@results.30 //@results.40 //@results.47" outgoingOperands="//@operands.39" id="TrNetPat8">
+    <nodes xsi:type="trnetvisual:MandatoryNode" name="Table" keepIn="//@restrictions.29 //@restrictions.36 //@restrictions.56 //@restrictions.57 //@restrictions.65" id="Table0"/>
+  </patterns>
+  <patterns incomingResults="//@results.22 //@results.25 //@results.31 //@results.45 //@results.57" outgoingOperands="//@operands.41" id="TrNetPat9">
+    <nodes xsi:type="trnetvisual:MandatoryNode" name="Column" keepIn="//@restrictions.30 //@restrictions.35 //@restrictions.41 //@restrictions.63 //@restrictions.92" id="Column0"/>
+  </patterns>
+  <patterns incomingResults="//@results.23 //@results.28 //@results.36 //@results.43 //@results.51" outgoingOperands="//@operands.43" id="TrNetPat13">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.20/@edges.0" name="Table" keepIn="//@restrictions.31 //@restrictions.38 //@restrictions.48 //@restrictions.60 //@restrictions.71" id="Table0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.20/@edges.0" name="Column" keepIn="//@restrictions.32 //@restrictions.39 //@restrictions.47 //@restrictions.61 //@restrictions.68" id="Column0"/>
+    <edges source="//@patterns.20/@nodes.0" target="//@patterns.20/@nodes.1" name="columns"/>
+  </patterns>
+  <patterns incomingResults="//@results.24 //@results.38 //@results.52" outgoingOperands="//@operands.45" id="TrNetPat15">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.21/@edges.0" name="Table" keepIn="//@restrictions.33 //@restrictions.52 //@restrictions.69" id="Table0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.21/@edges.0" name="Column" keepIn="//@restrictions.34 //@restrictions.53 //@restrictions.74" id="Column0"/>
+    <edges source="//@patterns.21/@nodes.0" target="//@patterns.21/@nodes.1" name="primaryKeys"/>
+  </patterns>
+  <patterns incomingResults="//@results.27 //@results.32 //@results.42 //@results.48" outgoingOperands="//@operands.49" id="TrNetPat10">
+    <nodes xsi:type="trnetvisual:MandatoryNode" name="Type" keepIn="//@restrictions.37 //@restrictions.42 //@restrictions.59 //@restrictions.66" id="Type0"/>
+  </patterns>
+  <patterns incomingResults="//@results.29 //@results.44" outgoingOperands="//@operands.52" id="TrNetPat7">
+    <nodes xsi:type="trnetvisual:MandatoryNode" name="Database" keepIn="//@restrictions.40 //@restrictions.62" id="Database0"/>
+  </patterns>
+  <patterns incomingResults="//@results.33 //@results.41 //@results.46" outgoingOperands="//@operands.63" id="TrNetPat11">
+    <nodes xsi:type="trnetvisual:MandatoryNode" name="Column" keepIn="//@restrictions.43 //@restrictions.58 //@restrictions.64" id="Column0"/>
+  </patterns>
+  <patterns incomingResults="//@results.35 //@results.49" outgoingOperands="//@operands.64" id="TrNetPat12">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.25/@edges.0" name="Table" keepIn="//@restrictions.46 //@restrictions.67" id="Table0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.25/@edges.0" name="Column" keepIn="//@restrictions.49 //@restrictions.72" id="Column0"/>
+    <edges source="//@patterns.25/@nodes.0" target="//@patterns.25/@nodes.1" name="columns"/>
+  </patterns>
+  <patterns incomingResults="//@results.37 //@results.50" outgoingOperands="//@operands.65" id="TrNetPat14">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.26/@edges.0" name="Table" keepIn="//@restrictions.50 //@restrictions.73" id="Table0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.26/@edges.0" name="Column" keepIn="//@restrictions.51 //@restrictions.70" id="Column0"/>
+    <edges source="//@patterns.26/@nodes.0" target="//@patterns.26/@nodes.1" name="primaryKeys"/>
+  </patterns>
+  <patterns incomingResults="//@results.54" outgoingOperands="//@operands.81" id="patternType">
+    <nodes xsi:type="trnetvisual:MandatoryNode" name="Type" keepIn="//@restrictions.84" id="type"/>
+  </patterns>
+  <patterns incomingResults="//@results.55" outgoingOperands="//@operands.82" id="patExtends">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.28/@edges.0" sameOut="//@restrictions.89" name="CClass" id="CClassSpecific"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.28/@edges.0" name="CClass" id="CClassParent">
+      <attributes externalAttributeCalculationCallRef="//@restrictions.91/@parameters.0" name="name"/>
+    </nodes>
+    <edges source="//@patterns.28/@nodes.0" target="//@patterns.28/@nodes.1" name="extends"/>
+  </patterns>
+  <patterns incomingResults="//@results.56" outgoingOperands="//@operands.84 //@operands.85" id="PatExtendsColumn">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.29/@edges.0" name="Table" keepIn="//@restrictions.90" id="Table"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.29/@edges.0" name="Column" keepOut="//@restrictions.92" id="Column">
+      <attributes name="name" attributeExternalCalculationCall="//@restrictions.91"/>
+    </nodes>
+    <edges source="//@patterns.29/@nodes.0" target="//@patterns.29/@nodes.1" name="columns"/>
+  </patterns>
+  <operators xsi:type="trnetvisual:External" results="//@results.1 //@results.2 //@results.5 //@results.9 //@results.10 //@results.13 //@results.55" id="TrNetOp1"/>
+  <operators xsi:type="trnetvisual:External" operands="//@operands.1 //@operands.8 //@operands.9 //@operands.21 //@operands.35 //@operands.37 //@operands.39 //@operands.41 //@operands.43 //@operands.45 //@operands.49 //@operands.52 //@operands.63 //@operands.64 //@operands.65 //@operands.81 //@operands.85" id="TrNetOp3"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.0" results="//@results.0" id="TrNetOp2"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.2" results="//@results.3" id="TrNetOp32"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.3" results="//@results.4" id="TrNetOp50"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.5 //@operands.6" results="//@results.6" id="TrNetOp4"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.7 //@operands.4" results="//@results.7" id="TrNetOp5"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.10 //@operands.11 //@operands.12 //@operands.13" results="//@results.8" id="TrNetOp33">
+    <conditions xsi:type="trnetvisual:ExternalConditionCall" id="isfalse" qualifiedName="generic.utils.Conditions.isfalse">
+      <parameters parameter="//@patterns.8/@nodes.0/@attributes.0"/>
+    </conditions>
+  </operators>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.14 //@operands.15 //@operands.16 //@operands.17 //@operands.18" results="//@results.11" id="TrNetOp6">
+    <conditions xsi:type="trnetvisual:ExternalConditionCall" id="istrue" qualifiedName="generic.utils.Conditions.istrue">
+      <parameters parameter="//@patterns.8/@nodes.0/@attributes.0"/>
+    </conditions>
+  </operators>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.19 //@operands.20" results="//@results.12" id="TrNetOp7">
+    <conditions xsi:type="trnetvisual:ExternalConditionCall" id="isInteger" qualifiedName="generic.utils.Conditions.isInteger">
+      <parameters parameter="//@patterns.5/@nodes.1/@attributes.0"/>
+    </conditions>
+  </operators>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.22 //@operands.23 //@operands.24 //@operands.25" results="//@results.14" id="TrNetOp39">
+    <conditions xsi:type="trnetvisual:ExternalConditionCall" id="isfalse" qualifiedName="generic.utils.Conditions.isfalse">
+      <parameters parameter="//@patterns.8/@nodes.0/@attributes.0"/>
+    </conditions>
+    <conditions xsi:type="trnetvisual:ExternalConditionCall" id="isInteger" qualifiedName="generic.utils.Conditions.isInteger">
+      <parameters parameter="//@patterns.5/@nodes.1/@attributes.0"/>
+    </conditions>
+  </operators>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.26 //@operands.27 //@operands.28 //@operands.29 //@operands.30" results="//@results.15" id="TrNetOp19">
+    <conditions xsi:type="trnetvisual:ExternalConditionCall" id="istrue" qualifiedName="generic.utils.Conditions.istrue">
+      <parameters parameter="//@patterns.8/@nodes.0/@attributes.0"/>
+    </conditions>
+    <conditions xsi:type="trnetvisual:ExternalConditionCall" id="isInteger" qualifiedName="generic.utils.Conditions.isInteger">
+      <parameters parameter="//@patterns.5/@nodes.1/@attributes.0"/>
+    </conditions>
+  </operators>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.31" results="//@results.16" id="projected1"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.32" results="//@results.17" id="TrNetOp20"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.33" results="//@results.18" id="TrNetOp21"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.34" results="//@results.19" id="TrNetOp22"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.36" results="//@results.20" id="TrNetOp44"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.38" results="//@results.21" id="TrNetOp45"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.40" results="//@results.22" id="TrNetOp46"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.42" results="//@results.23" id="TrNetOp48"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.44" results="//@results.24" id="TrNetOp49"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.46" results="//@results.25" id="TrNetOp34"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.47" results="//@results.26" id="TrNetOp35"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.48" results="//@results.27" id="TrNetOp36"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.50" results="//@results.28" id="TrNetOp37"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.51" results="//@results.29" id="TrNetOp8"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.53" results="//@results.30" id="TrNetOp9"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.54" results="//@results.31" id="TrNetOp10"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.55" results="//@results.32" id="TrNetOp11"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.56" results="//@results.33" id="TrNetOp12"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.57" results="//@results.34" id="TrNetOp13"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.58" results="//@results.35" id="TrNetOp14"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.59" results="//@results.36" id="TrNetOp15"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.60" results="//@results.37" id="TrNetOp16"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.61" results="//@results.38" id="TrNetOp17"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.62" results="//@results.39" id="TrNetOp18"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.66" results="//@results.40" id="TrNetOp40"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.67" results="//@results.41" id="TrNetOp41"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.68" results="//@results.42" id="TrNetOp42"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.69" results="//@results.43" id="TrNetOp43"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.70" results="//@results.44" id="TrNetOp23"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.71" results="//@results.45" id="TrNetOp24"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.72" results="//@results.46" id="TrNetOp25"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.73" results="//@results.47" id="TrNetOp26"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.74" results="//@results.48" id="TrNetOp27"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.75" results="//@results.49" id="TrNetOp28"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.76" results="//@results.50" id="TrNetOp29"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.77" results="//@results.51" id="TrNetOp30"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.78" results="//@results.52" id="TrNetOp31"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.79" results="//@results.53" id="TrNetOp38"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.80" results="//@results.54" id="operatorType"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.82 //@operands.83" results="//@results.56" id="opExtends"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.84" results="//@results.57" id="opProjExtends"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.2/@nodes.0" target="//@patterns.3/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.4/@nodes.0" target="//@patterns.5/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.5/@nodes.0" target="//@patterns.7/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.1/@nodes.0" target="//@patterns.6/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.3/@nodes.1" target="//@patterns.6/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.1/@nodes.0" target="//@patterns.7/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.3/@nodes.1" target="//@patterns.9/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Same" source="//@patterns.3/@nodes.0" target="//@patterns.8/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Same" source="//@patterns.8/@nodes.0" target="//@patterns.10/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Same" source="//@patterns.5/@nodes.1" target="//@patterns.10/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.5/@nodes.0" target="//@patterns.9/@nodes.2"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.1/@nodes.0" target="//@patterns.11/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.5/@nodes.0" target="//@patterns.11/@nodes.3"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.5/@nodes.0" target="//@patterns.12/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.4" target="//@patterns.12/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Same" source="//@patterns.13/@nodes.0" target="//@patterns.8/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.3/@nodes.1" target="//@patterns.14/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.5/@nodes.0" target="//@patterns.14/@nodes.2"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.1/@nodes.0" target="//@patterns.15/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.5/@nodes.0" target="//@patterns.15/@nodes.4"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.14/@nodes.1" target="//@patterns.12/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.14/@nodes.2" target="//@patterns.12/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.0" target="//@patterns.6/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.3" target="//@patterns.6/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.1" target="//@patterns.12/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.4" target="//@patterns.12/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.2" target="//@patterns.16/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.4" target="//@patterns.16/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.3/@nodes.0" target="//@patterns.17/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.3/@nodes.1" target="//@patterns.18/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.3/@nodes.2" target="//@patterns.19/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.3/@nodes.1" target="//@patterns.20/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.3/@nodes.2" target="//@patterns.20/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.3/@nodes.1" target="//@patterns.21/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.3/@nodes.2" target="//@patterns.21/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.9/@nodes.0" target="//@patterns.19/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.9/@nodes.1" target="//@patterns.18/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.9/@nodes.2" target="//@patterns.22/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.9/@nodes.1" target="//@patterns.20/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.9/@nodes.0" target="//@patterns.20/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.0" target="//@patterns.23/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.2" target="//@patterns.19/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.3" target="//@patterns.22/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.4" target="//@patterns.24/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.0" target="//@patterns.6/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.1" target="//@patterns.6/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.1" target="//@patterns.25/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.2" target="//@patterns.20/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.1" target="//@patterns.20/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.4" target="//@patterns.25/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.1" target="//@patterns.26/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.4" target="//@patterns.26/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.1" target="//@patterns.21/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.2" target="//@patterns.21/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.2" target="//@patterns.16/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.3" target="//@patterns.16/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.11/@nodes.1" target="//@patterns.18/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.14/@nodes.0" target="//@patterns.18/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.14/@nodes.1" target="//@patterns.24/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.14/@nodes.2" target="//@patterns.22/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.14/@nodes.0" target="//@patterns.20/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.14/@nodes.1" target="//@patterns.20/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.0" target="//@patterns.23/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.1" target="//@patterns.19/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.2" target="//@patterns.24/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.3" target="//@patterns.18/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.4" target="//@patterns.22/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.3" target="//@patterns.25/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.1" target="//@patterns.20/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.3" target="//@patterns.21/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.1" target="//@patterns.26/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.3" target="//@patterns.20/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.2" target="//@patterns.25/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.3" target="//@patterns.26/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.15/@nodes.2" target="//@patterns.21/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.9/@nodes.0" target="//@patterns.16/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.9/@nodes.2" target="//@patterns.16/@nodes.1"/>
+  <restrictions xsi:type="trnetvisual:ExternalAttributeCalculationCall" id="copy" qualifiedName="generic.utils.Copy.copy" result="//@patterns.3/@nodes.1/@attributes.0">
+    <parameters parameter="//@patterns.2/@nodes.0/@attributes.0"/>
+  </restrictions>
+  <restrictions xsi:type="trnetvisual:ExternalAttributeCalculationCall" id="colID" qualifiedName="generic.utils.AttrCalculation.colID" result="//@patterns.3/@nodes.2/@attributes.0">
+    <parameters parameter="//@patterns.2/@nodes.0/@attributes.0"/>
+  </restrictions>
+  <restrictions xsi:type="trnetvisual:ExternalAttributeCalculationCall" id="copy" qualifiedName="generic.utils.Copy.copy" result="//@patterns.5/@nodes.0/@attributes.0">
+    <parameters parameter="//@patterns.4/@nodes.0/@attributes.0"/>
+  </restrictions>
+  <restrictions xsi:type="trnetvisual:ExternalAttributeCalculationCall" id="junctTableName" qualifiedName="generic.utils.AttrCalculation.junctTableName" result="//@patterns.11/@nodes.1/@attributes.0">
+    <parameters parameter="//@patterns.8/@nodes.0/@attributes.1"/>
+  </restrictions>
+  <restrictions xsi:type="trnetvisual:ExternalAttributeCalculationCall" id="juncTableName" qualifiedName="generic.utils.AttrCalculation.junctTableName" result="//@patterns.15/@nodes.3/@attributes.0">
+    <parameters parameter="//@patterns.8/@nodes.0/@attributes.1"/>
+  </restrictions>
+  <restrictions xsi:type="trnetvisual:ExternalAttributeCalculationCall" id="copy" qualifiedName="generic.utils.Copy.copy" result="//@patterns.9/@nodes.0/@attributes.0">
+    <parameters parameter="//@patterns.8/@nodes.0/@attributes.1"/>
+  </restrictions>
+  <restrictions xsi:type="trnetvisual:ExternalAttributeCalculationCall" id="copy" qualifiedName="generic.utils.Copy.copy" result="//@patterns.14/@nodes.1/@attributes.0">
+    <parameters parameter="//@patterns.8/@nodes.0/@attributes.1"/>
+  </restrictions>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.5/@nodes.0" target="//@patterns.27/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:ExternalAttributeCalculationCall" id="junctablecolid" qualifiedName="generic.utils.AttrCalculation.junctablecolid" result="//@patterns.15/@nodes.1/@attributes.0">
+    <parameters parameter="//@patterns.8/@nodes.1/@attributes.0"/>
+  </restrictions>
+  <restrictions xsi:type="trnetvisual:ExternalAttributeCalculationCall" id="foreignkeycol" qualifiedName="generic.utils.AttrCalculation.foreignkeycol" result="//@patterns.15/@nodes.2/@attributes.0">
+    <parameters parameter="//@patterns.13/@nodes.1/@attributes.0"/>
+  </restrictions>
+  <restrictions xsi:type="trnetvisual:ExternalAttributeCalculationCall" id="copy" qualifiedName="generic.utils.Copy.copy" result="//@patterns.11/@nodes.2/@attributes.0">
+    <parameters parameter="//@patterns.8/@nodes.0/@attributes.1"/>
+  </restrictions>
+  <restrictions xsi:type="trnetvisual:ExternalAttributeCalculationCall" id="foreignkeycol" qualifiedName="generic.utils.AttrCalculation.foreignkeycol" result="//@patterns.11/@nodes.4/@attributes.0">
+    <parameters parameter="//@patterns.8/@nodes.1/@attributes.0"/>
+  </restrictions>
+  <restrictions xsi:type="trnetvisual:Same" source="//@patterns.28/@nodes.0" target="//@patterns.3/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.3/@nodes.1" target="//@patterns.29/@nodes.0"/>
+  <restrictions xsi:type="trnetvisual:ExternalAttributeCalculationCall" id="foreignkeycol" qualifiedName="generic.utils.AttrCalculation.foreignkeycol" result="//@patterns.29/@nodes.1/@attributes.0">
+    <parameters parameter="//@patterns.28/@nodes.1/@attributes.0"/>
+  </restrictions>
+  <restrictions xsi:type="trnetvisual:Keep" source="//@patterns.29/@nodes.1" target="//@patterns.19/@nodes.0"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.2" pattern="//@patterns.0"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.1"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.3" pattern="//@patterns.2"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.4" pattern="//@patterns.4"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.6" pattern="//@patterns.5"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.5" pattern="//@patterns.1"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.5" pattern="//@patterns.3"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.6" pattern="//@patterns.1"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.6"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.7"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.7" pattern="//@patterns.8"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.7" pattern="//@patterns.3"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.7" pattern="//@patterns.10"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.7" pattern="//@patterns.5"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.8" pattern="//@patterns.3"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.8" pattern="//@patterns.5"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.8" pattern="//@patterns.8"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.8" pattern="//@patterns.10"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.8" pattern="//@patterns.1"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.9" pattern="//@patterns.11"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.9" pattern="//@patterns.5"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.12"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.10" pattern="//@patterns.13"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.10" pattern="//@patterns.8"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.10" pattern="//@patterns.5"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.10" pattern="//@patterns.3"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.11" pattern="//@patterns.13"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.11" pattern="//@patterns.8"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.11" pattern="//@patterns.3"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.11" pattern="//@patterns.5"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.11" pattern="//@patterns.1"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.12" pattern="//@patterns.14"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.13" pattern="//@patterns.15"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.14" pattern="//@patterns.15"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.15" pattern="//@patterns.15"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.16"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.16" pattern="//@patterns.3"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.17"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.17" pattern="//@patterns.3"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.18"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.18" pattern="//@patterns.3"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.19"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.19" pattern="//@patterns.3"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.20"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.20" pattern="//@patterns.3"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.21"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.21" pattern="//@patterns.9"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.22" pattern="//@patterns.9"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.23" pattern="//@patterns.9"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.22"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.24" pattern="//@patterns.9"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.25" pattern="//@patterns.11"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.23"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.26" pattern="//@patterns.11"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.27" pattern="//@patterns.11"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.28" pattern="//@patterns.11"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.29" pattern="//@patterns.11"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.30" pattern="//@patterns.11"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.31" pattern="//@patterns.11"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.32" pattern="//@patterns.11"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.33" pattern="//@patterns.11"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.34" pattern="//@patterns.11"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.35" pattern="//@patterns.11"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.24"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.25"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.26"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.36" pattern="//@patterns.14"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.37" pattern="//@patterns.14"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.38" pattern="//@patterns.14"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.39" pattern="//@patterns.14"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.40" pattern="//@patterns.15"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.41" pattern="//@patterns.15"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.42" pattern="//@patterns.15"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.43" pattern="//@patterns.15"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.44" pattern="//@patterns.15"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.45" pattern="//@patterns.15"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.46" pattern="//@patterns.15"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.47" pattern="//@patterns.15"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.48" pattern="//@patterns.15"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.49" pattern="//@patterns.9"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.50" pattern="//@patterns.5"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.27"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.51" pattern="//@patterns.28"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.51" pattern="//@patterns.3"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.52" pattern="//@patterns.29"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.29"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.1" operator="//@operators.2"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.0" operator="//@operators.0"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.2" operator="//@operators.0"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.3" operator="//@operators.3"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.5" operator="//@operators.4"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.4" operator="//@operators.0"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.6" operator="//@operators.5"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.7" operator="//@operators.6"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.9" operator="//@operators.7"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.8" operator="//@operators.0"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.10" operator="//@operators.0"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.11" operator="//@operators.8"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.12" operator="//@operators.9"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.13" operator="//@operators.0"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.14" operator="//@operators.10"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.15" operator="//@operators.11"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.12" operator="//@operators.12"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.6" operator="//@operators.13"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.12" operator="//@operators.14"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.16" operator="//@operators.15"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.17" operator="//@operators.16"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.18" operator="//@operators.17"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.19" operator="//@operators.18"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.20" operator="//@operators.19"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.21" operator="//@operators.20"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.19" operator="//@operators.21"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.18" operator="//@operators.22"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.22" operator="//@operators.23"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.20" operator="//@operators.24"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.23" operator="//@operators.25"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.18" operator="//@operators.26"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.19" operator="//@operators.27"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.22" operator="//@operators.28"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.24" operator="//@operators.29"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.6" operator="//@operators.30"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.25" operator="//@operators.31"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.20" operator="//@operators.32"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.26" operator="//@operators.33"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.21" operator="//@operators.34"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.16" operator="//@operators.35"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.18" operator="//@operators.36"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.24" operator="//@operators.37"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.22" operator="//@operators.38"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.20" operator="//@operators.39"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.23" operator="//@operators.40"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.19" operator="//@operators.41"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.24" operator="//@operators.42"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.18" operator="//@operators.43"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.22" operator="//@operators.44"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.25" operator="//@operators.45"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.26" operator="//@operators.46"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.20" operator="//@operators.47"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.21" operator="//@operators.48"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.16" operator="//@operators.49"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.27" operator="//@operators.50"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.28" operator="//@operators.0"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.29" operator="//@operators.51"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.19" operator="//@operators.52"/>
+</trnetvisual:TrNetModel>

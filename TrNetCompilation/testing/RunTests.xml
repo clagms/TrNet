@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="RunTests" default="main" basedir=".">
+
+	<target name="main">
+
+		<!-- 
+		We don't need this because our metamodels are in the registry as plugins.
+		<epsilon.emf.register file="TrNetVisual.ecore" />
+		<epsilon.emf.register file="TrNet.ecore" />
+		-->
+
+		<epsilon.eunit src="TestOverlappedPM.eunit" report="no">
+			<modeltasks>
+				<epsilon.emf.loadModel name="Sample1" aliases="TrNetModel,CoreModel" modelfile="TestOverlappedPM/Sample1.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="Sample2" aliases="TrNetModel,CoreModel" modelfile="TestOverlappedPM/Sample2.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+			</modeltasks>
+		</epsilon.eunit>
+
+		<epsilon.eunit src="TestOverlappedPM_Integration.eunit" report="no">
+			<modeltasks>
+				<epsilon.emf.loadModel name="Sample2" aliases="TrNetModel,CoreModel" modelfile="TestOverlappedPM/Sample2.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="Sample2Expected" aliases="TrNetModel,CoreModel" modelfile="TestOverlappedPM/Sample2ExpectedOptimized.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="Sample2Expected2" aliases="TrNetModel,CoreModel" modelfile="TestOverlappedPM/Sample2ExpectedOptimized_2.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="Sample2Expected3" aliases="TrNetModel,CoreModel" modelfile="TestOverlappedPM/Sample2ExpectedOptimized_3.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="Sample3" aliases="TrNetModel,CoreModel" modelfile="TestOverlappedPM/Sample3.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="Sample3Expected1" aliases="TrNetModel,CoreModel" modelfile="TestOverlappedPM/Sample3ExpectedOptimized_1.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="Sample4" aliases="TrNetModel,CoreModel" modelfile="TestOverlappedPM/Sample4.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="Sample4Expected1" aliases="TrNetModel,CoreModel" modelfile="TestOverlappedPM/Sample4Expected1.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="Sample4Expected2" aliases="TrNetModel,CoreModel" modelfile="TestOverlappedPM/Sample4Expected2.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="Sample5" aliases="TrNetModel,CoreModel" modelfile="TestOverlappedPM/Sample5.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="Sample5Expected1" aliases="TrNetModel,CoreModel" modelfile="TestOverlappedPM/Sample5Expected1.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="Sample6" aliases="TrNetModel,CoreModel" modelfile="TestOverlappedPM/Sample6.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="Sample6Expected1" aliases="TrNetModel,CoreModel" modelfile="TestOverlappedPM/Sample6Expected1.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+								
+			</modeltasks>
+		</epsilon.eunit>
+
+		<!-- -->
+		<epsilon.eunit src="TestUtils.eunit" report="no">
+			<modeltasks>
+				<epsilon.emf.loadModel name="ActivityMigration" aliases="TrNetModel,CoreModel" modelfile="TestUtils/ActivityMigration.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="Class2Relational" aliases="TrNetModel,CoreModel" modelfile="TestUtils/Class2Relational.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="Class2RelacionalDSLTrans" aliases="TrNetModel,CoreModel" modelfile="TestUtils/Class2RelacionalDSLTrans.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="false" />
+
+			</modeltasks>
+		</epsilon.eunit>
+
+		<epsilon.eunit src="TestInferExecutionPlan.eunit" report="no">
+			<modeltasks>
+				<epsilon.emf.loadModel name="VisualModel1" aliases="TrNetModel,CoreModel" modelfile="TestInferExecutionPlan/VisualModel1.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+				<epsilon.emf.loadModel name="ExpectedVisualModel1" aliases="TrNetModel,CoreModel" modelfile="TestInferExecutionPlan/ExpectedVisualModel1.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+
+				<epsilon.emf.loadModel name="VisualModel3" aliases="TrNetModel,CoreModel" modelfile="TestInferExecutionPlan/VisualModel3.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+				<epsilon.emf.loadModel name="ExpectedVisualModel3" aliases="TrNetModel,CoreModel" modelfile="TestInferExecutionPlan/ExpectedVisualModel3.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+
+			</modeltasks>
+		</epsilon.eunit>
+
+
+		<epsilon.eunit src="TestGenerateExtectedSizes.eunit" report="no">
+			<modeltasks>
+				<epsilon.emf.loadModel name="VisualModel1" aliases="TrNetModel,CoreModel" modelfile="TestGenerateExtectedSizes/VisualModel1.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+				<epsilon.emf.loadModel name="CatalogModel1" modelfile="TestGenerateExtectedSizes/CatalogModel1.catalog" metamodeluri="http://catalog/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="ExpectedVisualModel1" aliases="TrNetModel,CoreModel" modelfile="TestGenerateExtectedSizes/ExpectedVisualModel1.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+
+				<epsilon.emf.loadModel name="VisualModel2" aliases="TrNetModel,CoreModel" modelfile="TestGenerateExtectedSizes/VisualModel2.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+				<epsilon.emf.loadModel name="CatalogModel2" modelfile="TestGenerateExtectedSizes/CatalogModel2.catalog" metamodeluri="http://catalog/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="ExpectedVisualModel2" aliases="TrNetModel,CoreModel" modelfile="TestGenerateExtectedSizes/ExpectedVisualModel2.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+
+				<epsilon.emf.loadModel name="VisualModel3" aliases="TrNetModel,CoreModel" modelfile="TestGenerateExtectedSizes/VisualModel3.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+				<epsilon.emf.loadModel name="CatalogModel3" modelfile="TestGenerateExtectedSizes/CatalogModel3.catalog" metamodeluri="http://catalog/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="ExpectedVisualModel3" aliases="TrNetModel,CoreModel" modelfile="TestGenerateExtectedSizes/ExpectedVisualModel3.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+
+				<epsilon.emf.loadModel name="VisualModel4" aliases="TrNetModel,CoreModel" modelfile="TestGenerateExtectedSizes/VisualModel4.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+				<epsilon.emf.loadModel name="CatalogModel4" modelfile="TestGenerateExtectedSizes/CatalogModel4.catalog" metamodeluri="http://catalog/1.0" read="true" store="false" />
+				<epsilon.emf.loadModel name="ExpectedVisualModel4" aliases="TrNetModel,CoreModel" modelfile="TestGenerateExtectedSizes/ExpectedVisualModel4.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+
+			</modeltasks>
+		</epsilon.eunit>
+
+		<epsilon.eunit src="TestGenerateOperandIndexes.eunit" report="no">
+			<modeltasks>
+				<epsilon.emf.loadModel name="VisualModel1" aliases="TrNetModel,CoreModel" modelfile="TestGenerateOperandIndexes/VisualModel1.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+				<epsilon.emf.loadModel name="ExpectedVisualModel1" aliases="TrNetModel,CoreModel" modelfile="TestGenerateOperandIndexes/ExpectedVisualModel1.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+
+				<epsilon.emf.loadModel name="VisualModel2" aliases="TrNetModel,CoreModel" modelfile="TestGenerateOperandIndexes/VisualModel2.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+				<epsilon.emf.loadModel name="ExpectedVisualModel2" aliases="TrNetModel,CoreModel" modelfile="TestGenerateOperandIndexes/ExpectedVisualModel2.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+
+				<epsilon.emf.loadModel name="VisualModel3" aliases="TrNetModel,CoreModel" modelfile="TestGenerateOperandIndexes/VisualModel3.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+				<epsilon.emf.loadModel name="ExpectedVisualModel3" aliases="TrNetModel,CoreModel" modelfile="TestGenerateOperandIndexes/ExpectedVisualModel3.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+
+				<epsilon.emf.loadModel name="VisualModel4" aliases="TrNetModel,CoreModel" modelfile="TestGenerateOperandIndexes/VisualModel4.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+				<epsilon.emf.loadModel name="ExpectedVisualModel4" aliases="TrNetModel,CoreModel" modelfile="TestGenerateOperandIndexes/ExpectedVisualModel4.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+
+			</modeltasks>
+		</epsilon.eunit>
+		
+
+	</target>
+
+
+	<target name="RunGenerateExpectedSizes">
+		<epsilon.eol src="../analysis/GenerateExpectedSizes.eol">
+			<model ref="VisualModel" />
+			<model ref="CatalogModel" />
+		</epsilon.eol>
+	</target>
+
+	<target name="RunGenerateOperandIndexes">
+		<epsilon.eol src="../analysis/GenerateOperandIndexes.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+	</target>
+
+	<target name="RunInferExecutionPlan">
+		<epsilon.eol src="../analysis/InferExecutionPlan.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+	</target>
+
+</project>

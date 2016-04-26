@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ApplyCostModelToExplicitTransformations" default="main" basedir=".">
+
+	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="${ant.library.dir}/ant-contrib.jar"/>
+	
+	<target name="main">
+		<foreach target="applyCostModel" param="theFile">
+		    <path>
+		    	<fileset dir="model/implicit" casesensitive="yes">
+			    	<include name="**/*.trnetvisual"/>
+			    </fileset>
+			</path>
+		 </foreach>
+	</target>
+	
+	<target name="applyCostModel">
+		
+		<echo message="${theFile}"/>
+		
+		<epsilon.emf.loadModel name="VisualModel" 
+			aliases="TrNetModel,CoreModel" 
+			modelfile="${theFile}" 
+			metamodeluri="http://trnetvisual/1.0" 
+			read="true" store="true" />
+		
+		<epsilon.emf.loadModel 
+			name="CatalogModel" 
+			modelfile="model/CatalogModel.catalog" 
+			metamodeluri="http://catalog/1.0" 
+			read="true" store="false" />
+		
+		<epsilon.evl src="validation/TrNetVisualValidation.evl">
+			<model ref="VisualModel" />
+		</epsilon.evl>
+
+		<epsilon.eol src="analysis/GenerateExpectedSizes.eol">
+			<model ref="VisualModel" />
+			<model ref="CatalogModel" />
+		</epsilon.eol>
+		
+		<epsilon.eol src="analysis/CalculateTotalCost.eol">
+			<model ref="VisualModel" />
+			<parameter name="baseDir" value="${basedir}"/>
+			<parameter name="currentTransformation" value="${theFile}"/>
+		</epsilon.eol>
+		
+		<epsilon.disposeModel model="VisualModel" />
+		
+	</target>
+
+</project>

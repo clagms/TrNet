@@ -1,0 +1,26 @@
+import "boolean.adt"
+	import "CClass.adt"
+
+Adt CClass_extends_CClass_Join
+	Sorts CClass_extends_CClass_Join;
+	Generators
+		newCClass_extends_CClass_Join: CClass,CClass -> CClass_extends_CClass_Join;
+	MarkOpOpIn2: CClass_extends_CClass_Join -> CClass_extends_CClass_Join;
+	Operations
+	getCClass0: CClass_extends_CClass_Join -> CClass;
+	getCClass1: CClass_extends_CClass_Join -> CClass;
+	isMarkedOpIn2: CClass_extends_CClass_Join -> bool;
+	Axioms
+	
+	getCClass0(newCClass_extends_CClass_Join($CClass0Var,$CClass1Var)) = $CClass0Var;
+		getCClass0(MarkOpOpIn2($CClass_extends_CClass_JoinVar)) = getCClass0($CClass_extends_CClass_JoinVar);
+	
+	getCClass1(newCClass_extends_CClass_Join($CClass0Var,$CClass1Var)) = $CClass1Var;
+		getCClass1(MarkOpOpIn2($CClass_extends_CClass_JoinVar)) = getCClass1($CClass_extends_CClass_JoinVar);
+	
+	isMarkedOpIn2(newCClass_extends_CClass_Join($CClass0Var,$CClass1Var)) = false;
+	isMarkedOpIn2(MarkOpOpIn2($CClass_extends_CClass_JoinVar)) = true;
+	Variables
+		CClass_extends_CClass_JoinVar : CClass_extends_CClass_Join;
+			CClass0Var : CClass;
+			CClass1Var : CClass;

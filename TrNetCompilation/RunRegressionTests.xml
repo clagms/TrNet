@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="CompileTrNet" default="main" basedir=".">
+
+	<target name="main">
+
+		<!-- Run tests on analisys algorithms. -->
+		<ant antfile="testing/RunTests.xml" inheritAll="false">
+		</ant>
+
+		<!-- Compile test transformations. -->
+		<antcall target="generateActivityMigration">
+		</antcall>
+
+		<antcall target="generateActivityMigrationDSLTrans">
+		</antcall>
+		
+		<antcall target="generateActivityMigrationDSLTransOpt">
+				</antcall>
+		
+		<antcall target="generateTestClass2Relational">
+				</antcall>
+		
+		<antcall target="generateTestClass2RelationalDSLTrans">
+						</antcall>
+		
+		
+	</target>
+
+	<target name="generateActivityMigration">
+		<!-- Create and fill the catalog model -->
+		<epsilon.emf.loadModel name="CatalogModel" modelfile="model/CatalogModel.catalog" metamodeluri="http://catalog/1.0" read="false" store="true" />
+		<epsilon.emf.loadModel name="Metamodel" modelfile="model/original_minimal_metamodel.ecore" metamodeluri="http://www.eclipse.org/emf/2002/Ecore" read="true" store="false" />
+		<epsilon.emf.loadModel name="Model" modelfile="testing/TestActivityMigration/random_model_100.xmi" metamodeluri="minuml1" read="true" store="false" />
+		<epsilon.etl src="analysis/Metamodel2CatalogModel.etl">
+			<model ref="Metamodel" />
+			<model ref="CatalogModel" />
+		</epsilon.etl>
+		<epsilon.eol src="analysis/GatherStatistics.eol">
+			<model ref="CatalogModel" />
+			<model ref="Model" />
+		</epsilon.eol>
+
+		<!-- Persist changes -->
+		<epsilon.disposeModels />
+
+
+		<!-- Compile the transformation -->
+		<epsilon.emf.loadModel name="CatalogModel" modelfile="model/CatalogModel.catalog" metamodeluri="http://catalog/1.0" read="true" store="false" />
+		<epsilon.emf.loadModel name="VisualModel" aliases="TrNetModel,CoreModel" modelfile="model/ActivityMigration.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+		<epsilon.eol src="analysis/GenerateIds.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+		<epsilon.eol src="analysis/GenerateExpectedSizes.eol">
+			<model ref="VisualModel" />
+			<model ref="CatalogModel" />
+		</epsilon.eol>
+		<epsilon.eol src="analysis/GenerateOperandIndexes.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+		<epsilon.evl src="validation/TrNetVisualValidation.evl">
+			<model ref="VisualModel" />
+		</epsilon.evl>
+		<epsilon.eol src="analysis/InferExecutionPlan.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+		<epsilon.egl src="TrNet2Java.egl">
+			<model ref="VisualModel" />
+		</epsilon.egl>
+		<epsilon.eol src="analysis/ClearExecutionPlan.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+
+
+		<epsilon.disposeModels />
+
+	</target>
+
+	<target name="generateActivityMigrationDSLTrans">
+		<!-- Create and fill the catalog model -->
+		<epsilon.emf.loadModel name="CatalogModel" modelfile="model/CatalogModel.catalog" metamodeluri="http://catalog/1.0" read="false" store="true" />
+		<epsilon.emf.loadModel name="Metamodel" modelfile="model/original_minimal_metamodel.ecore" metamodeluri="http://www.eclipse.org/emf/2002/Ecore" read="true" store="false" />
+		<epsilon.emf.loadModel name="Model" modelfile="testing/TestActivityMigrationFromDSLTrans/random_model_100.xmi" metamodeluri="minuml1" read="true" store="false" />
+		<epsilon.etl src="analysis/Metamodel2CatalogModel.etl">
+			<model ref="Metamodel" />
+			<model ref="CatalogModel" />
+		</epsilon.etl>
+		<epsilon.eol src="analysis/GatherStatistics.eol">
+			<model ref="CatalogModel" />
+			<model ref="Model" />
+		</epsilon.eol>
+
+		<!-- Persist changes -->
+		<epsilon.disposeModels />
+
+
+		<!-- Compile the transformation -->
+		<epsilon.emf.loadModel name="CatalogModel" modelfile="model/CatalogModel.catalog" metamodeluri="http://catalog/1.0" read="true" store="false" />
+		<epsilon.emf.loadModel name="VisualModel" aliases="TrNetModel,CoreModel" modelfile="model/ActivityMigrationGeneratedFromDSLTrans.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+		<epsilon.eol src="analysis/GenerateIds.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+		<epsilon.eol src="analysis/GenerateExpectedSizes.eol">
+			<model ref="VisualModel" />
+			<model ref="CatalogModel" />
+		</epsilon.eol>
+		<epsilon.eol src="analysis/GenerateOperandIndexes.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+		<epsilon.evl src="validation/TrNetVisualValidation.evl">
+			<model ref="VisualModel" />
+		</epsilon.evl>
+		<epsilon.eol src="analysis/InferExecutionPlan.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+		<epsilon.egl src="TrNet2Java.egl">
+			<model ref="VisualModel" />
+		</epsilon.egl>
+		<epsilon.eol src="analysis/ClearExecutionPlan.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+
+
+		<epsilon.disposeModels />
+
+	</target>
+	
+	
+	<target name="generateActivityMigrationDSLTransOpt">
+			<!-- Create and fill the catalog model -->
+			<epsilon.emf.loadModel name="CatalogModel" modelfile="model/CatalogModel.catalog" metamodeluri="http://catalog/1.0" read="false" store="true" />
+			<epsilon.emf.loadModel name="Metamodel" modelfile="model/original_minimal_metamodel.ecore" metamodeluri="http://www.eclipse.org/emf/2002/Ecore" read="true" store="false" />
+			<epsilon.emf.loadModel name="Model" modelfile="testing/TestActivityMigrationFromDSLTrans/random_model_100.xmi" metamodeluri="minuml1" read="true" store="false" />
+			<epsilon.etl src="analysis/Metamodel2CatalogModel.etl">
+				<model ref="Metamodel" />
+				<model ref="CatalogModel" />
+			</epsilon.etl>
+			<epsilon.eol src="analysis/GatherStatistics.eol">
+				<model ref="CatalogModel" />
+				<model ref="Model" />
+			</epsilon.eol>
+
+			<!-- Persist changes -->
+			<epsilon.disposeModels />
+
+
+			<!-- Compile the transformation -->
+			<epsilon.emf.loadModel name="CatalogModel" modelfile="model/CatalogModel.catalog" metamodeluri="http://catalog/1.0" read="true" store="false" />
+			<epsilon.emf.loadModel name="VisualModel" aliases="TrNetModel,CoreModel" modelfile="testing/TestActivityMigrationFromDSLTransOpt/ActivityMigrationGeneratedFromDSLTransOpt.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+			
+			<epsilon.eol src="analysis/GenerateExpectedSizes.eol">
+				<model ref="VisualModel" />
+				<model ref="CatalogModel" />
+			</epsilon.eol>
+			<epsilon.eol src="analysis/GenerateOperandIndexes.eol">
+				<model ref="VisualModel" />
+			</epsilon.eol>
+			<epsilon.evl src="validation/TrNetVisualValidation.evl">
+				<model ref="VisualModel" />
+			</epsilon.evl>
+			<epsilon.eol src="analysis/InferExecutionPlan.eol">
+				<model ref="VisualModel" />
+			</epsilon.eol>
+			<epsilon.egl src="TrNet2Java.egl">
+				<model ref="VisualModel" />
+			</epsilon.egl>
+			<epsilon.eol src="analysis/ClearExecutionPlan.eol">
+				<model ref="VisualModel" />
+			</epsilon.eol>
+
+
+			<epsilon.disposeModels />
+
+		</target>
+	
+	<target name="generateTestClass2Relational">
+		
+		<epsilon.emf.register file="model/Classes.ecore" />
+		<epsilon.emf.register file="model/DB.ecore" />
+				
+		<!-- Create and fill the catalog model -->
+			<epsilon.emf.loadModel name="CatalogModel" modelfile="model/CatalogModel.catalog" metamodeluri="http://catalog/1.0" read="false" store="true" />
+			<epsilon.emf.loadModel name="Metamodel" modelfile="model/Classes.ecore" metamodeluri="http://www.eclipse.org/emf/2002/Ecore" read="true" store="false" />
+			<epsilon.emf.loadModel name="Model" modelfile="testing/TestClass2Relational/ClassModel.xmi" metamodeluri="http://classes/1.0" read="true" store="false" />
+			<epsilon.etl src="analysis/Metamodel2CatalogModel.etl">
+				<model ref="Metamodel" />
+				<model ref="CatalogModel" />
+			</epsilon.etl>
+			<epsilon.eol src="analysis/GatherStatistics.eol">
+				<model ref="CatalogModel" />
+				<model ref="Model" />
+			</epsilon.eol>
+
+			<!-- Persist changes -->
+			<epsilon.disposeModels />
+
+
+			<!-- Compile the transformation -->
+			<epsilon.emf.loadModel name="CatalogModel" modelfile="model/CatalogModel.catalog" metamodeluri="http://catalog/1.0" read="true" store="false" />
+			<epsilon.emf.loadModel name="VisualModel" aliases="TrNetModel,CoreModel" modelfile="model/Class2Relational.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+			<epsilon.eol src="analysis/GenerateIds.eol">
+				<model ref="VisualModel" />
+			</epsilon.eol>
+			<epsilon.eol src="analysis/GenerateExpectedSizes.eol">
+				<model ref="VisualModel" />
+				<model ref="CatalogModel" />
+			</epsilon.eol>
+			<epsilon.eol src="analysis/GenerateOperandIndexes.eol">
+				<model ref="VisualModel" />
+			</epsilon.eol>
+			<epsilon.evl src="validation/TrNetVisualValidation.evl">
+				<model ref="VisualModel" />
+			</epsilon.evl>
+			<epsilon.eol src="analysis/InferExecutionPlan.eol">
+				<model ref="VisualModel" />
+			</epsilon.eol>
+			<epsilon.egl src="TrNet2Java.egl">
+				<model ref="VisualModel" />
+			</epsilon.egl>
+			<epsilon.eol src="analysis/ClearExecutionPlan.eol">
+				<model ref="VisualModel" />
+			</epsilon.eol>
+
+
+			<epsilon.disposeModels />
+
+		</target>
+
+	<target name="generateTestClass2RelationalDSLTrans">
+			<!-- Create and fill the catalog model -->
+			<epsilon.emf.loadModel name="CatalogModel" modelfile="model/CatalogModel.catalog" metamodeluri="http://catalog/1.0" read="false" store="true" />
+			<epsilon.emf.loadModel name="Metamodel" modelfile="model/Classes.ecore" metamodeluri="http://www.eclipse.org/emf/2002/Ecore" read="true" store="false" />
+			<epsilon.emf.loadModel name="Model" modelfile="testing/TestClass2RelationalDSLTrans/ClassModel.xmi" metamodeluri="http://classes/1.0" read="true" store="false" />
+			<epsilon.etl src="analysis/Metamodel2CatalogModel.etl">
+				<model ref="Metamodel" />
+				<model ref="CatalogModel" />
+			</epsilon.etl>
+			<epsilon.eol src="analysis/GatherStatistics.eol">
+				<model ref="CatalogModel" />
+				<model ref="Model" />
+			</epsilon.eol>
+
+			<!-- Persist changes -->
+			<epsilon.disposeModels />
+
+
+			<!-- Compile the transformation -->
+			<epsilon.emf.loadModel name="CatalogModel" modelfile="model/CatalogModel.catalog" metamodeluri="http://catalog/1.0" read="true" store="false" />
+			<epsilon.emf.loadModel name="VisualModel" aliases="TrNetModel,CoreModel" modelfile="model/Class2RelacionalDSLTrans.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+			<epsilon.eol src="analysis/GenerateIds.eol">
+				<model ref="VisualModel" />
+			</epsilon.eol>
+			<epsilon.eol src="analysis/GenerateExpectedSizes.eol">
+				<model ref="VisualModel" />
+				<model ref="CatalogModel" />
+			</epsilon.eol>
+			<epsilon.eol src="analysis/GenerateOperandIndexes.eol">
+				<model ref="VisualModel" />
+			</epsilon.eol>
+			<epsilon.evl src="validation/TrNetVisualValidation.evl">
+				<model ref="VisualModel" />
+			</epsilon.evl>
+			<epsilon.eol src="analysis/InferExecutionPlan.eol">
+				<model ref="VisualModel" />
+			</epsilon.eol>
+			<epsilon.egl src="TrNet2Java.egl">
+				<model ref="VisualModel" />
+			</epsilon.egl>
+			<epsilon.eol src="analysis/ClearExecutionPlan.eol">
+				<model ref="VisualModel" />
+			</epsilon.eol>
+
+
+			<epsilon.disposeModels />
+
+		</target>
+	
+
+</project>

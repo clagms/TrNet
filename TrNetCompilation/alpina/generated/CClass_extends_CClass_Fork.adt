@@ -1,0 +1,35 @@
+import "boolean.adt"
+	import "CClass.adt"
+
+Adt CClass_extends_CClass_Fork
+	Sorts CClass_extends_CClass_Fork;
+	Generators
+		newCClass_extends_CClass_Fork: CClass,CClass -> CClass_extends_CClass_Fork;
+	MarkOpOpIn: CClass_extends_CClass_Fork -> CClass_extends_CClass_Fork;
+	MarkOpOpOut: CClass_extends_CClass_Fork -> CClass_extends_CClass_Fork;
+	Operations
+	getCClass0: CClass_extends_CClass_Fork -> CClass;
+	getCClass1: CClass_extends_CClass_Fork -> CClass;
+	isMarkedOpIn: CClass_extends_CClass_Fork -> bool;
+	isMarkedOpOut: CClass_extends_CClass_Fork -> bool;
+	Axioms
+	
+	getCClass0(newCClass_extends_CClass_Fork($CClass0Var,$CClass1Var)) = $CClass0Var;
+		getCClass0(MarkOpOpIn($CClass_extends_CClass_ForkVar)) = getCClass0($CClass_extends_CClass_ForkVar);
+		getCClass0(MarkOpOpOut($CClass_extends_CClass_ForkVar)) = getCClass0($CClass_extends_CClass_ForkVar);
+	
+	getCClass1(newCClass_extends_CClass_Fork($CClass0Var,$CClass1Var)) = $CClass1Var;
+		getCClass1(MarkOpOpIn($CClass_extends_CClass_ForkVar)) = getCClass1($CClass_extends_CClass_ForkVar);
+		getCClass1(MarkOpOpOut($CClass_extends_CClass_ForkVar)) = getCClass1($CClass_extends_CClass_ForkVar);
+	
+	isMarkedOpIn(newCClass_extends_CClass_Fork($CClass0Var,$CClass1Var)) = false;
+	isMarkedOpIn(MarkOpOpIn($CClass_extends_CClass_ForkVar)) = true;
+			isMarkedOpIn(MarkOpOpOut($CClass_extends_CClass_ForkVar)) = isMarkedOpIn($CClass_extends_CClass_ForkVar);
+	
+	isMarkedOpOut(newCClass_extends_CClass_Fork($CClass0Var,$CClass1Var)) = false;
+	isMarkedOpOut(MarkOpOpOut($CClass_extends_CClass_ForkVar)) = true;
+			isMarkedOpOut(MarkOpOpIn($CClass_extends_CClass_ForkVar)) = isMarkedOpOut($CClass_extends_CClass_ForkVar);
+	Variables
+		CClass_extends_CClass_ForkVar : CClass_extends_CClass_Fork;
+			CClass0Var : CClass;
+			CClass1Var : CClass;

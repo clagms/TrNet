@@ -1,0 +1,570 @@
+
+"Inferring Execution Plan".println();
+
+var mapOperator2SuccessorOperators = new Map;
+var mapOperator2PredecessorOperators = new Map;
+
+var possibleCandidates = new Set;
+var operatorAlreadyInTheExecutionPlan = new Set;
+
+clearPreviouslyDerivedPlan();
+
+"Previously derived plan cleared.".println();
+
+buildGraph(mapOperator2SuccessorOperators, mapOperator2PredecessorOperators);
+
+computePossibleCandidates(possibleCandidates, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators);
+
+"Intermediate Graph built.".println();
+
+//("mapOperator2SuccessorOperators: " + mapOperator2SuccessorOperators).println();
+//("mapOperator2PredecessorOperators: " + mapOperator2PredecessorOperators).println();
+//("computePossibleCandidates: " + possibleCandidates).println();
+
+buildExecutionPlan(mapOperator2SuccessorOperators, mapOperator2PredecessorOperators, possibleCandidates, operatorAlreadyInTheExecutionPlan);
+
+"Inferring Execution Plan... DONE".println();
+
+
+operation computePossibleCandidates(possibleCandidates, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators) {
+	("computePossibleCandidates...").println();
+	
+	("VisualModel!Operator.allInstances().size: " + VisualModel!Operator.allInstances().size()).println();
+	
+	if (VisualModel!Operator.allInstances().isEmpty()){
+		throw "VisualModel!Operator.allInstances() is empty.";
+	}
+	
+	for (operator in VisualModel!Operator.allInstances()) {
+		if (not hasPredecessorsOPT(operator, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators)) {
+			possibleCandidates.add(operator);
+		}
+	}
+	("computePossibleCandidates... DONE").println();
+}
+
+operation clearPreviouslyDerivedPlan() {
+	for (derivedNext in VisualModel!NextDerived.allInstances()) {
+		//("Deleting " + derivedNext).println();
+		delete derivedNext;
+	}
+}
+
+operation buildExecutionPlan(mapOperator2SuccessorOperators, mapOperator2PredecessorOperators, possibleCandidates, operatorAlreadyInTheExecutionPlan) {
+	
+	//var startingOperator = selectAllReadyToExecuteOperators(mapOperator2SuccessorOperators).first;
+	var startingOperator = possibleCandidates.first;
+	
+	("possibleCandidates (before): " + possibleCandidates).println();
+	
+	var edgesRemoved = removeOperator(startingOperator, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators, possibleCandidates, operatorAlreadyInTheExecutionPlan);
+	
+	("possibleCandidates: " + possibleCandidates).println();
+	//("possibleCandidates(manual): " + selectAllReadyToExecuteOperators(mapOperator2SuccessorOperators)).println();
+	
+	
+	buildExecutionPlanRec(startingOperator, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators, edgesRemoved, possibleCandidates, operatorAlreadyInTheExecutionPlan);
+}
+
+operation buildExecutionPlanRec(startOperator, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators, edgesRemoved, possibleCandidates, operatorAlreadyInTheExecutionPlan) {
+	("Execution plan from " + startOperator).println();
+	if (not thereAreOperatorsLeft(operatorAlreadyInTheExecutionPlan)) {
+		return; // nothing to do.
+	}
+	var nextOperator = chooseNextOperator(startOperator, possibleCandidates);
+	
+	("nextOperator: " + nextOperator).println();
+	
+	if (nextOperator = null) {
+		// there are cicles.
+		//("mapOperator2SuccessorOperators: " + mapOperator2SuccessorOperators).println();
+		//("mapOperator2PredecessorOperators: " + mapOperator2PredecessorOperators).println();
+		
+		//("startOperator: " + startOperator).println();
+		
+		var nodesAtBeginningOfCycle = getNodesBelongingToSomeCycle(mapOperator2SuccessorOperators, edgesRemoved);
+		var nodesBelongingToSomeCycle = getAllNodesBelongingToSomeCycle(mapOperator2SuccessorOperators);
+		//("edgesRemoved: " + edgesRemoved).println();
+		//("nodesBelongingToSomeCycle: " + nodesBelongingToSomeCycle).println();
+		//("nodesAtBeginningOfCycle: " + nodesAtBeginningOfCycle).println();
+		
+		
+		if (nodesAtBeginningOfCycle.isEmpty()) {
+			throw "Unexpected.";
+		}
+		
+		
+		var nodeAtBeginningOfCycle = getNodeAtBeginningOfCycle(nodesAtBeginningOfCycle, mapOperator2SuccessorOperators);
+		
+		("nodeAtBeginningOfCycle: " + nodeAtBeginningOfCycle).println();
+		
+		establishExecutionOrder(startOperator, nodeAtBeginningOfCycle);
+
+		var allNodesInCycle = getNodesInAdjacentCycle(nodeAtBeginningOfCycle, nodesBelongingToSomeCycle, mapOperator2SuccessorOperators);
+		
+		//("allNodesInCycle: " + allNodesInCycle).println();
+		
+		var newedgesRemoved = buildExecutionPlanInCycle(allNodesInCycle, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators, possibleCandidates, operatorAlreadyInTheExecutionPlan);
+		
+		//("startOperator: " + startOperator).println();
+		//("mapOperator2SuccessorOperators: " + mapOperator2SuccessorOperators).println();
+		
+		buildExecutionPlanRec(nodeAtBeginningOfCycle, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators, newedgesRemoved, possibleCandidates, operatorAlreadyInTheExecutionPlan);
+		
+	} else {
+		// there are no cicles
+		var newedgesRemoved = removeOperator(nextOperator, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators, possibleCandidates, operatorAlreadyInTheExecutionPlan);
+		establishExecutionOrder(startOperator, nextOperator);
+		buildExecutionPlanRec(nextOperator, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators, newedgesRemoved, possibleCandidates, operatorAlreadyInTheExecutionPlan);
+	}
+	
+}
+
+operation nodeHasPreconditions(nodeInsideCycle, nodesBelongingToSomeCycle, mapOperator2SuccessorOperators) {
+	("Node has preconditions?: " + nodeInsideCycle).println();
+	for (node in nodesBelongingToSomeCycle) {
+		if (mapOperator2SuccessorOperators.get(node).includes(nodeInsideCycle)) {
+			("TRUE").println();
+			return true;
+		}
+	}
+	("False").println();
+	return false;
+}
+
+operation findPathBetween(startNode, endNode, nodesBelongingToCycle, mapOperator2SuccessorOperators, path) {
+	("findPathBetween: " + startNode.id + " and " + endNode.id).println();
+	("path: " + path).println();
+	
+	if (not thereIsANonNullPathBetween(startNode, startNode, mapOperator2SuccessorOperators)) {
+		throw "Wrong usage of function";
+	}
+	
+	for (succNode in mapOperator2SuccessorOperators.get(startNode)) {
+		if (not path.includes(succNode)) {
+			if (nodesBelongingToCycle.includes(succNode)) {
+				/*
+				if (succNode == endNode) {
+					path.add(succNode);
+					if (path.size < 2) {
+						throw "Unexpected";
+					}
+					return; // we have iterated over all nodes in the cycle.
+				}
+				*/
+				if (thereIsANonNullPathBetween(succNode, endNode, mapOperator2SuccessorOperators)) {
+					path.add(succNode);
+					findPathBetween(succNode, endNode, nodesBelongingToCycle, mapOperator2SuccessorOperators, path);
+				}
+			}
+		}
+		
+	}
+}
+
+operation buildExecutionPlanInCycle(allNodesInCycle, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators, possibleCandidates, operatorAlreadyInTheExecutionPlan) {
+	("allNodesInCycle: " + allNodesInCycle).println();
+	var previousNode = allNodesInCycle.first;
+	
+	// Clear all the edges  (except for the first node) from the cycle, as the order is already determined by the allNodesInCycle.
+	var ignoreFirst = true;
+	for (node in allNodesInCycle) {
+		if (not ignoreFirst) {
+			removeOperatorInCycle(node, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators, possibleCandidates, operatorAlreadyInTheExecutionPlan);
+		}
+		ignoreFirst = false;
+	}
+	
+	var ignoreFirst = true;
+	for (node in allNodesInCycle) {
+		if (not ignoreFirst) {
+			establishExecutionOrder(previousNode, node);
+			("connection: " + previousNode.id + " --> " +  node.id).println();
+			previousNode = node;
+		}
+		ignoreFirst = false;
+	}
+	
+	establishExecutionOrder(allNodesInCycle.last, allNodesInCycle.first);
+	
+	
+	("connection: " + allNodesInCycle.last + " --> " +  allNodesInCycle.first).println();
+	
+	var decisionNode = allNodesInCycle.first;
+	var firstNodeInCycle = allNodesInCycle.at(1);
+	
+	//("decisionNode: " + decisionNode).println();
+	//("firstNodeInCycle: " + firstNodeInCycle).println();
+	
+	//("mapOperator2SuccessorOperatorsdecisionNode: " + mapOperator2SuccessorOperators.get(decisionNode)).println();
+	//("mapOperator2PredecessorOperatorsfirstNodeInCycle: " + mapOperator2PredecessorOperators.get(firstNodeInCycle)).println();
+	
+	// after this the entry node becomes a possible candidate.
+	// and we have to clear its connections to and from the cycle.
+	possibleCandidates.add(allNodesInCycle.first);
+	mapOperator2SuccessorOperators.get(decisionNode).remove(firstNodeInCycle);
+	mapOperator2PredecessorOperators.get(firstNodeInCycle).remove(decisionNode);
+	
+	//("mapOperator2SuccessorOperatorsdecisionNode: " + mapOperator2SuccessorOperators.get(decisionNode)).println();
+	//("mapOperator2PredecessorOperatorsfirstNodeInCycle: " + mapOperator2PredecessorOperators.get(firstNodeInCycle)).println();
+	
+	
+	return removeOperator(allNodesInCycle.first, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators, possibleCandidates, operatorAlreadyInTheExecutionPlan);
+}
+
+operation getNodesBelongingToSomeCycle(mapOperator2SuccessorOperators, edgesRemoved) {
+	var previouslyRemovedNode = edgesRemoved.keySet().first;
+	return getAllNodesBelongingToSomeCycle(mapOperator2SuccessorOperators).select(node | edgesRemoved.get(previouslyRemovedNode).includes(node));
+}
+
+operation getAllNodesBelongingToSomeCycle(mapOperator2SuccessorOperators) {
+	return mapOperator2SuccessorOperators.keySet().select(node | thereIsANonNullPathBetween(node, node, mapOperator2SuccessorOperators));
+}
+
+operation getNodeAtBeginningOfCycle(nodesAtBeginningOfCycle, mapOperator2SuccessorOperators) {
+	for (nodeAtBeginningOfCycle1 in nodesAtBeginningOfCycle) {
+		for (nodeAtBeginningOfCycle2 in nodesAtBeginningOfCycle) {
+			if (mapOperator2SuccessorOperators.get(nodeAtBeginningOfCycle1).includes(nodeAtBeginningOfCycle2)) {
+				return nodeAtBeginningOfCycle1;
+			}
+		}
+	}
+}
+
+operation getNodesInAdjacentCycle(startNode, nodesBelongingToSomeCycle, mapOperator2SuccessorOperators) {
+	var path = new OrderedSet;
+	path.add(startNode);
+	findPathBetween(startNode, startNode, nodesBelongingToSomeCycle, mapOperator2SuccessorOperators, path);
+	return path;
+}
+
+
+
+operation thereIsANonNullPathBetween(startNode, endNode, mapOperator2SuccessorOperators) {
+	if (mapOperator2SuccessorOperators.get(startNode) == null) {
+		return false;
+	}
+	
+	//("Checking if there is NONNULL a path between " + startNode + " -> " + endNode ).println();
+	
+	var visited = new Set;
+	
+	visited.add(startNode);
+	
+	for (succNode in mapOperator2SuccessorOperators.get(startNode)) {
+		if (not visited.includes(succNode)) {
+			if (succNode == endNode) {
+				return true;
+			}
+			if (thereIsAPathBetween(succNode, endNode, mapOperator2SuccessorOperators, visited)) {
+				return true;
+			}
+		}
+	}
+	
+	//("Checking if there is NONNULL a path between " + startNode + " -> " + endNode + " NO!").println();
+	
+	return false;
+}
+
+operation thereIsAPathBetween(startNode, endNode, mapOperator2SuccessorOperators, visited) {
+
+	//("Checking if there is a path between " + startNode + " -> " + endNode ).println();
+	
+	if (startNode == endNode) {
+		throw "This should never happen!";
+	}
+	
+	if (mapOperator2SuccessorOperators.get(startNode) == null) {
+		//"No!".println();
+		return false;
+	}
+	
+	visited.add(startNode);
+	
+	//("Sucessors of " + startNode.id + " : " + mapOperator2SuccessorOperators.get(startNode)).println();
+	
+	for (succNode in mapOperator2SuccessorOperators.get(startNode)) {
+		if (succNode == endNode) {
+			return true;
+		}
+		if ( not visited.includes(succNode)){
+			if (thereIsAPathBetween(succNode, endNode, mapOperator2SuccessorOperators, visited)) {
+				return true;
+			}
+		}
+	}
+	
+	//("Checking if there is a path between " + startNode + " -> " + endNode + "  NO!").println();
+	
+	return false;
+}
+
+operation establishExecutionOrder(sourceOperator, targetOperator) {
+	("Establishing order between " + sourceOperator + " -> " + targetOperator).println();
+	var order = createNextDerivedRule();
+	("Order: " + order).println();
+	order.source = sourceOperator;
+	order.target = targetOperator;
+}
+
+operation createNextDerivedRule() {
+	"Creating next derived rule...".println();
+	var result : new VisualModel!NextDerived;
+	("Result " + result + " created!").println();
+	
+	VisualModel!TrNetModel.allInstances().first.flowRules.add(result);
+	
+	return result;
+}
+
+operation thereAreOperatorsLeft(operatorAlreadyInTheExecutionPlan) {
+	return operatorAlreadyInTheExecutionPlan.size() < VisualModel!Operator.allInstances().size();
+}
+
+operation chooseNextOperator(startOperator, possibleChoices) {
+	// se houver uma restricao do tipo next forte, Ž aqui que ele escolhe usando essa restricao (caso faca sentido claro).
+	if (possibleChoices.isEmpty) {
+		return null;
+	}
+	
+	//("chooseNextOperator startOperator: " + startOperator).println();
+	
+	var userDefinedRules = startOperator.flowOut;
+	
+	//("chooseNextOperator userDefinedRules: " + userDefinedRules).println();
+	
+	if (userDefinedRules == null) {
+		return possibleChoices.first;
+	}
+	
+	if (userDefinedRules.isEmpty()) {
+		return possibleChoices.first;
+	}
+	
+	var strongDefinedRules = userDefinedRules.select(rule | rule.isKindOf(VisualModel!Next));
+	
+	//("chooseNextOperator strongDefinedRules: " + strongDefinedRules).println();
+	
+	
+	if (strongDefinedRules.isEmpty()) {
+		return possibleChoices.first;
+	}
+	
+	if (strongDefinedRules.size() > 1) {
+		throw "Ambiguity found in operator " + startOperator;
+	}
+	
+	var nextOperator = strongDefinedRules.first.target;
+	
+	if ( not possibleChoices.includes(nextOperator)) {
+		throw "Impossible to satisfy next rule in operator " + startOperator;
+	}
+	return nextOperator;
+}
+
+operation removeOperatorInCycle(operator, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators, possibleCandidates, operatorAlreadyInTheExecutionPlan) {
+	("RemoveOperatorInCycle: " + operator).println();
+	var successors = mapOperator2SuccessorOperators.get(operator);
+	if (successors == null) {
+		throw "Attempt to remove an already-removed operator: " + operator;
+	}
+	var predecessors = mapOperator2PredecessorOperators.get(operator);
+	
+	/*
+	if (predecessors <> null) {
+		if (not predecessors.isEmpty()) {
+			throw "Attempt to remove an operator with preconditions: " + operator;
+		}
+	}
+	*/
+	
+	var edgesRemoved = new Map;
+	edgesRemoved.put(operator, successors);
+	
+	/*
+	if (not possibleCandidates.includes(operator)) {
+		throw "Wrong usage with operator " + operator;
+	}
+	*/
+	
+	possibleCandidates.remove(operator);
+	
+	// For each sucessor, disconnect it to this node.
+	for (successor in successors) {
+		var predecessors = mapOperator2PredecessorOperators.get(successor);
+		if (not predecessors.includes(operator)) {
+			throw "Inconsistency in graph found for operator " + successor;
+		}
+		predecessors.remove(operator);
+		
+		// and if this sucessor is left without preconditions, it means it is a possible candidate for the next iteration.
+		/* Operators inside cycle do not bocemo possible candidates
+		if (predecessors.isEmpty()) {
+			possibleCandidates.add(successor);
+		}
+		*/
+	}
+	
+	mapOperator2SuccessorOperators.put(operator, null); // so that we now that the operator has been removed.
+	
+	operatorAlreadyInTheExecutionPlan.add(operator);
+	
+	return edgesRemoved;
+}
+
+operation removeOperator(operator, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators, possibleCandidates, operatorAlreadyInTheExecutionPlan) {
+	("RemoveOperator : " + operator).println();
+	var successors = mapOperator2SuccessorOperators.get(operator);
+	if (successors == null) {
+		throw "Attempt to remove an already-removed operator: " + operator;
+	}
+	("successors : " + successors).println();
+	var predecessors = mapOperator2PredecessorOperators.get(operator);
+	if (predecessors <> null) {
+		if (not predecessors.isEmpty()) {
+			throw "Attempt to remove an operator with preconditions: " + operator;
+		}
+	}
+	
+	var edgesRemoved = new Map;
+	edgesRemoved.put(operator, successors);
+	
+	if (not possibleCandidates.includes(operator)) {
+		throw "Wrong usage with operator " + operator;
+	}
+	possibleCandidates.remove(operator);
+	
+	// For each sucessor, disconnect it to this node.
+	for (successor in successors) {
+		var predecessors = mapOperator2PredecessorOperators.get(successor);
+		if (not predecessors.includes(operator)) {
+			throw "Inconsistency in graph found for operator " + successor;
+		}
+		predecessors.remove(operator);
+		
+		// and if this sucessor is left without preconditions, it means it is a possible candidate for the next iteration.
+		if (predecessors.isEmpty()) {
+			("New candidate found : " + successor).println();
+			possibleCandidates.add(successor);
+		}
+		
+	}
+	
+	mapOperator2SuccessorOperators.put(operator, null); // so that we now that the operator has been removed.
+	
+	operatorAlreadyInTheExecutionPlan.add(operator);
+	
+	return edgesRemoved;
+}
+
+operation selectAllReadyToExecuteOperators(mapOperator2SuccessorOperators) {
+	var result = new Set;
+	for (operator in mapOperator2SuccessorOperators.keySet) {
+		if (mapOperator2SuccessorOperators.get(operator) <> null) {
+			if (not hasPredecessors(operator, mapOperator2SuccessorOperators)) {
+				result.add(operator);
+			}
+		}
+	}
+	return result;
+}
+
+
+operation buildGraph(mapOperator2SuccessorOperators, mapOperator2PredecessorOperators) {
+	("buildGraph...").println();
+	
+	for (operator in VisualModel!Operator.allInstances()) {
+		fillSuccessors(operator, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators);
+	}
+	("buildGraph... DONE").println();
+}
+
+operation fillSuccessors(operator, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators) {
+	var operatorsSucessors = new Set;
+	
+	
+	var patternSucessors = getPatternSuccessors(operator);
+	
+	for (pattern in patternSucessors) {
+		operatorsSucessors.addAll(getOperatorSuccessors(pattern));
+	}
+	
+	// aqui vai preencher mais tarde tbm as restricoes fracas e fortes dadas pelo utilizador.
+	operatorsSucessors.addAll(getUserDefinedSucessors(operator));
+	
+	mapOperator2SuccessorOperators.put(operator, operatorsSucessors);
+	
+	
+	for (successor in operatorsSucessors) {
+		if (not mapOperator2PredecessorOperators.containsKey(successor)) {
+			mapOperator2PredecessorOperators.put(successor, new Set);
+		}
+		mapOperator2PredecessorOperators.get(successor).add(operator);
+	}
+}
+
+operation getUserDefinedSucessors(operator) {
+	var result = new Set;
+	for (flowRule in operator.flowOut) { 
+		result.add(flowRule.target);
+	}
+	return result;
+}
+
+operation hasPredecessorsOPT(operator, mapOperator2SuccessorOperators, mapOperator2PredecessorOperators) {
+	("hasPredecessorsOPT operator: " + operator).println();
+	
+	if (mapOperator2PredecessorOperators.containsKey(operator)) {
+		("hasPredecessorsOPT mapOperator2PredecessorOperators.get(operator): " + mapOperator2PredecessorOperators.get(operator)).println();
+		return (not mapOperator2PredecessorOperators.get(operator).isEmpty());
+	}
+	("hasPredecessorsOPT mapOperator2PredecessorOperators.get(operator): NULLL").println();
+	return false;
+}
+
+operation hasPredecessors(operator, mapOperator2SuccessorOperators) {
+	return not selectPredecessors(operator, mapOperator2SuccessorOperators).isEmpty();
+}
+
+operation selectPredecessors(operator, mapOperator2SuccessorOperators) {
+	return mapOperator2SuccessorOperators.keySet.select(possiblePredecessor | isPredecessor(possiblePredecessor, operator, mapOperator2SuccessorOperators));
+}
+
+operation isPredecessor(possiblePredecessor, operator, mapOperator2SuccessorOperators) {
+	var successors = mapOperator2SuccessorOperators.get(possiblePredecessor);
+	if (successors == null) {
+		return false;
+	}
+	return successors.includes(operator);
+}
+
+operation printSuccessors(operator, mapOperator2SuccessorOperators) {
+	("Sucessors for " + operator.id).println();
+	var successors = mapOperator2SuccessorOperators.get(operator);
+	
+	if (successors == null) {
+		"null".println();
+	} else {
+		for (operatorSuc in successors) {
+			operatorSuc.id.println();
+		}
+	}
+	
+}
+
+operation getPatternSuccessors(operator) {
+	return operator.results.collect(result | result.pattern);
+}
+
+
+operation getOperatorSuccessors(pattern) {
+	return pattern.outgoingOperands.collect(operand | operand.operator);
+}
+
+
+operation printGraph(mapOperator2SuccessorOperators) {
+	for (operator in  VisualModel!Operator.allInstances()) {
+		printSuccessors(operator, mapOperator2SuccessorOperators);
+	}
+}

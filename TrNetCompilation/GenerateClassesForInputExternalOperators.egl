@@ -1,0 +1,115 @@
+[%
+import "Utils.eol";
+
+%]
+package [%=getPackageExternalInputOperator(externalInputOperator)%];
+
+import java.util.LinkedList;
+import [%=getGenericPackage()%].*;
+
+public class [%= getJavaClassExternalInputOperator(externalInputOperator) %]
+implements [%=getGenericPatternInterfaceListener()%]
+[% 
+for (connectedPattern in getPatternSucessorsFromOperator(externalInputOperator)){
+	%]
+	,[%= getInterfacePatternPublisher(connectedPattern) %]
+	[%
+}
+%]
+{
+
+public void notify([%=getGenericPatternClass()%] element){
+[% 
+for (connectedPattern in getPatternSucessorsFromOperator(externalInputOperator)){
+	generateCreatePatternInstanceAttempt(connectedPattern);
+}
+%]
+}
+
+[% 
+for (connectedPattern in getPatternSucessorsFromOperator(externalInputOperator)){
+	%]
+	
+	LinkedList<[%=getInterfacePatternListener(connectedPattern)%]> listeners[%=getClassPattern(connectedPattern)%];
+
+	public void registerListener([%=getInterfacePatternListener(connectedPattern)%] listener){
+		listeners[%=getClassPattern(connectedPattern)%].add(listener);
+	}
+		
+	public void notifyListeners([%=getClassPattern(connectedPattern)%] element){
+		for ([%=getInterfacePatternListener(connectedPattern)%] listener : listeners[%=getClassPattern(connectedPattern)%]){
+			listener.notify(element);
+		}
+	}
+	
+	[%
+}
+%]
+
+
+public [%= getJavaClassExternalInputOperator(externalInputOperator) %]() {
+	[%
+	for (connectedPattern in getPatternSucessorsFromOperator(externalInputOperator)){
+	%]
+	listeners[%=getClassPattern(connectedPattern)%] = new LinkedList<[%=getInterfacePatternListener(connectedPattern)%]>();
+	[%
+	}
+	%]
+}
+
+}
+
+
+[%
+operation generateCreatePatternInstanceAttempt(pattern){
+	if (hasOnlyOneNode(pattern)){
+		generateCreatePatternInstanceAttemptOneNode(pattern);
+	} else if (hasOnlyOneEdge(pattern)) {
+		generateCreatePatternInstanceAttemptOneEdge(pattern);
+	} else {
+		throw "Feature not implemented yet";
+	}
+}
+
+operation generateCreatePatternInstanceAttemptOneNode(pattern){
+	%]
+	if (element.nodes.size() == 1 && element.edges.size() == 0) {
+		[%=getGenericNodeClass()%] elementNode = element.nodes.get(0);
+		if (elementNode.types.contains("[%=pattern.nodes.first.name%]")){
+			[%=getClassPattern(pattern)%] patternInstance = new [%=getClassPattern(pattern)%]();
+			patternInstance.[%=getFieldNameNodePattern(pattern.nodes.first)%] = elementNode;
+			notifyListeners(patternInstance);
+		}
+	}
+	[%
+}
+
+operation generateCreatePatternInstanceAttemptOneEdge(pattern){
+	%]
+	if (element.nodes.size() == 2 && element.edges.size() == 1) {
+		[%=getGenericEdgeClass()%] elementEdge = element.edges.get(0);
+		[%=getGenericNodeClass()%] elementNodeSource = elementEdge.source;
+		[%=getGenericNodeClass()%] elementNodeTarget = elementEdge.target;
+		if (elementEdge.name.equals("[%=pattern.edges.first.name%]") && elementNodeSource.types.contains("[%=pattern.edges.first.source.name%]") && elementNodeTarget.types.contains("[%=pattern.edges.first.target.name%]")){
+			[%=getClassPattern(pattern)%] patternInstance = new [%=getClassPattern(pattern)%]();			
+			patternInstance.[%=getFieldNameNodePattern(pattern.edges.first.source)%] = elementNodeSource;
+			patternInstance.[%=getFieldNameNodePattern(pattern.edges.first.target)%] = elementNodeTarget;
+			
+			notifyListeners(patternInstance);
+		}
+	}
+	[%
+}
+
+operation  hasOnlyOneNode(pattern) {
+	return pattern.nodes.size() = 1 and pattern.edges.size()=0;
+}
+
+operation hasOnlyOneEdge(pattern){
+	return pattern.nodes.size() = 2 and pattern.edges.size()=1 and edgeIsConnectedToBothNodes(pattern.edges.first(), pattern.nodes.first(), pattern.nodes.last());
+}
+
+operation edgeIsConnectedToBothNodes(edge, pattern1, pattern2) {
+	return (edge.source = pattern1 and edge.target = pattern2) or (edge.source = pattern2 and edge.target = pattern1);
+}
+%]

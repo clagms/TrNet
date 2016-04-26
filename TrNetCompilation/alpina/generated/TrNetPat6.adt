@@ -1,0 +1,27 @@
+import "boolean.adt"
+	import "CClass.adt"
+	import "Attribute.adt"
+
+Adt TrNetPat6
+	Sorts TrNetPat6;
+	Generators
+		newTrNetPat6: CClass,Attribute -> TrNetPat6;
+	MarkOpTrNetOp3: TrNetPat6 -> TrNetPat6;
+	Operations
+	getCClass0: TrNetPat6 -> CClass;
+	getAttribute0: TrNetPat6 -> Attribute;
+	isMarkedTrNetOp3: TrNetPat6 -> bool;
+	Axioms
+	
+	getCClass0(newTrNetPat6($CClass0Var,$Attribute0Var)) = $CClass0Var;
+		getCClass0(MarkOpTrNetOp3($TrNetPat6Var)) = getCClass0($TrNetPat6Var);
+	
+	getAttribute0(newTrNetPat6($CClass0Var,$Attribute0Var)) = $Attribute0Var;
+		getAttribute0(MarkOpTrNetOp3($TrNetPat6Var)) = getAttribute0($TrNetPat6Var);
+	
+	isMarkedTrNetOp3(newTrNetPat6($CClass0Var,$Attribute0Var)) = false;
+	isMarkedTrNetOp3(MarkOpTrNetOp3($TrNetPat6Var)) = true;
+	Variables
+		TrNetPat6Var : TrNetPat6;
+			CClass0Var : CClass;
+			Attribute0Var : Attribute;

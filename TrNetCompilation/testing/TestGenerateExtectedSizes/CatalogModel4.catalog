@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="ASCII"?>
+<catalog:CatalogModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:catalog="http://catalog/1.0">
+  <types name="ModelElement" incomingReferences="//@references.11 //@references.15" aggregatedNumberOfInstances="26019">
+    <attributes name="name" aggregatedNumberOfDistinctValues="10002">
+      <samples numberOfDistinctValues="10002"/>
+    </attributes>
+    <samples numberOfInstances="26019"/>
+  </types>
+  <types name="StateMachine" outgoingReferences="//@references.0 //@references.65 //@references.66 //@references.67 //@references.68 //@references.74" incomingReferences="//@references.12 //@references.16" super="//@types.0" aggregatedNumberOfInstances="1">
+    <attributes name="name" aggregatedNumberOfDistinctValues="1">
+      <samples numberOfDistinctValues="1"/>
+    </attributes>
+    <samples numberOfInstances="1"/>
+  </types>
+  <types name="State" outgoingReferences="//@references.52 //@references.59" incomingReferences="//@references.3 //@references.6 //@references.20 //@references.31 //@references.45 //@references.0 //@references.69" super="//@types.3" aggregatedNumberOfInstances="4325">
+    <attributes name="name" aggregatedNumberOfDistinctValues="4325">
+      <samples numberOfDistinctValues="4325"/>
+    </attributes>
+    <samples numberOfInstances="4325"/>
+  </types>
+  <types name="StateVertex" outgoingReferences="//@references.1 //@references.58" incomingReferences="//@references.2 //@references.5 //@references.19 //@references.30 //@references.44" super="//@types.0" aggregatedNumberOfInstances="10000">
+    <attributes name="name" aggregatedNumberOfDistinctValues="10000">
+      <samples numberOfDistinctValues="10000"/>
+    </attributes>
+    <samples numberOfInstances="10000"/>
+  </types>
+  <types name="Transition" outgoingReferences="//@references.2 //@references.3 //@references.4 //@references.40 //@references.41 //@references.42 //@references.43 //@references.44 //@references.45 //@references.46 //@references.47 //@references.48 //@references.49 //@references.50 //@references.51" incomingReferences="//@references.26 //@references.37 //@references.1 //@references.52 //@references.53 //@references.54 //@references.55 //@references.56 //@references.57 //@references.58 //@references.59 //@references.60 //@references.61 //@references.62 //@references.63 //@references.64 //@references.74 //@references.75" super="//@types.0" aggregatedNumberOfInstances="10000">
+    <attributes name="name" aggregatedNumberOfDistinctValues="1">
+      <samples numberOfDistinctValues="1"/>
+    </attributes>
+    <samples numberOfInstances="10000"/>
+  </types>
+  <types name="CompositeState" outgoingReferences="//@references.5 //@references.6 //@references.7 //@references.8 //@references.9 //@references.10 //@references.39 //@references.53 //@references.60" incomingReferences="//@references.7 //@references.21 //@references.32 //@references.4 //@references.46 //@references.65 //@references.70" super="//@types.2" aggregatedNumberOfInstances="1">
+    <attributes name="name" aggregatedNumberOfDistinctValues="1">
+      <samples numberOfDistinctValues="1"/>
+    </attributes>
+    <samples numberOfInstances="1"/>
+  </types>
+  <types name="ActionState" outgoingReferences="//@references.54 //@references.61" incomingReferences="//@references.8 //@references.22 //@references.33 //@references.40 //@references.47 //@references.66 //@references.71" super="//@types.2" aggregatedNumberOfInstances="1479">
+    <attributes name="isDynamic" aggregatedNumberOfDistinctValues="1">
+      <samples numberOfDistinctValues="1"/>
+    </attributes>
+    <attributes name="name" aggregatedNumberOfDistinctValues="1479">
+      <samples numberOfDistinctValues="1479"/>
+    </attributes>
+    <samples numberOfInstances="1479"/>
+  </types>
+  <types name="Pseudostate" outgoingReferences="//@references.55 //@references.62" incomingReferences="//@references.9 //@references.23 //@references.34 //@references.41 //@references.48" super="//@types.3" aggregatedNumberOfInstances="5675">
+    <attributes name="kind" aggregatedNumberOfDistinctValues="4">
+      <samples numberOfDistinctValues="4"/>
+    </attributes>
+    <attributes name="name" aggregatedNumberOfDistinctValues="5675">
+      <samples numberOfDistinctValues="5675"/>
+    </attributes>
+    <samples numberOfInstances="5675"/>
+  </types>
+  <types name="ObjectFlowState" outgoingReferences="//@references.11 //@references.12 //@references.13 //@references.29 //@references.30 //@references.31 //@references.32 //@references.33 //@references.34 //@references.35 //@references.36 //@references.37 //@references.38 //@references.56 //@references.63" incomingReferences="//@references.24 //@references.35 //@references.10 //@references.42 //@references.49 //@references.67 //@references.72" super="//@types.2" aggregatedNumberOfInstances="1370">
+    <attributes name="name" aggregatedNumberOfDistinctValues="1370">
+      <samples numberOfDistinctValues="1370"/>
+    </attributes>
+    <samples numberOfInstances="1370"/>
+  </types>
+  <types name="ActivityGraph" outgoingReferences="//@references.14 //@references.69 //@references.70 //@references.71 //@references.72 //@references.73 //@references.75" incomingReferences="//@references.17 //@references.13" super="//@types.1" aggregatedNumberOfInstances="1">
+    <attributes name="name" aggregatedNumberOfDistinctValues="1">
+      <samples numberOfDistinctValues="1"/>
+    </attributes>
+    <samples numberOfInstances="1"/>
+  </types>
+  <types name="Partition" outgoingReferences="//@references.15 //@references.16 //@references.17 //@references.18 //@references.19 //@references.20 //@references.21 //@references.22 //@references.23 //@references.24 //@references.25 //@references.26 //@references.27" incomingReferences="//@references.18 //@references.14 //@references.29" super="//@types.0" aggregatedNumberOfInstances="1000">
+    <attributes name="name" aggregatedNumberOfDistinctValues="1000">
+      <samples numberOfDistinctValues="1000"/>
+    </attributes>
+    <samples numberOfInstances="1000"/>
+  </types>
+  <types name="FinalState" outgoingReferences="//@references.57 //@references.64" incomingReferences="//@references.25 //@references.36 //@references.39 //@references.43 //@references.50 //@references.68 //@references.73" super="//@types.2" aggregatedNumberOfInstances="1475">
+    <attributes name="name" aggregatedNumberOfDistinctValues="1475">
+      <samples numberOfDistinctValues="1475"/>
+    </attributes>
+    <samples numberOfInstances="1475"/>
+  </types>
+  <types name="Guard" outgoingReferences="//@references.28" incomingReferences="//@references.27 //@references.38 //@references.51" super="//@types.0" aggregatedNumberOfInstances="5018">
+    <attributes name="name" aggregatedNumberOfDistinctValues="1">
+      <samples numberOfDistinctValues="1"/>
+    </attributes>
+    <samples numberOfInstances="5018"/>
+  </types>
+  <types name="BooleanExpression" incomingReferences="//@references.28" aggregatedNumberOfInstances="5018">
+    <attributes name="body" aggregatedNumberOfDistinctValues="5018">
+      <samples numberOfDistinctValues="5018"/>
+    </attributes>
+    <attributes name="language" aggregatedNumberOfDistinctValues="1">
+      <samples numberOfDistinctValues="1"/>
+    </attributes>
+    <samples numberOfInstances="5018"/>
+  </types>
+  <references name="top" source="//@types.1" target="//@types.2" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="1" aggregatedNumberOfInstances="1">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="1" numberOfInstances="1"/>
+  </references>
+  <references name="outgoing" source="//@types.3" target="//@types.4" aggregatedNumberOfDistinctSourceInstances="6309" aggregatedNumberOfDistinctTargetInstances="10000" aggregatedNumberOfInstances="10000">
+    <samples numberOfDistinctSourceInstances="6309" numberOfDistinctTargetInstances="10000" numberOfInstances="10000"/>
+  </references>
+  <references name="source" source="//@types.4" target="//@types.3" aggregatedNumberOfDistinctSourceInstances="10000" aggregatedNumberOfDistinctTargetInstances="6309" aggregatedNumberOfInstances="10000">
+    <samples numberOfDistinctSourceInstances="10000" numberOfDistinctTargetInstances="6309" numberOfInstances="10000"/>
+  </references>
+  <references name="source" source="//@types.4" target="//@types.2" aggregatedNumberOfDistinctSourceInstances="4379" aggregatedNumberOfDistinctTargetInstances="2761" aggregatedNumberOfInstances="4379">
+    <samples numberOfDistinctSourceInstances="4379" numberOfDistinctTargetInstances="2761" numberOfInstances="4379"/>
+  </references>
+  <references name="source" source="//@types.4" target="//@types.5">
+    <samples/>
+  </references>
+  <references name="subvertex" source="//@types.5" target="//@types.3" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="9999" aggregatedNumberOfInstances="9999">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="9999" numberOfInstances="9999"/>
+  </references>
+  <references name="subvertex" source="//@types.5" target="//@types.2" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="4324" aggregatedNumberOfInstances="4324">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="4324" numberOfInstances="4324"/>
+  </references>
+  <references name="subvertex" source="//@types.5" target="//@types.5">
+    <samples/>
+  </references>
+  <references name="subvertex" source="//@types.5" target="//@types.6" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="1479" aggregatedNumberOfInstances="1479">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="1479" numberOfInstances="1479"/>
+  </references>
+  <references name="subvertex" source="//@types.5" target="//@types.7" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="5675" aggregatedNumberOfInstances="5675">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="5675" numberOfInstances="5675"/>
+  </references>
+  <references name="subvertex" source="//@types.5" target="//@types.8" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="1370" aggregatedNumberOfInstances="1370">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="1370" numberOfInstances="1370"/>
+  </references>
+  <references name="type" source="//@types.8" target="//@types.0">
+    <samples/>
+  </references>
+  <references name="type" source="//@types.8" target="//@types.1">
+    <samples/>
+  </references>
+  <references name="type" source="//@types.8" target="//@types.9">
+    <samples/>
+  </references>
+  <references name="partition" source="//@types.9" target="//@types.10" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="1000" aggregatedNumberOfInstances="1000">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="1000" numberOfInstances="1000"/>
+  </references>
+  <references name="contents" source="//@types.10" target="//@types.0" aggregatedNumberOfDistinctSourceInstances="1000" aggregatedNumberOfDistinctTargetInstances="3926" aggregatedNumberOfInstances="5000">
+    <samples numberOfDistinctSourceInstances="1000" numberOfDistinctTargetInstances="3926" numberOfInstances="5000"/>
+  </references>
+  <references name="contents" source="//@types.10" target="//@types.1">
+    <samples/>
+  </references>
+  <references name="contents" source="//@types.10" target="//@types.9">
+    <samples/>
+  </references>
+  <references name="contents" source="//@types.10" target="//@types.10">
+    <samples/>
+  </references>
+  <references name="contents" source="//@types.10" target="//@types.3" aggregatedNumberOfDistinctSourceInstances="1000" aggregatedNumberOfDistinctTargetInstances="3926" aggregatedNumberOfInstances="5000">
+    <samples numberOfDistinctSourceInstances="1000" numberOfDistinctTargetInstances="3926" numberOfInstances="5000"/>
+  </references>
+  <references name="contents" source="//@types.10" target="//@types.2" aggregatedNumberOfDistinctSourceInstances="948" aggregatedNumberOfDistinctTargetInstances="1743" aggregatedNumberOfInstances="2224">
+    <samples numberOfDistinctSourceInstances="948" numberOfDistinctTargetInstances="1743" numberOfInstances="2224"/>
+  </references>
+  <references name="contents" source="//@types.10" target="//@types.5">
+    <samples/>
+  </references>
+  <references name="contents" source="//@types.10" target="//@types.6" aggregatedNumberOfDistinctSourceInstances="534" aggregatedNumberOfDistinctTargetInstances="560" aggregatedNumberOfInstances="711">
+    <samples numberOfDistinctSourceInstances="534" numberOfDistinctTargetInstances="560" numberOfInstances="711"/>
+  </references>
+  <references name="contents" source="//@types.10" target="//@types.7" aggregatedNumberOfDistinctSourceInstances="987" aggregatedNumberOfDistinctTargetInstances="2183" aggregatedNumberOfInstances="2776">
+    <samples numberOfDistinctSourceInstances="987" numberOfDistinctTargetInstances="2183" numberOfInstances="2776"/>
+  </references>
+  <references name="contents" source="//@types.10" target="//@types.8" aggregatedNumberOfDistinctSourceInstances="542" aggregatedNumberOfDistinctTargetInstances="565" aggregatedNumberOfInstances="715">
+    <samples numberOfDistinctSourceInstances="542" numberOfDistinctTargetInstances="565" numberOfInstances="715"/>
+  </references>
+  <references name="contents" source="//@types.10" target="//@types.11" aggregatedNumberOfDistinctSourceInstances="591" aggregatedNumberOfDistinctTargetInstances="618" aggregatedNumberOfInstances="798">
+    <samples numberOfDistinctSourceInstances="591" numberOfDistinctTargetInstances="618" numberOfInstances="798"/>
+  </references>
+  <references name="contents" source="//@types.10" target="//@types.4">
+    <samples/>
+  </references>
+  <references name="contents" source="//@types.10" target="//@types.12">
+    <samples/>
+  </references>
+  <references name="expression" source="//@types.12" target="//@types.13" aggregatedNumberOfDistinctSourceInstances="5018" aggregatedNumberOfDistinctTargetInstances="5018" aggregatedNumberOfInstances="5018">
+    <samples numberOfDistinctSourceInstances="5018" numberOfDistinctTargetInstances="5018" numberOfInstances="5018"/>
+  </references>
+  <references name="type" source="//@types.8" target="//@types.10">
+    <samples/>
+  </references>
+  <references name="type" source="//@types.8" target="//@types.3">
+    <samples/>
+  </references>
+  <references name="type" source="//@types.8" target="//@types.2">
+    <samples/>
+  </references>
+  <references name="type" source="//@types.8" target="//@types.5">
+    <samples/>
+  </references>
+  <references name="type" source="//@types.8" target="//@types.6">
+    <samples/>
+  </references>
+  <references name="type" source="//@types.8" target="//@types.7">
+    <samples/>
+  </references>
+  <references name="type" source="//@types.8" target="//@types.8">
+    <samples/>
+  </references>
+  <references name="type" source="//@types.8" target="//@types.11">
+    <samples/>
+  </references>
+  <references name="type" source="//@types.8" target="//@types.4">
+    <samples/>
+  </references>
+  <references name="type" source="//@types.8" target="//@types.12">
+    <samples/>
+  </references>
+  <references name="subvertex" source="//@types.5" target="//@types.11" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="1475" aggregatedNumberOfInstances="1475">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="1475" numberOfInstances="1475"/>
+  </references>
+  <references name="source" source="//@types.4" target="//@types.6" aggregatedNumberOfDistinctSourceInstances="1455" aggregatedNumberOfDistinctTargetInstances="917" aggregatedNumberOfInstances="1455">
+    <samples numberOfDistinctSourceInstances="1455" numberOfDistinctTargetInstances="917" numberOfInstances="1455"/>
+  </references>
+  <references name="source" source="//@types.4" target="//@types.7" aggregatedNumberOfDistinctSourceInstances="5621" aggregatedNumberOfDistinctTargetInstances="3548" aggregatedNumberOfInstances="5621">
+    <samples numberOfDistinctSourceInstances="5621" numberOfDistinctTargetInstances="3548" numberOfInstances="5621"/>
+  </references>
+  <references name="source" source="//@types.4" target="//@types.8" aggregatedNumberOfDistinctSourceInstances="1413" aggregatedNumberOfDistinctTargetInstances="900" aggregatedNumberOfInstances="1413">
+    <samples numberOfDistinctSourceInstances="1413" numberOfDistinctTargetInstances="900" numberOfInstances="1413"/>
+  </references>
+  <references name="source" source="//@types.4" target="//@types.11" aggregatedNumberOfDistinctSourceInstances="1511" aggregatedNumberOfDistinctTargetInstances="944" aggregatedNumberOfInstances="1511">
+    <samples numberOfDistinctSourceInstances="1511" numberOfDistinctTargetInstances="944" numberOfInstances="1511"/>
+  </references>
+  <references name="target" source="//@types.4" target="//@types.3" aggregatedNumberOfDistinctSourceInstances="10000" aggregatedNumberOfDistinctTargetInstances="6322" aggregatedNumberOfInstances="10000">
+    <samples numberOfDistinctSourceInstances="10000" numberOfDistinctTargetInstances="6322" numberOfInstances="10000"/>
+  </references>
+  <references name="target" source="//@types.4" target="//@types.2" aggregatedNumberOfDistinctSourceInstances="4385" aggregatedNumberOfDistinctTargetInstances="2768" aggregatedNumberOfInstances="4385">
+    <samples numberOfDistinctSourceInstances="4385" numberOfDistinctTargetInstances="2768" numberOfInstances="4385"/>
+  </references>
+  <references name="target" source="//@types.4" target="//@types.5">
+    <samples/>
+  </references>
+  <references name="target" source="//@types.4" target="//@types.6" aggregatedNumberOfDistinctSourceInstances="1444" aggregatedNumberOfDistinctTargetInstances="931" aggregatedNumberOfInstances="1444">
+    <samples numberOfDistinctSourceInstances="1444" numberOfDistinctTargetInstances="931" numberOfInstances="1444"/>
+  </references>
+  <references name="target" source="//@types.4" target="//@types.7" aggregatedNumberOfDistinctSourceInstances="5615" aggregatedNumberOfDistinctTargetInstances="3554" aggregatedNumberOfInstances="5615">
+    <samples numberOfDistinctSourceInstances="5615" numberOfDistinctTargetInstances="3554" numberOfInstances="5615"/>
+  </references>
+  <references name="target" source="//@types.4" target="//@types.8" aggregatedNumberOfDistinctSourceInstances="1434" aggregatedNumberOfDistinctTargetInstances="901" aggregatedNumberOfInstances="1434">
+    <samples numberOfDistinctSourceInstances="1434" numberOfDistinctTargetInstances="901" numberOfInstances="1434"/>
+  </references>
+  <references name="target" source="//@types.4" target="//@types.11" aggregatedNumberOfDistinctSourceInstances="1507" aggregatedNumberOfDistinctTargetInstances="936" aggregatedNumberOfInstances="1507">
+    <samples numberOfDistinctSourceInstances="1507" numberOfDistinctTargetInstances="936" numberOfInstances="1507"/>
+  </references>
+  <references name="guard" source="//@types.4" target="//@types.12" aggregatedNumberOfDistinctSourceInstances="5018" aggregatedNumberOfDistinctTargetInstances="5018" aggregatedNumberOfInstances="5018">
+    <samples numberOfDistinctSourceInstances="5018" numberOfDistinctTargetInstances="5018" numberOfInstances="5018"/>
+  </references>
+  <references name="outgoing" source="//@types.2" target="//@types.4" aggregatedNumberOfDistinctSourceInstances="2761" aggregatedNumberOfDistinctTargetInstances="4379" aggregatedNumberOfInstances="4379">
+    <samples numberOfDistinctSourceInstances="2761" numberOfDistinctTargetInstances="4379" numberOfInstances="4379"/>
+  </references>
+  <references name="outgoing" source="//@types.5" target="//@types.4">
+    <samples/>
+  </references>
+  <references name="outgoing" source="//@types.6" target="//@types.4" aggregatedNumberOfDistinctSourceInstances="917" aggregatedNumberOfDistinctTargetInstances="1455" aggregatedNumberOfInstances="1455">
+    <samples numberOfDistinctSourceInstances="917" numberOfDistinctTargetInstances="1455" numberOfInstances="1455"/>
+  </references>
+  <references name="outgoing" source="//@types.7" target="//@types.4" aggregatedNumberOfDistinctSourceInstances="3548" aggregatedNumberOfDistinctTargetInstances="5621" aggregatedNumberOfInstances="5621">
+    <samples numberOfDistinctSourceInstances="3548" numberOfDistinctTargetInstances="5621" numberOfInstances="5621"/>
+  </references>
+  <references name="outgoing" source="//@types.8" target="//@types.4" aggregatedNumberOfDistinctSourceInstances="900" aggregatedNumberOfDistinctTargetInstances="1413" aggregatedNumberOfInstances="1413">
+    <samples numberOfDistinctSourceInstances="900" numberOfDistinctTargetInstances="1413" numberOfInstances="1413"/>
+  </references>
+  <references name="outgoing" source="//@types.11" target="//@types.4" aggregatedNumberOfDistinctSourceInstances="944" aggregatedNumberOfDistinctTargetInstances="1511" aggregatedNumberOfInstances="1511">
+    <samples numberOfDistinctSourceInstances="944" numberOfDistinctTargetInstances="1511" numberOfInstances="1511"/>
+  </references>
+  <references name="incoming" source="//@types.3" target="//@types.4" aggregatedNumberOfDistinctSourceInstances="6322" aggregatedNumberOfDistinctTargetInstances="10000" aggregatedNumberOfInstances="10000">
+    <samples numberOfDistinctSourceInstances="6322" numberOfDistinctTargetInstances="10000" numberOfInstances="10000"/>
+  </references>
+  <references name="incoming" source="//@types.2" target="//@types.4" aggregatedNumberOfDistinctSourceInstances="2768" aggregatedNumberOfDistinctTargetInstances="4385" aggregatedNumberOfInstances="4385">
+    <samples numberOfDistinctSourceInstances="2768" numberOfDistinctTargetInstances="4385" numberOfInstances="4385"/>
+  </references>
+  <references name="incoming" source="//@types.5" target="//@types.4">
+    <samples/>
+  </references>
+  <references name="incoming" source="//@types.6" target="//@types.4" aggregatedNumberOfDistinctSourceInstances="931" aggregatedNumberOfDistinctTargetInstances="1444" aggregatedNumberOfInstances="1444">
+    <samples numberOfDistinctSourceInstances="931" numberOfDistinctTargetInstances="1444" numberOfInstances="1444"/>
+  </references>
+  <references name="incoming" source="//@types.7" target="//@types.4" aggregatedNumberOfDistinctSourceInstances="3554" aggregatedNumberOfDistinctTargetInstances="5615" aggregatedNumberOfInstances="5615">
+    <samples numberOfDistinctSourceInstances="3554" numberOfDistinctTargetInstances="5615" numberOfInstances="5615"/>
+  </references>
+  <references name="incoming" source="//@types.8" target="//@types.4" aggregatedNumberOfDistinctSourceInstances="901" aggregatedNumberOfDistinctTargetInstances="1434" aggregatedNumberOfInstances="1434">
+    <samples numberOfDistinctSourceInstances="901" numberOfDistinctTargetInstances="1434" numberOfInstances="1434"/>
+  </references>
+  <references name="incoming" source="//@types.11" target="//@types.4" aggregatedNumberOfDistinctSourceInstances="936" aggregatedNumberOfDistinctTargetInstances="1507" aggregatedNumberOfInstances="1507">
+    <samples numberOfDistinctSourceInstances="936" numberOfDistinctTargetInstances="1507" numberOfInstances="1507"/>
+  </references>
+  <references name="top" source="//@types.1" target="//@types.5" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="1" aggregatedNumberOfInstances="1">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="1" numberOfInstances="1"/>
+  </references>
+  <references name="top" source="//@types.1" target="//@types.6">
+    <samples/>
+  </references>
+  <references name="top" source="//@types.1" target="//@types.8">
+    <samples/>
+  </references>
+  <references name="top" source="//@types.1" target="//@types.11">
+    <samples/>
+  </references>
+  <references name="top" source="//@types.9" target="//@types.2" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="1" aggregatedNumberOfInstances="1">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="1" numberOfInstances="1"/>
+  </references>
+  <references name="top" source="//@types.9" target="//@types.5" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="1" aggregatedNumberOfInstances="1">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="1" numberOfInstances="1"/>
+  </references>
+  <references name="top" source="//@types.9" target="//@types.6">
+    <samples/>
+  </references>
+  <references name="top" source="//@types.9" target="//@types.8">
+    <samples/>
+  </references>
+  <references name="top" source="//@types.9" target="//@types.11">
+    <samples/>
+  </references>
+  <references name="transitions" source="//@types.1" target="//@types.4" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="10000" aggregatedNumberOfInstances="10000">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="10000" numberOfInstances="10000"/>
+  </references>
+  <references name="transitions" source="//@types.9" target="//@types.4" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="10000" aggregatedNumberOfInstances="10000">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="10000" numberOfInstances="10000"/>
+  </references>
+</catalog:CatalogModel>

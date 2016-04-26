@@ -1,0 +1,30 @@
+import "./DecompositionOperations.eol";
+
+/*
+	This algorithm assumes that the decomposition was already done and that its costs are computed.
+	Furthermore, it assumes that, for an explicit decomposition, the minimum cost is equal to the maximum cost.
+	In addition, it assumes that all decompositions (explicit or implicit) have a minimum cost of -1.
+	No information is lost because of the previous assumption and because the min and max of implicit decompositions are calculated from the 
+		costs of explicit decompositions.
+	It will follow interesting decompositions and whenever an interesting explicit decomposition is found, it will apply OPM to it, 
+		saving the new cost in the minCost property.
+	An interesting decomposition is a decomposition that has a cost within some given range.
+	The algorithm will still perform the same decomposition as always but will skip certain branches that yeild a cost that is not interesting.
+	After applying OPM to an explicit decomposition, a new cost is calculated and the computational effort is decreased.
+	When a branch is completely explored, the algorithm will update the parent's min and max costs.
+	This last step ensures that whole branches can be skipped in the computation.
+	While doing this, we would also like to warn the user if a new minimum is achieved. 
+	This will definitely be a nice discovery.
+*/
+
+var trace = true;
+
+var computationEffort = 20;
+
+var trnetmodel = TrNetModel!TrNetModel.all.first;
+
+var implicitOperators = findAllImplicitOperators(trnetmodel);
+
+var rootDecompositionProcess = Decomposition!Decomposition.all.first;
+
+decomposeAndApplyOPM(rootDecompositionProcess, trnetmodel, computationEffort, implicitOperators.first, "");

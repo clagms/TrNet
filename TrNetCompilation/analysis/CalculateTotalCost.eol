@@ -1,0 +1,20 @@
+import "../Utils.eol";
+
+var trnetmodel = TrNetModel!TrNetModel.all.first;
+
+if (findAllImplicitOperators(trnetmodel).isEmpty()){
+	var totalCost = 0.0d;
+	
+	for (pat in trnetmodel.patterns) { 
+		totalCost = totalCost + pat.expected_size;
+	}
+	
+	outputCost(totalCost);
+}
+
+operation outputCost(totalCost){
+	var outputFileWriter = new Native("java.io.FileWriter")(baseDir +  
+												"/analysis/costs.csv" , true);
+	outputFileWriter.write(currentTransformation + " , " + totalCost + "\n");
+	outputFileWriter.close();
+}

@@ -1,0 +1,148 @@
+[%
+import "UtilsAlpina.eol";
+%]
+import "boolean.adt"
+[%
+for (nodeName in pattern.nodes.collect(n | n.name).asSet()) {
+	generateImportNodeAdt(nodeName);
+}
+%]
+
+Adt [%=pattern.id%]
+	Sorts [%=pattern.id%];
+	Generators
+		[%=getPatternConstructorName(pattern)%]: [%=generatePatternConstructorArguments(pattern)%] -> [%=pattern.id%];
+		[%
+		for (operator in getOperatorSucessorsFromPattern(pattern)) {
+			generateOperatorMark(operator, pattern);
+		}
+		%]
+	Operations
+		[%
+		for (node in pattern.nodes) {
+			generateNodeProjection(node, pattern);
+		}
+		%]
+		[%
+		for (operator in getOperatorSucessorsFromPattern(pattern)) {
+			generateOperatorIsMarkedCondition(operator, pattern);
+		}
+		%]
+	Axioms
+		[%
+		for (node in pattern.nodes) {
+			generateNodeProjectionAxioms(node, pattern);
+		}
+		%]
+		[%
+		for (operator in getOperatorSucessorsFromPattern(pattern)) {
+			generateOperatorIsMarkedConditionAxioms(operator, pattern);
+		}
+		%]
+	Variables
+		[%=getPatternVariable(pattern)%] : [%=pattern.id%];
+		[%
+		for (node in pattern.nodes) {
+			%]
+			[%=getNodeVariable(node)%] : [%=node.name%];
+			[%
+		}
+		%]
+[%
+
+operation generateImportNodeAdt(nodeName) {
+	%]
+	import "[%=nodeName%].adt"
+	[%
+}
+
+operation generateNodeProjection(node, pattern) {
+	%]
+	[%=getProjectionNodePatternName(node)%]: [%=pattern.id%] -> [%=node.name%];
+	[%
+}
+
+operation generateNodeProjectionAxioms(node, pattern) {
+	%]	
+	[%=getProjectionNodePatternName(node)%]([%=getPatternConstructorName(pattern)%]([%=generatePatternConstructorArgumentsVars(pattern)%])) = $[%=getNodeVariable(node)%];
+	[%
+	for (operator in getOperatorSucessorsFromPattern(pattern)) {
+		%]
+		[%=getProjectionNodePatternName(node)%]([%=getOperatorMarkOperation(operator)%]($[%=getPatternVariable(pattern)%])) = [%=getProjectionNodePatternName(node)%]($[%=getPatternVariable(pattern)%]);
+		[%
+	}
+	%]
+	[%
+}
+
+operation generateOperatorIsMarkedConditionAxioms(operator, pattern) {
+	%]	
+	[%=getMarkedConditionName(operator)%]([%=getPatternConstructorName(pattern)%]([%=generatePatternConstructorArgumentsVars(pattern)%])) = false;
+	[%=getMarkedConditionName(operator)%]([%=getOperatorMarkOperation(operator)%]($[%=getPatternVariable(pattern)%])) = true;
+	[%
+	for (otherOperator in getOperatorSucessorsFromPattern(pattern)) {
+		if (otherOperator<>operator) {
+			%]
+			[%=getMarkedConditionName(operator)%]([%=getOperatorMarkOperation(otherOperator)%]($[%=getPatternVariable(pattern)%])) = [%=getMarkedConditionName(operator)%]($[%=getPatternVariable(pattern)%]);
+			[%
+		}
+	}
+	%]
+	[%
+}
+
+operation generateOperatorMark(operator, pattern) {
+	%]
+	[%=getOperatorMarkOperation(operator)%]: [%=pattern.id%] -> [%=pattern.id%];
+	[%
+}
+
+operation generateOperatorIsMarkedCondition(operator, pattern) {
+	%]
+	[%=getMarkedConditionName(operator)%]: [%=pattern.id%] -> bool;
+	[%
+}
+
+operation generatePatternConstructorArgumentsVars(pattern) {
+	var comma = false;
+	
+	var resultString = "";
+	
+	for (node in pattern.nodes) {
+		if (comma) {
+			resultString = resultString + ",";
+		}
+		resultString = resultString + "$" + getNodeVariable(node);
+		
+		comma = true;
+	}
+	
+	return resultString;
+}
+
+operation getNodeVariable(node) {
+	return node.id + "Var";
+}
+
+operation getPatternVariable(pattern) {
+	return pattern.id + "Var";
+}
+
+operation generatePatternConstructorArguments(pattern) {
+	var comma = false;
+	
+	var resultString = "";
+	
+	for (node in pattern.nodes) {
+		if (comma) {
+			resultString = resultString + ",";
+		}
+		resultString = resultString + node.name;
+		
+		comma = true;
+	}
+	
+	return resultString;
+	
+}
+%]

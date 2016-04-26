@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+
+<!--
+-->
+
+<plugin>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <package
+            uri="http://classdiagram/1.0"
+            class="classdiagram.ClassdiagramPackage"
+            genModel="model/classdiagram.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated evolved_metamodel -->
+      <package
+            uri="http://www.eclipse.org/uml2/3.0.0/UML"
+            class="uml.UmlPackage"
+            genModel="model/evolved_metamodel.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.extension_parser">
+      <!-- @generated evolved_metamodel -->
+      <parser
+            type="uml"
+            class="uml.util.UmlResourceFactoryImpl"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated evolved_metamodel -->
+      <package
+            uri="http://www.eclipse.org/emf/2002/Ecore"
+            class="ecore.EcorePackage"
+            genModel="model/evolved_metamodel.genmodel"/>
+   </extension>
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated original_minimal_metamodel -->
+      <package
+            uri="minuml1"
+            class="minuml1.Minuml1Package"
+            genModel="model/original_minimal_metamodel.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated Classes -->
+      <package
+            uri="http://classes/1.0"
+            class="classes.ClassesPackage"
+            genModel="model/Classes.genmodel"/>
+   </extension>
+
+</plugin>

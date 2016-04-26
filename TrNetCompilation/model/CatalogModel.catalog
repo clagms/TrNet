@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="ASCII"?>
+<catalog:CatalogModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:catalog="http://catalog/1.0">
+  <types name="CModel" outgoingReferences="//@references.0 //@references.1 //@references.11" aggregatedNumberOfInstances="1">
+    <samples numberOfInstances="1"/>
+  </types>
+  <types name="Classifier" incomingReferences="//@references.0 //@references.4 //@references.7" super="//@types.2" aggregatedNumberOfInstances="10002">
+    <attributes name="name" aggregatedNumberOfDistinctValues="10002">
+      <samples numberOfDistinctValues="10002"/>
+    </attributes>
+    <samples numberOfInstances="10002"/>
+  </types>
+  <types name="NamedElement" aggregatedNumberOfInstances="20002">
+    <attributes name="name" aggregatedNumberOfDistinctValues="20002">
+      <samples numberOfDistinctValues="20002"/>
+    </attributes>
+    <samples numberOfInstances="20002"/>
+  </types>
+  <types name="CClass" outgoingReferences="//@references.2 //@references.3 //@references.10" incomingReferences="//@references.2 //@references.5 //@references.8 //@references.10 //@references.1" super="//@types.1" aggregatedNumberOfInstances="10000">
+    <attributes name="name" aggregatedNumberOfDistinctValues="10000">
+      <samples numberOfDistinctValues="10000"/>
+    </attributes>
+    <attributes name="abstract" aggregatedNumberOfDistinctValues="2">
+      <samples numberOfDistinctValues="2"/>
+    </attributes>
+    <samples numberOfInstances="10000"/>
+  </types>
+  <types name="Attribute" outgoingReferences="//@references.4 //@references.5 //@references.6" incomingReferences="//@references.3" super="//@types.2 //@types.5" aggregatedNumberOfInstances="10000">
+    <attributes name="name" aggregatedNumberOfDistinctValues="10000">
+      <samples numberOfDistinctValues="10000"/>
+    </attributes>
+    <attributes name="isMany" aggregatedNumberOfDistinctValues="2">
+      <samples numberOfDistinctValues="2"/>
+    </attributes>
+    <samples numberOfInstances="10000"/>
+  </types>
+  <types name="TypedElement" outgoingReferences="//@references.7 //@references.8 //@references.9" aggregatedNumberOfInstances="10000">
+    <samples numberOfInstances="10000"/>
+  </types>
+  <types name="Datatype" incomingReferences="//@references.6 //@references.9 //@references.11" super="//@types.1" aggregatedNumberOfInstances="2">
+    <attributes name="name" aggregatedNumberOfDistinctValues="2">
+      <samples numberOfDistinctValues="2"/>
+    </attributes>
+    <samples numberOfInstances="2"/>
+  </types>
+  <references name="contents" source="//@types.0" target="//@types.1" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="10002" aggregatedNumberOfInstances="10002">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="10002" numberOfInstances="10002"/>
+  </references>
+  <references name="contents" source="//@types.0" target="//@types.3" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="10000" aggregatedNumberOfInstances="10000">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="10000" numberOfInstances="10000"/>
+  </references>
+  <references name="extends" source="//@types.3" target="//@types.3" aggregatedNumberOfDistinctSourceInstances="4963" aggregatedNumberOfDistinctTargetInstances="3942" aggregatedNumberOfInstances="4963">
+    <samples numberOfDistinctSourceInstances="4963" numberOfDistinctTargetInstances="3942" numberOfInstances="4963"/>
+  </references>
+  <references name="attributes" source="//@types.3" target="//@types.4" aggregatedNumberOfDistinctSourceInstances="6331" aggregatedNumberOfDistinctTargetInstances="10000" aggregatedNumberOfInstances="10000">
+    <samples numberOfDistinctSourceInstances="6331" numberOfDistinctTargetInstances="10000" numberOfInstances="10000"/>
+  </references>
+  <references name="type" source="//@types.4" target="//@types.1" aggregatedNumberOfDistinctSourceInstances="10000" aggregatedNumberOfDistinctTargetInstances="6367" aggregatedNumberOfInstances="10000">
+    <samples numberOfDistinctSourceInstances="10000" numberOfDistinctTargetInstances="6367" numberOfInstances="10000"/>
+  </references>
+  <references name="type" source="//@types.4" target="//@types.3" aggregatedNumberOfDistinctSourceInstances="9998" aggregatedNumberOfDistinctTargetInstances="6366" aggregatedNumberOfInstances="9998">
+    <samples numberOfDistinctSourceInstances="9998" numberOfDistinctTargetInstances="6366" numberOfInstances="9998"/>
+  </references>
+  <references name="type" source="//@types.4" target="//@types.6" aggregatedNumberOfDistinctSourceInstances="2" aggregatedNumberOfDistinctTargetInstances="1" aggregatedNumberOfInstances="2">
+    <samples numberOfDistinctSourceInstances="2" numberOfDistinctTargetInstances="1" numberOfInstances="2"/>
+  </references>
+  <references name="type" source="//@types.5" target="//@types.1" aggregatedNumberOfDistinctSourceInstances="10000" aggregatedNumberOfDistinctTargetInstances="6367" aggregatedNumberOfInstances="10000">
+    <samples numberOfDistinctSourceInstances="10000" numberOfDistinctTargetInstances="6367" numberOfInstances="10000"/>
+  </references>
+  <references name="type" source="//@types.5" target="//@types.3" aggregatedNumberOfDistinctSourceInstances="9998" aggregatedNumberOfDistinctTargetInstances="6366" aggregatedNumberOfInstances="9998">
+    <samples numberOfDistinctSourceInstances="9998" numberOfDistinctTargetInstances="6366" numberOfInstances="9998"/>
+  </references>
+  <references name="type" source="//@types.5" target="//@types.6" aggregatedNumberOfDistinctSourceInstances="2" aggregatedNumberOfDistinctTargetInstances="1" aggregatedNumberOfInstances="2">
+    <samples numberOfDistinctSourceInstances="2" numberOfDistinctTargetInstances="1" numberOfInstances="2"/>
+  </references>
+  <references name="super" source="//@types.3" target="//@types.3">
+    <samples/>
+  </references>
+  <references name="contents" source="//@types.0" target="//@types.6" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="2" aggregatedNumberOfInstances="2">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="2" numberOfInstances="2"/>
+  </references>
+</catalog:CatalogModel>

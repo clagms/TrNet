@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<notation:Diagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:trnetvisual="http://trnetvisual/1.0" xmi:id="_2bVQUPa4EeKqouElHMZMQQ" type="Trnetvisual" measurementUnit="Pixel">
+  <children xmi:type="notation:Node" xmi:id="_2dbiEPa4EeKqouElHMZMQQ" type="2001">
+    <children xmi:type="notation:DecorationNode" xmi:id="_2dcJIPa4EeKqouElHMZMQQ" type="5001"/>
+    <styles xmi:type="notation:DescriptionStyle" xmi:id="_2dbiEfa4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2dbiEva4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <styles xmi:type="notation:LineStyle" xmi:id="_2dbiE_a4EeKqouElHMZMQQ"/>
+    <element xmi:type="trnetvisual:ExternalAttributeCalculationCall" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@restrictions.0"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2dbiFPa4EeKqouElHMZMQQ" x="117" y="27"/>
+  </children>
+  <children xmi:type="notation:Node" xmi:id="_2dcJIfa4EeKqouElHMZMQQ" type="2004">
+    <children xmi:type="notation:BasicCompartment" xmi:id="_2dcJJ_a4EeKqouElHMZMQQ" type="7003">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_2dcJKPa4EeKqouElHMZMQQ"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_2dcJKfa4EeKqouElHMZMQQ"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_2dcJKva4EeKqouElHMZMQQ" type="7004">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_2dcJK_a4EeKqouElHMZMQQ"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_2dcJLPa4EeKqouElHMZMQQ"/>
+    </children>
+    <styles xmi:type="notation:DescriptionStyle" xmi:id="_2dcJIva4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2dcJI_a4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <styles xmi:type="notation:LineStyle" xmi:id="_2dcJJPa4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_2dcJJfa4EeKqouElHMZMQQ"/>
+    <element xmi:type="trnetvisual:External" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operators.0"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2dcJJva4EeKqouElHMZMQQ" x="387" y="27"/>
+  </children>
+  <children xmi:type="notation:Node" xmi:id="_2dcwMPa4EeKqouElHMZMQQ" type="2004">
+    <children xmi:type="notation:BasicCompartment" xmi:id="_2dcwNva4EeKqouElHMZMQQ" type="7003">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_2dcwN_a4EeKqouElHMZMQQ"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_2dcwOPa4EeKqouElHMZMQQ"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_2dcwOfa4EeKqouElHMZMQQ" type="7004">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_2dcwOva4EeKqouElHMZMQQ"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_2dcwO_a4EeKqouElHMZMQQ"/>
+    </children>
+    <styles xmi:type="notation:DescriptionStyle" xmi:id="_2dcwMfa4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2dcwMva4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <styles xmi:type="notation:LineStyle" xmi:id="_2dcwM_a4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_2dcwNPa4EeKqouElHMZMQQ"/>
+    <element xmi:type="trnetvisual:External" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operators.1"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2dcwNfa4EeKqouElHMZMQQ" x="387" y="675"/>
+  </children>
+  <children xmi:type="notation:Node" xmi:id="_2dcwPPa4EeKqouElHMZMQQ" type="2003">
+    <children xmi:type="notation:BasicCompartment" xmi:id="_2ddXQPa4EeKqouElHMZMQQ" type="7001">
+      <children xmi:type="notation:Node" xmi:id="_2diPwPa4EeKqouElHMZMQQ" type="3001">
+        <children xmi:type="notation:DecorationNode" xmi:id="_2diPxfa4EeKqouElHMZMQQ" type="5003"/>
+        <styles xmi:type="notation:DescriptionStyle" xmi:id="_2diPwfa4EeKqouElHMZMQQ"/>
+        <styles xmi:type="notation:FontStyle" xmi:id="_2diPwva4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+        <styles xmi:type="notation:LineStyle" xmi:id="_2diPw_a4EeKqouElHMZMQQ"/>
+        <element xmi:type="trnetvisual:ExternalConditionCall" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operators.2/@conditions.0"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2diPxPa4EeKqouElHMZMQQ"/>
+      </children>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_2ddXQfa4EeKqouElHMZMQQ"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_2ddXQva4EeKqouElHMZMQQ"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_2ddXQ_a4EeKqouElHMZMQQ" type="7002">
+      <children xmi:type="notation:Node" xmi:id="_2djd4Pa4EeKqouElHMZMQQ" type="3002">
+        <children xmi:type="notation:DecorationNode" xmi:id="_2djd5fa4EeKqouElHMZMQQ" type="5004"/>
+        <styles xmi:type="notation:DescriptionStyle" xmi:id="_2djd4fa4EeKqouElHMZMQQ"/>
+        <styles xmi:type="notation:FontStyle" xmi:id="_2djd4va4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+        <styles xmi:type="notation:LineStyle" xmi:id="_2djd4_a4EeKqouElHMZMQQ"/>
+        <element xmi:type="trnetvisual:ExternalActionCall" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operators.2/@actions.0"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2djd5Pa4EeKqouElHMZMQQ"/>
+      </children>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_2ddXRPa4EeKqouElHMZMQQ"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_2ddXRfa4EeKqouElHMZMQQ"/>
+    </children>
+    <styles xmi:type="notation:DescriptionStyle" xmi:id="_2dcwPfa4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2dcwPva4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <styles xmi:type="notation:LineStyle" xmi:id="_2dcwP_a4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_2dcwQPa4EeKqouElHMZMQQ"/>
+    <element xmi:type="trnetvisual:Combinator" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operators.2"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2dcwQfa4EeKqouElHMZMQQ" x="234" y="369"/>
+  </children>
+  <children xmi:type="notation:Node" xmi:id="_2ddXRva4EeKqouElHMZMQQ" type="2003">
+    <children xmi:type="notation:BasicCompartment" xmi:id="_2ddXTPa4EeKqouElHMZMQQ" type="7001">
+      <children xmi:type="notation:Node" xmi:id="_2dlTEPa4EeKqouElHMZMQQ" type="3001">
+        <children xmi:type="notation:DecorationNode" xmi:id="_2dlTFfa4EeKqouElHMZMQQ" type="5003"/>
+        <styles xmi:type="notation:DescriptionStyle" xmi:id="_2dlTEfa4EeKqouElHMZMQQ"/>
+        <styles xmi:type="notation:FontStyle" xmi:id="_2dlTEva4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+        <styles xmi:type="notation:LineStyle" xmi:id="_2dlTE_a4EeKqouElHMZMQQ"/>
+        <element xmi:type="trnetvisual:ExternalConditionCall" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operators.3/@conditions.0"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2dlTFPa4EeKqouElHMZMQQ"/>
+      </children>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_2ddXTfa4EeKqouElHMZMQQ"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_2ddXTva4EeKqouElHMZMQQ"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_2ddXT_a4EeKqouElHMZMQQ" type="7002">
+      <children xmi:type="notation:Node" xmi:id="_2dnIQPa4EeKqouElHMZMQQ" type="3002">
+        <children xmi:type="notation:DecorationNode" xmi:id="_2dnIRfa4EeKqouElHMZMQQ" type="5004"/>
+        <styles xmi:type="notation:DescriptionStyle" xmi:id="_2dnIQfa4EeKqouElHMZMQQ"/>
+        <styles xmi:type="notation:FontStyle" xmi:id="_2dnIQva4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+        <styles xmi:type="notation:LineStyle" xmi:id="_2dnIQ_a4EeKqouElHMZMQQ"/>
+        <element xmi:type="trnetvisual:ExternalActionCall" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operators.3/@actions.0"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2dnIRPa4EeKqouElHMZMQQ"/>
+      </children>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_2ddXUPa4EeKqouElHMZMQQ"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_2ddXUfa4EeKqouElHMZMQQ"/>
+    </children>
+    <styles xmi:type="notation:DescriptionStyle" xmi:id="_2ddXR_a4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2ddXSPa4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <styles xmi:type="notation:LineStyle" xmi:id="_2ddXSfa4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_2ddXSva4EeKqouElHMZMQQ"/>
+    <element xmi:type="trnetvisual:Combinator" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operators.3"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2ddXS_a4EeKqouElHMZMQQ" x="441" y="369"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_2ddXUva4EeKqouElHMZMQQ" type="2005" fontName="Lucida Grande">
+    <children xmi:type="notation:DecorationNode" xmi:id="_2dd-Ufa4EeKqouElHMZMQQ" type="7005">
+      <children xmi:type="notation:Shape" xmi:id="_2do9cPa4EeKqouElHMZMQQ" type="3003" fontName="Lucida Grande">
+        <children xmi:type="notation:DecorationNode" xmi:id="_2dpkgPa4EeKqouElHMZMQQ" type="5006"/>
+        <children xmi:type="notation:BasicCompartment" xmi:id="_2dpkgfa4EeKqouElHMZMQQ" type="7006">
+          <children xmi:type="notation:Shape" xmi:id="_2dsAwPa4EeKqouElHMZMQQ" type="3004" fontName="Lucida Grande">
+            <children xmi:type="notation:DecorationNode" xmi:id="_2dsn0Pa4EeKqouElHMZMQQ" type="5005"/>
+            <element xmi:type="trnetvisual:AttributePattern" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.0/@nodes.0/@attributes.0"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2dsAwfa4EeKqouElHMZMQQ"/>
+          </children>
+          <styles xmi:type="notation:SortingStyle" xmi:id="_2dpkgva4EeKqouElHMZMQQ"/>
+          <styles xmi:type="notation:FilteringStyle" xmi:id="_2dpkg_a4EeKqouElHMZMQQ"/>
+        </children>
+        <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_2do9cfa4EeKqouElHMZMQQ"/>
+        <element xmi:type="trnetvisual:MandatoryNode" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.0/@nodes.0"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2do9cva4EeKqouElHMZMQQ" x="26" y="106"/>
+      </children>
+      <children xmi:type="notation:Shape" xmi:id="_2dpkhPa4EeKqouElHMZMQQ" type="3003" fontName="Lucida Grande">
+        <children xmi:type="notation:DecorationNode" xmi:id="_2dpkh_a4EeKqouElHMZMQQ" type="5006"/>
+        <children xmi:type="notation:BasicCompartment" xmi:id="_2dqLkPa4EeKqouElHMZMQQ" type="7006">
+          <children xmi:type="notation:Shape" xmi:id="_2dt18Pa4EeKqouElHMZMQQ" type="3004" fontName="Lucida Grande">
+            <children xmi:type="notation:DecorationNode" xmi:id="_2dt18va4EeKqouElHMZMQQ" type="5005"/>
+            <element xmi:type="trnetvisual:AttributePattern" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.0/@nodes.1/@attributes.0"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2dt18fa4EeKqouElHMZMQQ"/>
+          </children>
+          <styles xmi:type="notation:SortingStyle" xmi:id="_2dqLkfa4EeKqouElHMZMQQ"/>
+          <styles xmi:type="notation:FilteringStyle" xmi:id="_2dqLkva4EeKqouElHMZMQQ"/>
+        </children>
+        <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_2dpkhfa4EeKqouElHMZMQQ"/>
+        <element xmi:type="trnetvisual:MandatoryNode" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.0/@nodes.1"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2dpkhva4EeKqouElHMZMQQ" x="386" y="106"/>
+      </children>
+      <children xmi:type="notation:Shape" xmi:id="_2dqLk_a4EeKqouElHMZMQQ" type="3003" fontName="Lucida Grande">
+        <children xmi:type="notation:DecorationNode" xmi:id="_2dqLlva4EeKqouElHMZMQQ" type="5006"/>
+        <children xmi:type="notation:BasicCompartment" xmi:id="_2dqLl_a4EeKqouElHMZMQQ" type="7006">
+          <children xmi:type="notation:Shape" xmi:id="_2dvEEPa4EeKqouElHMZMQQ" type="3004" fontName="Lucida Grande">
+            <children xmi:type="notation:DecorationNode" xmi:id="_2dvEEva4EeKqouElHMZMQQ" type="5005"/>
+            <element xmi:type="trnetvisual:AttributePattern" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.0/@nodes.2/@attributes.0"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2dvEEfa4EeKqouElHMZMQQ"/>
+          </children>
+          <styles xmi:type="notation:SortingStyle" xmi:id="_2dqLmPa4EeKqouElHMZMQQ"/>
+          <styles xmi:type="notation:FilteringStyle" xmi:id="_2dqLmfa4EeKqouElHMZMQQ"/>
+        </children>
+        <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_2dqLlPa4EeKqouElHMZMQQ"/>
+        <element xmi:type="trnetvisual:MandatoryNode" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.0/@nodes.2"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2dqLlfa4EeKqouElHMZMQQ" x="206" y="34"/>
+      </children>
+    </children>
+    <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_2ddXU_a4EeKqouElHMZMQQ"/>
+    <element xmi:type="trnetvisual:Pattern" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.0"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2dd-UPa4EeKqouElHMZMQQ" x="144" y="126"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_2dd-Uva4EeKqouElHMZMQQ" type="2005" fontName="Lucida Grande">
+    <children xmi:type="notation:DecorationNode" xmi:id="_2dd-Vfa4EeKqouElHMZMQQ" type="7005">
+      <children xmi:type="notation:Shape" xmi:id="_2d6DMPa4EeKqouElHMZMQQ" type="3003" fontName="Lucida Grande">
+        <children xmi:type="notation:DecorationNode" xmi:id="_2d6DM_a4EeKqouElHMZMQQ" type="5006"/>
+        <children xmi:type="notation:BasicCompartment" xmi:id="_2d6DNPa4EeKqouElHMZMQQ" type="7006">
+          <styles xmi:type="notation:SortingStyle" xmi:id="_2d6DNfa4EeKqouElHMZMQQ"/>
+          <styles xmi:type="notation:FilteringStyle" xmi:id="_2d6DNva4EeKqouElHMZMQQ"/>
+        </children>
+        <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_2d6DMfa4EeKqouElHMZMQQ"/>
+        <element xmi:type="trnetvisual:MandatoryNode" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.1/@nodes.0"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2d6DMva4EeKqouElHMZMQQ" x="206" y="34"/>
+      </children>
+      <children xmi:type="notation:Shape" xmi:id="_2d6DN_a4EeKqouElHMZMQQ" type="3003" fontName="Lucida Grande">
+        <children xmi:type="notation:DecorationNode" xmi:id="_2d6qQPa4EeKqouElHMZMQQ" type="5006"/>
+        <children xmi:type="notation:BasicCompartment" xmi:id="_2d6qQfa4EeKqouElHMZMQQ" type="7006">
+          <styles xmi:type="notation:SortingStyle" xmi:id="_2d6qQva4EeKqouElHMZMQQ"/>
+          <styles xmi:type="notation:FilteringStyle" xmi:id="_2d6qQ_a4EeKqouElHMZMQQ"/>
+        </children>
+        <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_2d6DOPa4EeKqouElHMZMQQ"/>
+        <element xmi:type="trnetvisual:MandatoryNode" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.1/@nodes.1"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2d6DOfa4EeKqouElHMZMQQ" x="26" y="34"/>
+      </children>
+    </children>
+    <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_2dd-U_a4EeKqouElHMZMQQ"/>
+    <element xmi:type="trnetvisual:Pattern" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.1"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2dd-VPa4EeKqouElHMZMQQ" x="27" y="513"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_2dd-Vva4EeKqouElHMZMQQ" type="2005" fontName="Lucida Grande">
+    <children xmi:type="notation:DecorationNode" xmi:id="_2dd-Wfa4EeKqouElHMZMQQ" type="7005">
+      <children xmi:type="notation:Shape" xmi:id="_2eHekPa4EeKqouElHMZMQQ" type="3003" fontName="Lucida Grande">
+        <children xmi:type="notation:DecorationNode" xmi:id="_2eHek_a4EeKqouElHMZMQQ" type="5006"/>
+        <children xmi:type="notation:BasicCompartment" xmi:id="_2eHelPa4EeKqouElHMZMQQ" type="7006">
+          <styles xmi:type="notation:SortingStyle" xmi:id="_2eHelfa4EeKqouElHMZMQQ"/>
+          <styles xmi:type="notation:FilteringStyle" xmi:id="_2eHelva4EeKqouElHMZMQQ"/>
+        </children>
+        <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_2eHekfa4EeKqouElHMZMQQ"/>
+        <element xmi:type="trnetvisual:MandatoryNode" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.2/@nodes.0"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2eHekva4EeKqouElHMZMQQ" x="206" y="34"/>
+      </children>
+      <children xmi:type="notation:Shape" xmi:id="_2eIFoPa4EeKqouElHMZMQQ" type="3003" fontName="Lucida Grande">
+        <children xmi:type="notation:DecorationNode" xmi:id="_2eIFo_a4EeKqouElHMZMQQ" type="5006"/>
+        <children xmi:type="notation:BasicCompartment" xmi:id="_2eIFpPa4EeKqouElHMZMQQ" type="7006">
+          <styles xmi:type="notation:SortingStyle" xmi:id="_2eIFpfa4EeKqouElHMZMQQ"/>
+          <styles xmi:type="notation:FilteringStyle" xmi:id="_2eIFpva4EeKqouElHMZMQQ"/>
+        </children>
+        <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_2eIFofa4EeKqouElHMZMQQ"/>
+        <element xmi:type="trnetvisual:MandatoryNode" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.2/@nodes.1"/>
+        <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2eIFova4EeKqouElHMZMQQ" x="26" y="34"/>
+      </children>
+    </children>
+    <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_2dd-V_a4EeKqouElHMZMQQ"/>
+    <element xmi:type="trnetvisual:Pattern" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.2"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_2dd-WPa4EeKqouElHMZMQQ" x="441" y="513"/>
+  </children>
+  <styles xmi:type="notation:DiagramStyle" xmi:id="_2bVQUfa4EeKqouElHMZMQQ"/>
+  <element xmi:type="trnetvisual:TrNetModel" href="Sample3_test_applyOverlappedPM_2.trnetvisual#/"/>
+  <edges xmi:type="notation:Edge" xmi:id="_2eVhAPa4EeKqouElHMZMQQ" type="4002" source="_2do9cPa4EeKqouElHMZMQQ" target="_2d6DN_a4EeKqouElHMZMQQ">
+    <styles xmi:type="notation:RoutingStyle" xmi:id="_2eVhAfa4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2eVhAva4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:Keep" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@restrictions.1"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2eVhA_a4EeKqouElHMZMQQ" points="[25, 25, 15, 15]$[-15, -15, -25, -25]"/>
+  </edges>
+  <edges xmi:type="notation:Edge" xmi:id="_2eWvIPa4EeKqouElHMZMQQ" type="4002" source="_2dpkhPa4EeKqouElHMZMQQ" target="_2d6DMPa4EeKqouElHMZMQQ">
+    <styles xmi:type="notation:RoutingStyle" xmi:id="_2eWvIfa4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2eWvIva4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:Keep" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@restrictions.2"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2eWvI_a4EeKqouElHMZMQQ" points="[-25, -25, -15, -15]$[15, 15, 25, 25]"/>
+  </edges>
+  <edges xmi:type="notation:Edge" xmi:id="_2eX9QPa4EeKqouElHMZMQQ" type="4002" source="_2do9cPa4EeKqouElHMZMQQ" target="_2eIFoPa4EeKqouElHMZMQQ">
+    <styles xmi:type="notation:RoutingStyle" xmi:id="_2eX9Qfa4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2eX9Qva4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:Keep" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@restrictions.3"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2eX9Q_a4EeKqouElHMZMQQ" points="[25, 25, 15, 15]$[-15, -15, -25, -25]"/>
+  </edges>
+  <edges xmi:type="notation:Connector" xmi:id="_2eYkUPa4EeKqouElHMZMQQ" type="4003" source="_2dcJIfa4EeKqouElHMZMQQ" target="_2ddXUva4EeKqouElHMZMQQ">
+    <styles xmi:type="notation:FontStyle" xmi:id="_2eYkUfa4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:AnyResult" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@results.0"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2eYkUva4EeKqouElHMZMQQ" points="[0, 0, 0, -60]$[0, 60, 0, 0]"/>
+    <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_2fBdgPa4EeKqouElHMZMQQ" id="(0.5,1.0)"/>
+    <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_2fBdgfa4EeKqouElHMZMQQ" id="(0.4990512333965844,0.0)"/>
+  </edges>
+  <edges xmi:type="notation:Connector" xmi:id="_2eZycPa4EeKqouElHMZMQQ" type="4003" source="_2dcwPPa4EeKqouElHMZMQQ" target="_2dd-Uva4EeKqouElHMZMQQ">
+    <styles xmi:type="notation:FontStyle" xmi:id="_2eZycfa4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:AnyResult" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@results.1"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2eZycva4EeKqouElHMZMQQ" points="[0, 0, 0, -60]$[0, 60, 0, 0]"/>
+    <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_2fBdgva4EeKqouElHMZMQQ" id="(0.5,1.0)"/>
+    <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_2fBdg_a4EeKqouElHMZMQQ" id="(0.7953890489913544,0.0)"/>
+  </edges>
+  <edges xmi:type="notation:Connector" xmi:id="_2ebAkPa4EeKqouElHMZMQQ" type="4003" source="_2ddXRva4EeKqouElHMZMQQ" target="_2dd-Vva4EeKqouElHMZMQQ">
+    <styles xmi:type="notation:FontStyle" xmi:id="_2ebAkfa4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:AnyResult" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@results.2"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2ebAkva4EeKqouElHMZMQQ" points="[0, 0, 0, -60]$[0, 60, 0, 0]"/>
+    <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_2fCEkva4EeKqouElHMZMQQ" id="(0.5,1.0)"/>
+    <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_2fCEk_a4EeKqouElHMZMQQ" id="(0.207492795389049,0.0)"/>
+  </edges>
+  <edges xmi:type="notation:Connector" xmi:id="_2ecOsPa4EeKqouElHMZMQQ" type="4005" source="_2dd-Uva4EeKqouElHMZMQQ" target="_2dcwMPa4EeKqouElHMZMQQ">
+    <styles xmi:type="notation:FontStyle" xmi:id="_2ecOsfa4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:AnyOperand" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operands.0"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2ecOsva4EeKqouElHMZMQQ" points="[0, 0, -196, -60]$[196, 60, 0, 0]"/>
+    <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_2fCroPa4EeKqouElHMZMQQ" id="(0.49855907780979825,1.0)"/>
+    <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_2fCrofa4EeKqouElHMZMQQ" id="(0.325,0.0)"/>
+  </edges>
+  <edges xmi:type="notation:Connector" xmi:id="_2edc0Pa4EeKqouElHMZMQQ" type="4005" source="_2ddXUva4EeKqouElHMZMQQ" target="_2dcwPPa4EeKqouElHMZMQQ">
+    <styles xmi:type="notation:FontStyle" xmi:id="_2edc0fa4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:AnyOperand" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operands.1"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2edc0va4EeKqouElHMZMQQ" points="[0, 0, 0, -60]$[0, 60, 0, 0]"/>
+    <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_2fCrpPa4EeKqouElHMZMQQ" id="(0.3055028462998102,1.0)"/>
+    <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_2fDSsPa4EeKqouElHMZMQQ" id="(0.5,0.0)"/>
+  </edges>
+  <edges xmi:type="notation:Connector" xmi:id="_2eeD4Pa4EeKqouElHMZMQQ" type="4005" source="_2ddXUva4EeKqouElHMZMQQ" target="_2ddXRva4EeKqouElHMZMQQ">
+    <styles xmi:type="notation:FontStyle" xmi:id="_2eeD4fa4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:AnyOperand" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operands.2"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2eeD4va4EeKqouElHMZMQQ" points="[0, 0, 0, -60]$[0, 60, 0, 0]"/>
+    <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_2fCrova4EeKqouElHMZMQQ" id="(0.6907020872865275,1.0)"/>
+    <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_2fCro_a4EeKqouElHMZMQQ" id="(0.5,0.0)"/>
+  </edges>
+  <edges xmi:type="notation:Connector" xmi:id="_2efSAPa4EeKqouElHMZMQQ" type="4005" source="_2dd-Vva4EeKqouElHMZMQQ" target="_2dcwMPa4EeKqouElHMZMQQ">
+    <styles xmi:type="notation:FontStyle" xmi:id="_2efSAfa4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:AnyOperand" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operands.3"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2efSAva4EeKqouElHMZMQQ" points="[0, 0, 198, -60]$[-198, 60, 0, 0]"/>
+    <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_2fCEkPa4EeKqouElHMZMQQ" id="(0.49855907780979825,1.0)"/>
+    <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_2fCEkfa4EeKqouElHMZMQQ" id="(0.65,0.0)"/>
+  </edges>
+  <edges xmi:type="notation:Edge" xmi:id="_2eggIPa4EeKqouElHMZMQQ" type="4017" source="_2dbiEPa4EeKqouElHMZMQQ" target="_2dsAwPa4EeKqouElHMZMQQ">
+    <children xmi:type="notation:DecorationNode" xmi:id="_2eggJPa4EeKqouElHMZMQQ" type="6006">
+      <styles xmi:type="notation:DescriptionStyle" xmi:id="_2eggJfa4EeKqouElHMZMQQ"/>
+      <layoutConstraint xmi:type="notation:Location" xmi:id="_2eggJva4EeKqouElHMZMQQ" y="40"/>
+    </children>
+    <styles xmi:type="notation:RoutingStyle" xmi:id="_2eggIfa4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2eggIva4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xsi:nil="true"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2eggI_a4EeKqouElHMZMQQ" points="[0, 0, -60, -42]$[48, 34, -12, -8]"/>
+  </edges>
+  <edges xmi:type="notation:Edge" xmi:id="_2ehuQPa4EeKqouElHMZMQQ" type="4013" source="_2diPwPa4EeKqouElHMZMQQ" target="_2dt18Pa4EeKqouElHMZMQQ">
+    <children xmi:type="notation:DecorationNode" xmi:id="_2eiVUPa4EeKqouElHMZMQQ" type="6002">
+      <layoutConstraint xmi:type="notation:Location" xmi:id="_2eiVUfa4EeKqouElHMZMQQ" y="40"/>
+    </children>
+    <styles xmi:type="notation:RoutingStyle" xmi:id="_2ehuQfa4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2ehuQva4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:ExternalConditionCallParameter" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operators.2/@conditions.0/@parameters.0"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2ehuQ_a4EeKqouElHMZMQQ" points="[0, 0, -70, -52]$[59, 44, -11, -8]"/>
+  </edges>
+  <edges xmi:type="notation:Edge" xmi:id="_2ejjcPa4EeKqouElHMZMQQ" type="4013" source="_2diPwPa4EeKqouElHMZMQQ" target="_2dvEEPa4EeKqouElHMZMQQ">
+    <children xmi:type="notation:DecorationNode" xmi:id="_2ejjdPa4EeKqouElHMZMQQ" type="6002">
+      <layoutConstraint xmi:type="notation:Location" xmi:id="_2ejjdfa4EeKqouElHMZMQQ" y="40"/>
+    </children>
+    <styles xmi:type="notation:RoutingStyle" xmi:id="_2ejjcfa4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2ejjcva4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:ExternalConditionCallParameter" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operators.2/@conditions.0/@parameters.1"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2ejjc_a4EeKqouElHMZMQQ" points="[0, 0, -80, -62]$[69, 54, -11, -8]"/>
+  </edges>
+  <edges xmi:type="notation:Edge" xmi:id="_2ekxkPa4EeKqouElHMZMQQ" type="4014" source="_2djd4Pa4EeKqouElHMZMQQ" target="_2dsAwPa4EeKqouElHMZMQQ">
+    <children xmi:type="notation:DecorationNode" xmi:id="_2elYoPa4EeKqouElHMZMQQ" type="6003">
+      <layoutConstraint xmi:type="notation:Location" xmi:id="_2elYofa4EeKqouElHMZMQQ" y="40"/>
+    </children>
+    <styles xmi:type="notation:RoutingStyle" xmi:id="_2ekxkfa4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2ekxkva4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:ExternalActionCallParameter" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operators.2/@actions.0/@parameters.0"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2ekxk_a4EeKqouElHMZMQQ" points="[0, 0, -60, -42]$[48, 34, -12, -8]"/>
+  </edges>
+  <edges xmi:type="notation:Edge" xmi:id="_2emmwPa4EeKqouElHMZMQQ" type="4013" source="_2dlTEPa4EeKqouElHMZMQQ" target="_2dvEEPa4EeKqouElHMZMQQ">
+    <children xmi:type="notation:DecorationNode" xmi:id="_2emmxPa4EeKqouElHMZMQQ" type="6002">
+      <layoutConstraint xmi:type="notation:Location" xmi:id="_2emmxfa4EeKqouElHMZMQQ" y="40"/>
+    </children>
+    <styles xmi:type="notation:RoutingStyle" xmi:id="_2emmwfa4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2emmwva4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:ExternalConditionCallParameter" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operators.3/@conditions.0/@parameters.0"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2emmw_a4EeKqouElHMZMQQ" points="[0, 0, -80, -62]$[69, 54, -11, -8]"/>
+  </edges>
+  <edges xmi:type="notation:Edge" xmi:id="_2en04Pa4EeKqouElHMZMQQ" type="4013" source="_2dlTEPa4EeKqouElHMZMQQ" target="_2dt18Pa4EeKqouElHMZMQQ">
+    <children xmi:type="notation:DecorationNode" xmi:id="_2en05Pa4EeKqouElHMZMQQ" type="6002">
+      <layoutConstraint xmi:type="notation:Location" xmi:id="_2en05fa4EeKqouElHMZMQQ" y="40"/>
+    </children>
+    <styles xmi:type="notation:RoutingStyle" xmi:id="_2en04fa4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2en04va4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:ExternalConditionCallParameter" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operators.3/@conditions.0/@parameters.1"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2en04_a4EeKqouElHMZMQQ" points="[0, 0, -70, -52]$[59, 44, -11, -8]"/>
+  </edges>
+  <edges xmi:type="notation:Edge" xmi:id="_2epDAPa4EeKqouElHMZMQQ" type="4014" source="_2dnIQPa4EeKqouElHMZMQQ" target="_2dsAwPa4EeKqouElHMZMQQ">
+    <children xmi:type="notation:DecorationNode" xmi:id="_2epqEPa4EeKqouElHMZMQQ" type="6003">
+      <layoutConstraint xmi:type="notation:Location" xmi:id="_2epqEfa4EeKqouElHMZMQQ" y="40"/>
+    </children>
+    <styles xmi:type="notation:RoutingStyle" xmi:id="_2epDAfa4EeKqouElHMZMQQ"/>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2epDAva4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:ExternalActionCallParameter" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@operators.3/@actions.0/@parameters.0"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2epDA_a4EeKqouElHMZMQQ" points="[0, 0, -60, -42]$[48, 34, -12, -8]"/>
+  </edges>
+  <edges xmi:type="notation:Connector" xmi:id="_2eq4MPa4EeKqouElHMZMQQ" type="4016" source="_2do9cPa4EeKqouElHMZMQQ" target="_2dpkhPa4EeKqouElHMZMQQ">
+    <children xmi:type="notation:DecorationNode" xmi:id="_2eq4M_a4EeKqouElHMZMQQ" type="6005">
+      <layoutConstraint xmi:type="notation:Location" xmi:id="_2eq4NPa4EeKqouElHMZMQQ" y="40"/>
+    </children>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2eq4Mfa4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:EdgePattern" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.0/@edges.0"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2eq4Mva4EeKqouElHMZMQQ" points="[0, 0, -240, 0]$[240, 0, 0, 0]"/>
+    <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_3GbbwPa4EeKqouElHMZMQQ" id="(1.0,0.5)"/>
+    <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_3GcC0Pa4EeKqouElHMZMQQ" id="(0.0,0.5)"/>
+  </edges>
+  <edges xmi:type="notation:Connector" xmi:id="_2esGUPa4EeKqouElHMZMQQ" type="4016" source="_2dqLk_a4EeKqouElHMZMQQ" target="_2dpkhPa4EeKqouElHMZMQQ">
+    <children xmi:type="notation:DecorationNode" xmi:id="_2esGU_a4EeKqouElHMZMQQ" type="6005">
+      <layoutConstraint xmi:type="notation:Location" xmi:id="_2esGVPa4EeKqouElHMZMQQ" y="40"/>
+    </children>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2esGUfa4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:EdgePattern" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.0/@edges.1"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2esGUva4EeKqouElHMZMQQ" points="[0, 0, -60, -59]$[60, 59, 0, 0]"/>
+    <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_3Ga0sPa4EeKqouElHMZMQQ" id="(1.0,0.5)"/>
+    <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_3Ga0sfa4EeKqouElHMZMQQ" id="(0.0,0.24)"/>
+  </edges>
+  <edges xmi:type="notation:Connector" xmi:id="_2et7gPa4EeKqouElHMZMQQ" type="4016" source="_2do9cPa4EeKqouElHMZMQQ" target="_2dqLk_a4EeKqouElHMZMQQ">
+    <children xmi:type="notation:DecorationNode" xmi:id="_2et7g_a4EeKqouElHMZMQQ" type="6005">
+      <layoutConstraint xmi:type="notation:Location" xmi:id="_2et7hPa4EeKqouElHMZMQQ" y="40"/>
+    </children>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2et7gfa4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:EdgePattern" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.0/@edges.2"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2et7gva4EeKqouElHMZMQQ" points="[0, 0, -60, 59]$[60, -59, 0, 0]"/>
+    <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_3GaNoPa4EeKqouElHMZMQQ" id="(1.0,0.24)"/>
+    <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_3GaNofa4EeKqouElHMZMQQ" id="(0.0,0.5)"/>
+  </edges>
+  <edges xmi:type="notation:Connector" xmi:id="_2evJoPa4EeKqouElHMZMQQ" type="4016" source="_2d6DN_a4EeKqouElHMZMQQ" target="_2d6DMPa4EeKqouElHMZMQQ">
+    <children xmi:type="notation:DecorationNode" xmi:id="_2evwsPa4EeKqouElHMZMQQ" type="6005">
+      <layoutConstraint xmi:type="notation:Location" xmi:id="_2evwsfa4EeKqouElHMZMQQ" y="40"/>
+    </children>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2evJofa4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:EdgePattern" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.1/@edges.0"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2evJova4EeKqouElHMZMQQ" points="[0, 0, -60, 0]$[60, 0, 0, 0]"/>
+    <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_3HDG0Pa4EeKqouElHMZMQQ" id="(1.0,0.5)"/>
+    <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_3HDt4Pa4EeKqouElHMZMQQ" id="(0.0,0.5)"/>
+  </edges>
+  <edges xmi:type="notation:Connector" xmi:id="_2ew-0Pa4EeKqouElHMZMQQ" type="4016" source="_2eIFoPa4EeKqouElHMZMQQ" target="_2eHekPa4EeKqouElHMZMQQ">
+    <children xmi:type="notation:DecorationNode" xmi:id="_2ew-0_a4EeKqouElHMZMQQ" type="6005">
+      <layoutConstraint xmi:type="notation:Location" xmi:id="_2exl4Pa4EeKqouElHMZMQQ" y="40"/>
+    </children>
+    <styles xmi:type="notation:FontStyle" xmi:id="_2ew-0fa4EeKqouElHMZMQQ" fontName="Lucida Grande"/>
+    <element xmi:type="trnetvisual:EdgePattern" href="Sample3_test_applyOverlappedPM_2.trnetvisual#//@patterns.2/@edges.0"/>
+    <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_2ew-0va4EeKqouElHMZMQQ" points="[0, 0, -60, 0]$[60, 0, 0, 0]"/>
+    <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_3G_ccPa4EeKqouElHMZMQQ" id="(1.0,0.5)"/>
+    <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_3HADgPa4EeKqouElHMZMQQ" id="(0.0,0.5)"/>
+  </edges>
+</notation:Diagram>

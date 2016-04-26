@@ -1,0 +1,14 @@
+import "GenerateIds.eol";
+
+
+wizard TestWizard {
+
+	guard : self.isKindOf(TrNetModel)
+
+	title : 'Generate All IDs'
+
+	do {
+		clearAllGeneratedIds();
+		//generateAllIDs();
+	}
+}

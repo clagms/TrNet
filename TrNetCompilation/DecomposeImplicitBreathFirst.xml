@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="DecomposeImplicitBreathFirst" default="main" basedir="." xmlns:fl="antlib:it.haefelinger.flaka">
+
+	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="${ant.library.dir}/ant-contrib.jar"/>
+	
+	<typedef
+	    name="javaselector"
+	    classname="utils.ImplicitAlreadyDecomposedSelector"
+	    classpath="bin"/>
+	
+	<property name="root" 
+		value="model/implicit/"/>
+	
+	<target name="main">
+		<echo message="Root: ${root}"/>
+		<resourcecount property="count.files">
+			<fileset dir="${root}" casesensitive="yes" includes="**/*_implicit.trnetvisual">
+				<javaselector />
+		    </fileset>
+		</resourcecount>
+		<input
+		    message="There are ${count.files} files. Continue (y/n)?"
+		    validargs="y,n"
+		/>
+		<echo message="Files: ${count.files}"/>
+		<foreach target="decompose" param="theFile" parallel="false">
+		    <path>
+		    	<fileset dir="${root}" casesensitive="yes">
+			    	<include name="**/*_implicit.trnetvisual"/>
+			    </fileset>
+			</path>
+		 </foreach>
+		<echo message="Files: ${count.files}"/>
+	</target>
+	
+	<target name="decompose">
+		
+		<echo message="${theFile}"/>
+		
+		<epsilon.emf.loadModel name="TrNetModel" 
+			aliases="VisualModel,CoreModel" 
+			modelfile="${theFile}" 
+			metamodeluri="http://trnetvisual/1.0" 
+			read="true" store="false" />
+		
+		<epsilon.eol src="analysis/DecomposeImplicitPatterns.eol">
+			<model ref="TrNetModel" />
+			<parameter name="transformationFile" value="${theFile}" />
+		</epsilon.eol>
+		
+	</target>
+
+</project>

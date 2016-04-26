@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="ASCII"?>
+<catalog:CatalogModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:catalog="http://catalog/1.0">
+  <types name="Square" outgoingReferences="//@references.0 //@references.1 //@references.2" incomingReferences="//@references.0 //@references.3" super="//@types.2" aggregatedNumberOfInstances="3">
+    <attributes name="id" aggregatedNumberOfDistinctValues="3">
+      <samples numberOfDistinctValues="3"/>
+    </attributes>
+    <samples numberOfInstances="3"/>
+  </types>
+  <types name="Pentagon" incomingReferences="//@references.1 //@references.4" super="//@types.2" aggregatedNumberOfInstances="1">
+    <attributes name="id" aggregatedNumberOfDistinctValues="1">
+      <samples numberOfDistinctValues="1"/>
+    </attributes>
+    <samples numberOfInstances="1"/>
+  </types>
+  <types name="IdElement" aggregatedNumberOfInstances="7">
+    <attributes name="id" aggregatedNumberOfDistinctValues="7">
+      <samples numberOfDistinctValues="7"/>
+    </attributes>
+    <samples numberOfInstances="7"/>
+  </types>
+  <types name="Triangle" incomingReferences="//@references.2" super="//@types.2" aggregatedNumberOfInstances="2">
+    <attributes name="id" aggregatedNumberOfDistinctValues="2">
+      <samples numberOfDistinctValues="2"/>
+    </attributes>
+    <samples numberOfInstances="2"/>
+  </types>
+  <types name="Circle" outgoingReferences="//@references.3 //@references.4" super="//@types.2" aggregatedNumberOfInstances="1">
+    <attributes name="id" aggregatedNumberOfDistinctValues="1">
+      <samples numberOfDistinctValues="1"/>
+    </attributes>
+    <samples numberOfInstances="1"/>
+  </types>
+  <references name="squares" source="//@types.0" target="//@types.0" aggregatedNumberOfDistinctSourceInstances="2" aggregatedNumberOfDistinctTargetInstances="2" aggregatedNumberOfInstances="2">
+    <samples numberOfDistinctSourceInstances="2" numberOfDistinctTargetInstances="2" numberOfInstances="2"/>
+  </references>
+  <references name="pentagons" source="//@types.0" target="//@types.1" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="1" aggregatedNumberOfInstances="1">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="1" numberOfInstances="1"/>
+  </references>
+  <references name="triangles" source="//@types.0" target="//@types.3" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="2" aggregatedNumberOfInstances="2">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="2" numberOfInstances="2"/>
+  </references>
+  <references name="squares" source="//@types.4" target="//@types.0" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="1" aggregatedNumberOfInstances="1">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="1" numberOfInstances="1"/>
+  </references>
+  <references name="pentagons" source="//@types.4" target="//@types.1" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="1" aggregatedNumberOfInstances="1">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="1" numberOfInstances="1"/>
+  </references>
+</catalog:CatalogModel>

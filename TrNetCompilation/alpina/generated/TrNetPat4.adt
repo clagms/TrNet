@@ -1,0 +1,26 @@
+import "boolean.adt"
+	import "CClass.adt"
+
+Adt TrNetPat4
+	Sorts TrNetPat4;
+	Generators
+		newTrNetPat4: CClass,CClass -> TrNetPat4;
+	MarkOpTrNetOp1: TrNetPat4 -> TrNetPat4;
+	Operations
+	getCClass0: TrNetPat4 -> CClass;
+	getCClass1: TrNetPat4 -> CClass;
+	isMarkedTrNetOp1: TrNetPat4 -> bool;
+	Axioms
+	
+	getCClass0(newTrNetPat4($CClass0Var,$CClass1Var)) = $CClass0Var;
+		getCClass0(MarkOpTrNetOp1($TrNetPat4Var)) = getCClass0($TrNetPat4Var);
+	
+	getCClass1(newTrNetPat4($CClass0Var,$CClass1Var)) = $CClass1Var;
+		getCClass1(MarkOpTrNetOp1($TrNetPat4Var)) = getCClass1($TrNetPat4Var);
+	
+	isMarkedTrNetOp1(newTrNetPat4($CClass0Var,$CClass1Var)) = false;
+	isMarkedTrNetOp1(MarkOpTrNetOp1($TrNetPat4Var)) = true;
+	Variables
+		TrNetPat4Var : TrNetPat4;
+			CClass0Var : CClass;
+			CClass1Var : CClass;

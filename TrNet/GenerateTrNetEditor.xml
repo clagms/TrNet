@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="GenerateTrNetEditor" default="main" basedir=".">
+
+	<!-- Generate GMF Editor -->
+	<target name="main">
+
+		<!-- Remove previously generated files. -->
+
+		<delete quiet="true" includeEmptyDirs="true">
+			<fileset dir="../TrNet.tests/src" />
+		</delete>
+
+		<delete quiet="true" includeEmptyDirs="true">
+			<fileset dir="../TrNet.editor/src" />
+		</delete>
+
+		<delete quiet="true" includeEmptyDirs="true">
+			<fileset dir="../TrNet.edit/src" />
+		</delete>
+
+		<delete quiet="true" includeEmptyDirs="true">
+			<fileset dir="./src" />
+		</delete>
+
+		<delete quiet="true" includeEmptyDirs="true">
+			<fileset dir="./META-INF" />
+		</delete>
+
+		<delete file="./model/TrNet.genmodel" />
+		
+		<delete file="./plugin.properties" />
+		<delete file="./plugin.xml" />
+		
+		<eclipse.refreshLocal resource="TrNet" depth="infinite"/>
+		<eclipse.refreshLocal resource="TrNet.edit" depth="infinite"/>
+		<eclipse.refreshLocal resource="TrNet.editor" depth="infinite"/>
+		<eclipse.refreshLocal resource="TrNet.tests" depth="infinite"/>
+
+		<epsilon.eugenia src="model/TrNet.ecore" firstStep="genmodel" lastStep="genmodel"/>
+		<epsilon.eugenia src="model/TrNet.ecore" firstStep="emfcode" lastStep="emfcode"/>
+
+		<!-- Deploy diagram icon files 
+		<copy todir="../new/dir" >
+			<fileset dir="src_dir" />
+		</copy>
+		-->
+
+	</target>
+
+
+
+</project>

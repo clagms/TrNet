@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="GenerateExplicitVersionFromDecomposition" default="main" basedir=".">
+
+	<property name="trnet" 
+		value="model/implicit/class2relational_explicit_med.trnetvisual"/>
+	
+	<property name="decomposition" 
+				value="model/implicit/DecompositionClass2Relational.xmi"/>
+	
+	<target name="main">
+
+		<epsilon.emf.register file="../TrNetDecompositionProcess/model/DecompositionProcess.ecore" />
+		
+		<epsilon.emf.loadModel name="TrNetModel" 
+			aliases="VisualModel,CoreModel" 
+			modelfile="${trnet}" 
+			metamodeluri="http://trnetvisual/1.0" 
+			read="true" store="true" />
+		
+		<epsilon.emf.loadModel 
+					name="Decomposition" 
+					modelfile="${decomposition}" 
+					metamodeluri="http://decompositionprocess/1.0" 
+					read="true" store="false" />
+		
+		<epsilon.eol src="analysis/GenerateExplicitVersionFromSequenceSplits.eol">
+			<model ref="TrNetModel" />
+			<model ref="Decomposition" />
+		</epsilon.eol>
+		
+		<epsilon.disposeModels />
+		
+	</target>
+	
+</project>

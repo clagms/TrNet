@@ -1,0 +1,58 @@
+[%
+import "Utils.eol";
+
+%]
+package [%=getPackagePattern(pattern)%];
+
+import generic.*;
+
+public class [%=getClassPattern(pattern)%]{
+[%
+for (node in pattern.nodes) {
+	%]
+	public [%=getClassNodePattern(node)%] [%=getFieldNameNodePattern(node)%];
+	[%
+}
+%]
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		
+		[%
+		for (node in pattern.nodes) {
+		%]
+		result = prime * result + (([%=getFieldNameNodePattern(node)%]==null) ? 0 : [%=getFieldNameNodePattern(node)%].hashCode());
+		[%
+		}
+		%]
+		return result;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		[%=getClassPattern(pattern)%] other = ([%=getClassPattern(pattern)%]) obj;
+		[%
+		for (node in pattern.nodes) {
+		%]
+		if ([%=getFieldNameNodePattern(node)%]==null) {
+			if (other.[%=getFieldNameNodePattern(node)%] != null) {
+				return false;
+			}
+		} else if (! [%=getFieldNameNodePattern(node)%].equals(other.[%=getFieldNameNodePattern(node)%])) {
+			return false;
+		}
+		[%
+		}
+		%]
+		return true;
+	}
+
+}

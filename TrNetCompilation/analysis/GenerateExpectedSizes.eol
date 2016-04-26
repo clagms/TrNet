@@ -1,0 +1,19 @@
+import "../Utils.eol";
+
+var trnetmodel = TrNetModel!TrNetModel.all.first;
+
+computeTransformationCost(trnetmodel);
+
+//nodePattern2AttributeDistinctValues.println();
+
+/* DEBUG
+for (pattern in VisualModel!Pattern.all()){
+	pattern.println();
+	for (parent in getAllParentsSet(pattern)){
+		parent.println();
+	}
+	isUnfilled(pattern).println();
+	canBeFilled(pattern).println();
+}
+*/
+

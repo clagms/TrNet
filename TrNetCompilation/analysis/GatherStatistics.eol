@@ -1,0 +1,154 @@
+"Gathering new sample...".println();
+
+var sampleIndex = getMaxSampleIndex();
+
+var propertyGetter = Model.getPropertyGetter();
+
+for (typeCatalog in CatalogModel!TypeCatalog.all) {
+	var newTypeCatalogSample = new CatalogModel!TypeCatalogSample;
+	typeCatalog.samples.add(newTypeCatalogSample);
+	newTypeCatalogSample.index = sampleIndex;
+	
+	var allEClassesOfKind = Model.getAllOfKind(typeCatalog.name);
+	
+	newTypeCatalogSample.numberOfInstances = allEClassesOfKind.size();
+	
+	for (attributeCatalog in typeCatalog.attributes) {
+		
+		var newAttrCatalogSample = new CatalogModel!AttributeCatalogSample;
+		attributeCatalog.samples.add(newAttrCatalogSample);
+		newAttrCatalogSample.index = sampleIndex;
+		newAttrCatalogSample.numberOfDistinctValues = getNumberOfDistinctValues(attributeCatalog, allEClassesOfKind, propertyGetter);
+		
+	}
+}
+
+for (referenceCatalog in CatalogModel!ReferenceCatalog.all) {
+	
+	var newReferenceCatalogSample = new CatalogModel!ReferenceCatalogSample;
+	referenceCatalog.samples.add(newReferenceCatalogSample);
+	newReferenceCatalogSample.index = sampleIndex;
+	
+	var allEClassSources = Model.getAllOfKind(referenceCatalog.source.name);
+	var allEClassTargets = Model.getAllOfKind(referenceCatalog.target.name);
+	
+	var distinctSourceEClasses = new Set;
+	var distinctTargetEClasses = new Set;
+	
+	var numberOfReferenceInstances = 0;
+	
+	for (sourceEClass in allEClassSources) {
+		("sourceEClass: " + sourceEClass).println();
+		
+		var references = propertyGetter.invoke(sourceEClass, referenceCatalog.name);
+		
+		//("references: " + references).println();
+		
+		if (references <> null) {
+			
+			var alreadyAddedSourceEClass = false; // avoid repetition for performance reasons.
+			
+			for (targetEclass in references) {
+				// we only have one instance of this reference if one of its targets belongs to the set of valid targets (of the same kind);
+				if (allEClassTargets.includes(targetEclass)) {
+					if (not alreadyAddedSourceEClass) {
+						distinctSourceEClasses.add(sourceEClass); // avoid repetition for performance reasons.
+						alreadyAddedSourceEClass = true;
+					}
+					distinctTargetEClasses.add(targetEclass);
+					numberOfReferenceInstances = numberOfReferenceInstances + 1;
+				}
+			}
+			
+		}
+		
+		newReferenceCatalogSample.numberOfDistinctSourceInstances = distinctSourceEClasses.size();
+		newReferenceCatalogSample.numberOfDistinctTargetInstances = distinctTargetEClasses.size();
+		newReferenceCatalogSample.numberOfInstances = numberOfReferenceInstances;
+		
+		
+	}
+	
+}
+
+
+"Gathering new sample... DONE".println();
+
+"Updating Aggregated Values...".println();
+
+// For now, just copy the first samples' values to the aggregated values
+
+for (typeCatalog in CatalogModel!TypeCatalog.all) {
+	typeCatalog.aggregatedNumberOfInstances = computeAggregatedNumberOfInstancesTypeCatalog(typeCatalog);
+	
+	for (attributeCatalog in typeCatalog.attributes) {
+		attributeCatalog.aggregatedNumberOfDistinctValues = computeAggregatedNumberOfInstancesAttributeCatalog(attributeCatalog);
+	}
+
+}
+
+for (referenceCatalog in CatalogModel!ReferenceCatalog.all) {
+	referenceCatalog.aggregatedNumberOfDistinctSourceInstances = computeAggregatedNumberOfDistinctSourceInstances(referenceCatalog);
+	referenceCatalog.aggregatedNumberOfDistinctTargetInstances = computeAggregatedNumberOfDistinctTargetInstances(referenceCatalog);
+	referenceCatalog.aggregatedNumberOfInstances = computeAggregatedNumberOfInstancesReferenceCatalog(referenceCatalog);
+}
+
+
+"Updating Aggregated Values... DONE".println();
+
+
+operation computeAggregatedNumberOfInstancesAttributeCatalog(attributeCatalog) {
+	var sample = attributeCatalog.samples.first;
+	return sample.numberOfDistinctValues;
+}
+
+operation computeAggregatedNumberOfInstancesReferenceCatalog(referenceCatalog) {
+	var sample = referenceCatalog.samples.first;
+	return sample.numberOfInstances;
+}
+
+operation computeAggregatedNumberOfDistinctSourceInstances(referenceCatalog) {
+	var sample = referenceCatalog.samples.first;
+	return sample.numberOfDistinctSourceInstances;
+}
+
+operation computeAggregatedNumberOfDistinctTargetInstances(referenceCatalog) {
+	var sample = referenceCatalog.samples.first;
+	return sample.numberOfDistinctTargetInstances;
+}
+
+
+operation computeAggregatedNumberOfInstancesTypeCatalog(typeCatalog) {
+	var newReferenceCatalogSample = typeCatalog.samples.first;
+	return newReferenceCatalogSample.numberOfInstances;
+}
+
+
+
+operation getNumberOfDistinctValues(attributeCatalog, allEClassesOfKind, propertyGetter) {
+	
+	var distinctValues = new Set;
+	
+	for (eclass in allEClassesOfKind) {
+		distinctValues.add(propertyGetter.invoke(eclass, attributeCatalog.name));
+	}
+	
+	return distinctValues.size();
+}
+
+
+operation getMaxSampleIndex() {
+	// we assume all indexes are synchronized.
+	var allSamples = CatalogModel!TypeCatalog.all.first.samples;
+	
+	var maxIndex = 0;
+	
+	for (sample in allSamples) {
+		if (sample.index > maxIndex) {
+			maxIndex = sample.index;
+		}
+	}
+	
+	return maxIndex;
+}
+

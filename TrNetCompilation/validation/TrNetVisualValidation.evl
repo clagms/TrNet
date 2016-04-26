@@ -1,0 +1,233 @@
+pre {
+	var patternIds = new Map;
+	var patternIdNotUnique = new Map;
+	
+	for (pattern in VisualModel!Pattern.all) {
+		if (pattern.id<>"") {
+			if (patternIds.containsKey(pattern.id)) {
+				patternIdNotUnique.put(pattern, true);
+			} else {
+				patternIds.put(pattern.id, true);
+				patternIdNotUnique.put(pattern.id, false);
+			}
+		} else {
+			patternIdNotUnique.put(pattern.id, false);
+		}
+	}
+	
+	
+	var operatorIds = new Map;
+	var operatorIdNotUnique = new Map;
+	
+	for (operator in VisualModel!Operator.all) {
+		if (operator.id<>"") {
+			if (operatorIds.containsKey(operator.id)) {
+				operatorIdNotUnique.put(operator.id, true);
+			} else {
+				operatorIds.put(operator.id, true);
+				operatorIdNotUnique.put(operator.id, false);
+			}
+		} else {
+			operatorIdNotUnique.put(operator.id, false);
+		}
+	}
+}
+
+context VisualModel!TrNetModel {
+	
+  	constraint TrNetModelMustHaveOneInput {
+    
+	    check: not self.operators.select(e | e.isKindOf(VisualModel!External) and (not e.results.isEmpty())).isEmpty()
+		
+		message : "Element " + self + " must have at least one External Operator as input to the network."
+	
+  	}
+  	
+  	constraint TrNetModelMustHaveOneInput {
+    
+	    check: not self.operators.select(e | e.isKindOf(VisualModel!External) and (not e.operands.isEmpty())).isEmpty()
+		
+		message : "Element " + self + " must have at least one External Operator as output to the network."
+	
+  	}
+  	
+  	constraint TrNetModelMustHaveId {
+    
+	    check: self.id <> ""
+		
+		message : "Element " + self + " must define an id. Please run the Generate IDs Action."
+	
+  	}
+     
+}
+
+context VisualModel!Pattern {
+	
+	constraint PatternMustHaveIncommingResults {
+    
+	    check: not self.incomingResults.isEmpty()
+		
+		message : "Element " + self + " must have at least one input."
+	
+	}
+	
+	constraint PatternMustHaveOutgoingOperands {
+    
+	    check: not self.outgoingOperands.isEmpty()
+		
+		message : "Element " + self + " must have at least one output."
+	
+	}
+	
+	constraint PatternMustHaveId {
+    
+	    check: self.id <> ""
+		
+		message : "Element " + self + " must define an id. Please run the Generate IDs Action."
+	
+	}
+	
+	constraint PatternIdUnique {
+    
+	    //check: VisualModel!Pattern.all.forAll(pat : VisualModel!Pattern | pat = self or pat.id <> self.id)
+		check: patternIdNotUnique.get(self.id)==false
+		
+		message : "Element " + self + " must have a unique ID."
+	
+	}
+  
+}
+
+context VisualModel!NodePattern {
+	
+	constraint NodePatternMustHaveId {
+    
+	    check: self.id <> ""
+		
+		message : "Element " + self + " must define an id. Please run the Generate IDs Action."
+	
+	}
+	
+	constraint PatternMustHaveName {
+    
+	    check: self.name <> ""
+		
+		message : "Element " + self + " must have a name."
+	
+	}
+	
+	constraint NodePatternIdUnique {
+    
+	    check: self.pattern.nodes.forAll(node : VisualModel!NodePattern | node = self or node.id <> self.id)
+		
+		message : "Element " + self + " must have a unique ID."
+		
+	
+	}
+	
+	constraint NodePatternMustBeUniquelyDefined {
+    
+	    check: (VisualModel!Keep.all
+	    	.select(keep|keep.target==self and (not 
+	    	VisualModel!Operator.all
+	    	  .select(op|op.operands
+	    	   .collect(oper| oper.pattern)
+	    	     .collect(pat | pat.nodes).includes(keep.source) and
+	    	  op.results
+	    	   .collect(res| res.pattern)
+	    	     .collect(pat| pat.nodes).includes(self)).isEmpty())).size > 0) implies 
+	    	   VisualModel!Keep.all
+		    	.select(keep|keep.target==self and (not 
+		    	VisualModel!Operator.all
+		    	  .select(op|op.operands
+		    	   .collect(oper| oper.pattern)
+		    	     .collect(pat | pat.nodes).includes(keep.source) and
+		    	  op.results
+		    	   .collect(res| res.pattern)
+		    	     .collect(pat| pat.nodes).includes(self)).isEmpty())).size == 1
+		
+		message : "Node " + self + " is not uniquely defined."
+	
+	}
+  
+}
+
+context VisualModel!Same {
+	
+	constraint SameMustBeUseful {
+    
+	    check: VisualModel!Operator.all.exists(op | 
+	    				op.operands.collect(operand | operand.pattern.nodes).flatten().includes(self.source) 
+	    				and 
+	    				op.operands.collect(operand | operand.pattern.nodes).flatten().includes(self.target))
+		
+		message : "Same " + self.source.pattern.id + "_" + self.source.id + 
+						" -- " + 
+						self.target.pattern.id + "_" + self.target.id + " is useless."
+	
+	}
+	
+}
+
+context VisualModel!Operator {
+	
+	constraint OperatorMustHaveId {
+    
+	    check: self.id <> ""
+		
+		message : "Element " + self + " must define an id. Please run the Generate IDs Action."
+	
+	}
+	
+	constraint OperatorIdUnique {
+    
+	    //check: VisualModel!Operator.all.forAll(op : VisualModel!Operator | op = self or op.id <> self.id)
+		check: operatorIdNotUnique.get(self.id)==false
+		
+		message : "Element " + self + " must have a unique ID."
+	
+	}
+	
+}
+
+context VisualModel!External {
+	
+	constraint ExternalEitherInputOrOutputNotBoth {
+    
+	    check: ((not self.operands.isEmpty()) implies self.results.isEmpty()) or ((not self.results.isEmpty()) implies self.operands.isEmpty())
+		
+		message : "Element " + self + " must be either Input or Output, not both."
+	
+	}
+	
+	
+}
+
+context VisualModel!Combinator {
+	
+	constraint CombinatorConnectedInput {
+    
+	    check: not self.operands.isEmpty()
+		
+		message : "Element " + self + " must be connected to at least one operand."
+	
+	}
+	
+	constraint CombinatorConnectedOutput {
+    
+	    check: not self.results.isEmpty()
+		
+		message : "Element " + self + " must be connected to at least one result."
+	
+	}
+	
+	
+}
+
+
+
+
+
+post {
+
+}

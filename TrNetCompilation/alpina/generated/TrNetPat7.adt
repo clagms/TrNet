@@ -1,0 +1,15 @@
+import "boolean.adt"
+	import "Attribute.adt"
+
+Adt TrNetPat7
+	Sorts TrNetPat7;
+	Generators
+		newTrNetPat7: Attribute -> TrNetPat7;
+	Operations
+	getAttribute0: TrNetPat7 -> Attribute;
+	Axioms
+	
+	getAttribute0(newTrNetPat7($Attribute0Var)) = $Attribute0Var;
+	Variables
+		TrNetPat7Var : TrNetPat7;
+			Attribute0Var : Attribute;

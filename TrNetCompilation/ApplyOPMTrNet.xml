@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ApplyOPMTrNet" default="main" basedir=".">
+
+	<target name="main">
+
+		<!-- -->
+		<epsilon.emf.loadModel name="VisualModel" aliases="TrNetModel,CoreModel" modelfile="../DSLTransCompilation/ActivityDiagramMigrationOpt.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+		
+		<!-- Generate IDs on the Visual Model -->
+		<epsilon.eol src="analysis/OverlappedPM.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+		
+	</target>
+
+</project>

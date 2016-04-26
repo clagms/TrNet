@@ -1,0 +1,1818 @@
+import "../Utils.eol";
+
+operation fixedPointIterateOPM(maxSteps, equalPatternsCache, equalOperatorsCache){
+	
+	var stepCounter = maxSteps;
+
+	while(tryToApplyOverlappedPM(equalPatternsCache, equalOperatorsCache) and (stepCounter>0)) {	
+		("#Number Of Patterns: " + VisualModel!Pattern.all.size).println();
+		("#Number Of Operators: " + VisualModel!Operator.all.size).println();
+		("#stepCounter: " + stepCounter).println();
+		stepCounter = stepCounter - 1;
+	}
+	
+	return stepCounter;
+}
+
+operation tryToApplyOverlappedPM(equalPatternsCache, equalOperatorsCache) {
+	for (operator in getAllExternalInputOperators()) {  
+		if (applyOverlappedPM(operator, equalPatternsCache, equalOperatorsCache)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/*
+Defines the necessary and suficient condition for two patterns to be joined.
+*/
+operation equalPatterns(pattern1, pattern2, equalPatternsCache) {
+	
+	assert(equalPatternsCache<>null, "equalPatternsCache == null");
+	
+	if (isInCache(pattern1, pattern2, equalPatternsCache)) {
+		var _result = getCachedResult(pattern1, pattern2, equalPatternsCache);
+		("Cache Hit: " + pattern1.id + " === " + pattern2.id + " -> " + (_result <> null)).println();
+		return _result;
+	}
+	
+	if (pattern1.nodes.size <> pattern2.nodes.size) {
+		setCachedResult(pattern1, pattern2, equalPatternsCache, null);
+		return null;
+	}
+	
+	if (pattern1.edges.size <> pattern2.edges.size) {
+		setCachedResult(pattern1, pattern2, equalPatternsCache, null);
+		return null;
+	}
+	
+	if (pattern1.incomingResults.size <> pattern2.incomingResults.size) {
+		setCachedResult(pattern1, pattern2, equalPatternsCache, null);
+		return null;
+	}
+	
+	var commonSuccessorOperators = getCommonOperators(getOperatorSucessorsFromPattern(pattern1), getOperatorSucessorsFromPattern(pattern2));
+	if (commonSuccessorOperators.exists(operator | operator.isKindOf(VisualModel!Combinator))) {
+		// we cannot join two patterns that feed the same combinador, as they the combination of their elements will produce results that would otherwise be not produced with only one pattern
+		setCachedResult(pattern1, pattern2, equalPatternsCache, null);
+		return null;
+	}
+	
+	//this performs a subgraph isomorphism... for a node to be equal to another they must have the same name, the same in and out edges and the same keepIns (from the same patterns).
+	var bijectiveMappingsBetweenNodes = nodeSetsAreExactlyTheSame(pattern1, pattern2);
+	
+	if (bijectiveMappingsBetweenNodes == null) {
+		setCachedResult(pattern1, pattern2, equalPatternsCache, null);
+		return null;
+	}
+	
+	var mapBetweenNodesPattern1ToNodesPattern2 = bijectiveMappingsBetweenNodes.first;
+	var mapBetweenNodesPattern2ToNodesPattern1 = bijectiveMappingsBetweenNodes.last;
+	
+	
+	//successfully built the nodes correspondence, which means the patterns are exactly alike.
+	// now we turn to the past of this pattern.
+	// this does not call equalOperators(); It just finds the bijection in plain old equality
+	// if there were equivalent patterns, then they would have been joined already.
+	var bijectiveMappingsBetweenOperators = operatorSetsAreExactlyTheSame(getOperatorPredecessorsFromPattern(pattern1), getOperatorPredecessorsFromPattern(pattern2));
+	if (bijectiveMappingsBetweenOperators == null) {
+		setCachedResult(pattern1, pattern2, equalPatternsCache, null);
+		return null;
+	}
+	
+	var mapBetweenOperatorsPattern1ToOperatorsPattern2 = bijectiveMappingsBetweenOperators.first;
+	var mapBetweenOperatorsPattern2ToOperatorsPattern1 = bijectiveMappingsBetweenOperators.last;
+	
+	var result = Sequence{mapBetweenNodesPattern1ToNodesPattern2, mapBetweenNodesPattern2ToNodesPattern1, mapBetweenOperatorsPattern1ToOperatorsPattern2, mapBetweenOperatorsPattern2ToOperatorsPattern1};
+	setCachedResult(pattern1, pattern2, equalPatternsCache, result);
+	return result;
+}
+
+operation isInCache(obj1, obj2, cache) {
+	if (cache.containsKey(obj1)) {
+		if (cache.get(obj1).containsKey(obj2)){
+			return true;
+		}
+	}
+	
+	if (cache.containsKey(obj2)) {
+		if(cache.get(obj2).containsKey(obj1)) {
+			return true;
+		}
+	}
+	
+	return false;
+}
+operation getCachedResult(obj1, obj2, cache) {
+	if (cache.containsKey(obj1)) {
+		if (cache.get(obj1).containsKey(obj2)){
+			return cache.get(obj1).get(obj2);
+		}
+	}
+	
+	if (cache.containsKey(obj2)) {
+		if (cache.get(obj2).containsKey(obj1)){
+			return cache.get(obj2).get(obj1);
+		}
+	}
+	
+	throw "Not in cache!";
+}
+operation setCachedResult(obj1, obj2, cache, result) {
+	if (cache.containsKey(obj1)) {
+		if (cache.get(obj1).containsKey(obj2)) {
+			throw "Operation not allowed!";
+		}
+		if (cache.containsKey(obj2)) {
+			if (cache.get(obj2).containsKey(obj1)) { 
+				throw "Operation not allowed!";
+			}
+		}
+		cache.get(obj1).put(obj2, result);
+	} else if (cache.containsKey(obj2)) {
+		if (cache.get(obj2).containsKey(obj1)) {
+			throw "Operation not allowed!";
+		}
+		if (cache.containsKey(obj1)) {
+			if (cache.get(obj1).containsKey(obj2)) { 
+				throw "Operation not allowed!";
+			}
+		}
+		cache.get(obj2).put(obj1, result);
+	} else {
+		var innerCache = new Map;
+		innerCache.put(obj2, result);
+		cache.put(obj1, innerCache);
+	}
+}
+
+operation operatorSetsAreExactlyTheSame(operators1, operators2) {
+	if (operators1.size <> operators2.size) {
+		return null;
+	}
+	
+	// we follow pratically the same algorithm that nodeSetsAreExactlyTheSame follows with the expection that the equality of operators is the exact equality (==)
+	var potencialOperators2 = new Map;
+	for (op1 in operators1) {
+		var candidateOperators = getCandidateOperators(op1, operators2);
+		if (candidateOperators.isEmpty()) {
+			//impossible to have an isomorphism
+			return null;
+		}
+		potencialOperators2.put(op1, candidateOperators);
+	}
+	
+	var potencialOperators1 = new Map;
+	for (op2 in operators2) {
+		var candidateOperators = getCandidateOperators(op2, operators1);
+		if (candidateOperators.isEmpty()) {
+			//impossible to have an isomorphism
+			return null;
+		}
+		potencialOperators1.put(op2, candidateOperators);
+	}
+	
+	for (op1 in potencialOperators2.keySet) {
+		for (op2 in potencialOperators2.get(op1)) {
+			if (not potencialOperators1.get(op2).contains(op1)) {
+				potencialOperators2.get(op1).remove(op2);
+			}
+		}
+		if (potencialOperators2.get(op1).isEmpty()) {
+			return null;
+		}
+	}
+	
+	for (op2 in potencialOperators1.keySet) {
+		for (op1 in potencialOperators1.get(op2)) {
+			if (not potencialOperators2.get(op1).contains(op2)) {
+				potencialOperators1.get(op2).remove(op1);
+			}
+		}
+		if (potencialOperators1.get(op2).isEmpty()) {
+			return null;
+		}
+	}
+	
+	for (op1 in potencialOperators2.keySet) {
+		var operators2Size = potencialOperators2.get(op1).size;
+		for (op2 in potencialOperators2.get(op1))  {
+			if (operators2Size <> potencialOperators1.get(op2).size) {
+				return null;
+			}
+		}
+	}
+	for (op2 in potencialOperators1.keySet) {
+		var operators1Size = potencialOperators1.get(op2).size;
+		for (op1 in potencialOperators1.get(op2))  {
+			if (operators1Size <> potencialOperators2.get(op1).size) {
+				return null;
+			}
+		}
+	}
+	
+	
+	var potencialOperators2Bij = new Map;
+	var potencialOperators1Bij = new Map;
+	for (op1 in potencialOperators2.keySet) {
+		var choosenOp2 = potencialOperators2.get(op1).first;
+		potencialOperators2Bij.put(op1, choosenOp2);
+		potencialOperators1Bij.put(choosenOp2, op1);
+		
+		for (op1aux in potencialOperators2.keySet) {
+			potencialOperators2.get(op1aux).remove(choosenOp2);
+		}
+	}
+	
+	return Sequence{potencialOperators2Bij, potencialOperators1Bij};
+}
+
+operation nodeSetsAreExactlyTheSame(pattern1, pattern2) {
+
+	// try to check if it is impossible to find the isomorphism
+
+	if (pattern1.nodes.size <> pattern2.nodes.size) {
+		return null;
+	}
+	if (pattern1.edges.size <> pattern2.edges.size) {
+		return null;
+	}
+	
+	// check if for each node in one set, there is at least a corresponding node in the other set.
+	// this is not isomorphism yet, it is just to which possible nodes in the nodes2 set can correspond to each node.
+	var potencialNodes2 = new Map;
+	for (node1 in pattern1.nodes) {
+		var candidateNodes = getCandidateNodes(node1, pattern2.nodes);
+		if (candidateNodes.isEmpty()) {
+			//impossible to have an isomorphism
+			return null;
+		}
+		potencialNodes2.put(node1, candidateNodes);
+	}
+	
+	// now we do the same in the other direction
+	var potencialNodes1 = new Map;
+	for (node2 in pattern2.nodes) {
+		var candidateNodes = getCandidateNodes(node2, pattern1.nodes);
+		if (candidateNodes.isEmpty()) {
+			//impossible to have an isomorphism
+			return null;
+		}
+		potencialNodes1.put(node2, candidateNodes);
+	}
+	
+	// now we perform the interception between the two, in the two directions, in order to trim both mappings.
+	for (node1 in potencialNodes2.keySet) {
+		// we will remove form potencialNodes2 all those nodes that don0t map back to node 1.
+		for (node2 in potencialNodes2.get(node1)) {
+			if (not potencialNodes1.get(node2).contains(node1)) {
+				potencialNodes2.get(node1).remove(node2);
+			}
+		}
+		// if after the trimming, node1 does not map to anything, we can't have an isomorphism
+		if (potencialNodes2.get(node1).isEmpty()) {
+			return null;
+		}
+	}
+	
+	for (node2 in potencialNodes1.keySet) {
+		// we will remove form potencialNodes1 all those nodes that don't map back to node2.
+		for (node1 in potencialNodes1.get(node2)) {
+			if (not potencialNodes2.get(node1).contains(node2)) {
+				potencialNodes1.get(node2).remove(node1);
+			}
+		}
+		// if after the trimming, node2 does not map to anything, we can't have an isomorphism
+		if (potencialNodes1.get(node2).isEmpty()) {
+			return null;
+		}
+	}
+	
+	// now in most cases we will have a one to one mapping.
+	// but there are still cases where we will have ambiguities, e.g., 
+	// A1 -> A1' 
+	// A1 -> A2'
+	// A2 -> A1'
+	// A2 -> A2'
+	// A1' -> A1 
+	// A1' -> A2
+	// A2' -> A1
+	// A2' -> A2
+	
+	// In this cases we will just check if the number of corresponding nodes for each graph is exactly the same in both directions, to ensure that we can trim the mappings to just one.
+	for (node1 in potencialNodes2.keySet) {
+		var nodes2Size = potencialNodes2.get(node1).size;
+		for (node2 in potencialNodes2.get(node1))  {
+			// we now that nodes2 maps to node1 and possibly more.
+			if (nodes2Size <> potencialNodes1.get(node2).size) {
+				// it means we are not free to choose the mapping.
+				return null;
+			}
+		}
+	}	
+	for (node2 in potencialNodes1.keySet) {
+		var nodes1Size = potencialNodes1.get(node2).size;
+		for (node1 in potencialNodes1.get(node2))  {
+			// we know that nodes1 maps to node2 and possibly more.
+			if (nodes1Size <> potencialNodes2.get(node1).size) {
+				// it means we are not free to choose the mapping.
+				return null;
+			}
+		}
+	}
+	
+	var potencialNodes2Bij = new Map;
+	var potencialNodes1Bij = new Map;
+	
+	
+	// know we just trim the mappings in order to obtain a bijective mapping.
+	for (node1 in potencialNodes2.keySet) {
+		var choosenNode2 = potencialNodes2.get(node1).first;
+		potencialNodes2Bij.put(node1, choosenNode2);
+		potencialNodes1Bij.put(choosenNode2, node1);
+		
+		// now we need to remove from potencialNodes2 any map that does to chosenNode2.
+		for (node1aux in potencialNodes2.keySet) {
+			potencialNodes2.get(node1aux).remove(choosenNode2);
+		}
+	}
+	
+	return Sequence{potencialNodes2Bij, potencialNodes1Bij};
+}
+
+operation getCandidateOperators(op1, operators2) {
+	var result = new Set;
+	
+	for (op2 in operators2) {
+		if (op1 == op2) {
+			result.add(op2);
+		}
+	}
+	
+	return result;
+}
+
+operation getCandidateNodes(node1, nodes2) {
+	var result = new Set;
+	
+	for (node2 in nodes2) {
+		if (equalNodes(node1, node2)) {
+			result.add(node2);
+		}
+	}
+	
+	return result;
+}
+
+operation getCandidateKeeps(keep1, keeps2) {
+	var result = new Set;
+	
+	for (keep2 in keeps2) {
+		if (equalKeeps(keep1, keep2)) {
+			result.add(keep2);
+		}
+	}
+	
+	return result;
+}
+
+operation equalKeeps(keep1, keep2) {
+	if (keep1.source <> keep2.source) {
+		return false;
+	}
+	
+	return true;
+}
+
+operation getCandidateAttributes(attribute, attributes) {
+	var result = new Set;
+	
+	for (attribute2 in attributes) {
+		if (equalAttributes(attribute, attribute2)) {
+			result.add(attribute2);
+		}
+	}
+	
+	return result;
+}
+
+operation equalAttributes(attribute1, attribute2) {
+	if (attribute1.name <> attribute2.name) {
+		return false;
+	}
+	
+	if (attribute1.attributeExternalCalculationCall <> null) {
+		if (attribute2.attributeExternalCalculationCall == null) {
+			return false;
+		}
+		
+		if (not equalExternalAttributeCalculationCall(attribute1.attributeExternalCalculationCall , attribute2.attributeExternalCalculationCall)) {
+			return false;
+		}
+	}
+	
+	if (attribute2.attributeExternalCalculationCall <> null) {
+		if (attribute1.attributeExternalCalculationCall == null) {
+			return false;
+		}
+		
+		if (not equalExternalAttributeCalculationCall(attribute1.attributeExternalCalculationCall , attribute2.attributeExternalCalculationCall)) {
+			return false;
+		}
+	}
+	
+	return true;
+}
+
+operation equalNodes(node1, node2) {
+	if (node1.type() <> node2.type()) {
+		return false;
+	}
+	
+	if (node1.name <> node2.name) {
+		return false;
+	}
+	
+	if (node1.incoming.size <> node2.incoming.size) {
+		return false;
+	}
+	
+	if (node1.outgoing.size <> node2.outgoing.size) {
+		return false;
+	}
+	
+	if (not edgesSetAreEqual(node1.incoming, node2.incoming)) {
+		return false;
+	}
+	
+	if (not edgesSetAreEqual(node1.outgoing, node2.outgoing)) {
+		return false;
+	}
+	
+	if (not attributeSetsAreEqual(getAttributesCreatedWithCalculations(node1.attributes), getAttributesCreatedWithCalculations(node2.attributes))) {
+		return false;
+	}
+	
+	if (not keepSetsAreExactlyTheSame(node1.keepIn, node2.keepIn)) {
+		return false;
+	}
+	
+	return true;
+}
+
+operation keepSetsAreExactlyTheSame(keeps1, keeps2) {
+	// the algorithm followed here is the same as the one followed for nodeSetsAreExactlyTheSame
+	
+	if (keeps1.size <> keeps2.size) {
+		return false;
+	}
+	
+	var potencialKeeps2 = new Map;
+	for (keep1 in keeps1) {
+		var candidateKeeps = getCandidateKeeps(keep1, keeps2);
+		if (candidateKeeps.isEmpty()) {
+			return false;
+		}
+		potencialKeeps2.put(keep1, candidateKeeps);
+	}
+	
+	
+	var potencialKeeps1 = new Map;
+	for (keep2 in keeps2) {
+		var candidateKeeps = getCandidateKeeps(keep2, keeps1);
+		if (candidateKeeps.isEmpty()) {
+			return false;
+		}
+		potencialKeeps1.put(keep2, candidateKeeps);
+	}
+	
+	for (keep1 in potencialKeeps2.keySet) {
+		for (keep2 in potencialKeeps2.get(keep1)) {
+			if (not potencialKeeps1.get(keep2).contains(keep1)) {
+				potencialKeeps2.get(keep1).remove(keep2);
+			}
+		}
+		if (potencialKeeps2.get(keep1).isEmpty()) {
+			return false;
+		}
+	}
+	for (keep2 in potencialKeeps1.keySet) {
+		for (keep1 in potencialKeeps1.get(keep2)) {
+			if (not potencialKeeps2.get(keep1).contains(keep2)) {
+				potencialKeeps1.get(keep2).remove(keep1);
+			}
+		}
+		if (potencialKeeps1.get(keep2).isEmpty()) {
+			return false;
+		}
+	}
+	
+	
+	for (keep1 in potencialKeeps2.keySet) {
+		var keeps2Size = potencialKeeps2.get(keep1).size;
+		for (keep2 in potencialKeeps2.get(keep1))  {
+			if (keeps2Size <> potencialKeeps1.get(keep2).size) {
+				return false;
+			}
+		}
+	}
+	for (keep2 in potencialKeeps1.keySet) {
+		var keeps1Size = potencialKeeps1.get(keep2).size;
+		for (keep1 in potencialKeeps1.get(keep2))  {
+			if (keeps1Size <> potencialKeeps2.get(keep1).size) {
+				return false;
+			}
+		}
+	}
+	
+	// it is not necessary to build the mapping. Although we could do it.
+	return true;	
+	
+}
+
+operation attributeSetsAreEqual(attributes1, attributes2) {
+	// the algorithm followed here is the same as the one followed for nodeSetsAreExactlyTheSame
+	
+	if (attributes1.size <> attributes2.size) {
+		return false;
+	}
+	
+	var potencialAttributes2 = new Map;
+	for (attribute1 in attributes1) {
+		var candidateAttributes = getCandidateAttributes(attribute1, attributes2);
+		if (candidateAttributes.isEmpty()) {
+			return false;
+		}
+		potencialAttributes2.put(attribute1, candidateAttributes);
+	}
+	
+	
+	var potencialAttributes1 = new Map;
+	for (attribute2 in attributes2) {
+		var candidateAttributes = getCandidateAttributes(attribute2, attributes1);
+		if (candidateAttributes.isEmpty()) {
+			return false;
+		}
+		potencialAttributes1.put(attribute2, candidateAttributes);
+	}
+	
+	for (attribute1 in potencialAttributes2.keySet) {
+		for (attribute2 in potencialAttributes2.get(attribute1)) {
+			if (not potencialAttributes1.get(attribute2).contains(attribute1)) {
+				potencialAttributes2.get(attribute1).remove(attribute2);
+			}
+		}
+		if (potencialAttributes2.get(attribute1).isEmpty()) {
+			return false;
+		}
+	}
+	for (attribute2 in potencialAttributes1.keySet) {
+		for (attribute1 in potencialAttributes1.get(attribute2)) {
+			if (not potencialAttributes2.get(attribute1).contains(attribute2)) {
+				potencialAttributes1.get(attribute2).remove(attribute1);
+			}
+		}
+		if (potencialAttributes1.get(attribute2).isEmpty()) {
+			return false;
+		}
+	}
+	
+	
+	for (attribute1 in potencialAttributes2.keySet) {
+		var attributes2Size = potencialAttributes2.get(attribute1).size;
+		for (attribute2 in potencialAttributes2.get(attribute1))  {
+			if (attributes2Size <> potencialAttributes1.get(attribute2).size) {
+				return false;
+			}
+		}
+	}
+	for (attribute2 in potencialAttributes1.keySet) {
+		var attributes1Size = potencialAttributes1.get(attribute2).size;
+		for (attribute1 in potencialAttributes1.get(attribute2))  {
+			if (attributes1Size <> potencialAttributes2.get(attribute1).size) {
+				return false;
+			}
+		}
+	}
+	
+	// it is not necessary to build the mapping. Although we could do it.
+	return true;	
+	
+}
+
+operation edgesSetAreEqual(edges1, edges2) {
+	// the algorithm followed here is the same as the one followed for nodeSetsAreExactlyTheSame
+	
+	if (edges1.size <> edges2.size) {
+		//throw "err8";
+		return false;
+	}
+	
+	// we follow pratically the same algorithm that nodeSetsAreExactlyTheSame follows with the expection that the equality of operators is the exact equality (==)
+	var potencialEdges2 = new Map;
+	for (edge1 in edges1) {
+		var candidateEdges = getCandidateEdges(edge1, edges2);
+		if (candidateEdges.isEmpty()) {
+			//impossible to have an isomorphism
+			//throw "err7";
+			return false;
+		}
+		potencialEdges2.put(edge1, candidateEdges);
+	}
+	
+	
+	var potencialEdges1 = new Map;
+	for (edge2 in edges2) {
+		var candidateEdges = getCandidateEdges(edge2, edges1);
+		if (candidateEdges.isEmpty()) {
+			//impossible to have an isomorphism
+			//throw "err6";
+			return false;
+		}
+		potencialEdges1.put(edge2, candidateEdges);
+	}
+	
+	for (edge1 in potencialEdges2.keySet) {
+		for (edge2 in potencialEdges2.get(edge1)) {
+			if (not potencialEdges1.get(edge2).contains(edge1)) {
+				potencialEdges2.get(edge1).remove(edge2);
+			}
+		}
+		if (potencialEdges2.get(edge1).isEmpty()) {
+			//throw "err5";
+			return false;
+		}
+	}
+	for (edge2 in potencialEdges1.keySet) {
+		for (edge1 in potencialEdges1.get(edge2)) {
+			if (not potencialEdges2.get(edge1).contains(edge2)) {
+				potencialEdges1.get(edge2).remove(edge1);
+			}
+		}
+		if (potencialEdges1.get(edge2).isEmpty()) {
+			//throw "err4";
+			return false;
+		}
+	}
+	
+	
+	for (edge1 in potencialEdges2.keySet) {
+		var edges2Size = potencialEdges2.get(edge1).size;
+		for (edge2 in potencialEdges2.get(edge1))  {
+			if (edges2Size <> potencialEdges1.get(edge2).size) {
+				//throw "err3" + edges2Size  + " :::: "  + potencialEdges1.get(edge2).size;
+				//throw "err3" + potencialEdges2  + " :::: "  + potencialEdges1 + " :::: " + edge1 + "::::" + edge2;
+				return false;
+			}
+		}
+	}
+	for (edge2 in potencialEdges1.keySet) {
+		var edges1Size = potencialEdges1.get(edge2).size;
+		for (edge1 in potencialEdges1.get(edge2))  {
+			if (edges1Size <> potencialEdges2.get(edge1).size) {
+				//throw "err2";
+				return false;
+			}
+		}
+	}
+	
+	// it is not necessary to build the mapping. Although we could do it.
+	return true;	
+}
+
+operation getCandidateEdges(edge1, edges2) {
+	var result = new Set;
+	
+	for (edge2 in edges2) {
+		if (edgesAreEqual(edge1, edge2)) {
+			result.add(edge2);
+		}
+	}
+	
+	return result;
+}
+
+operation edgesAreEqual(edge1, edge2) {
+	if (edge1.name <> edge2.name) {
+		return false;
+	}
+	
+	//this is not necessary, just an heuristic to speed things a bit.
+	if (edge1.source.name <> edge2.source.name) {
+		return false;
+	}
+	if (edge1.target.name <> edge2.target.name) {
+		return false;
+	}
+	
+	
+	return true;
+}
+
+
+operation equalOperators(operator1, operator2, equalOperatorsCache) {
+	
+	assert(equalOperatorsCache<>null, "equalOperatorsCache == null");
+	
+	if (isInCache(operator1, operator2, equalOperatorsCache)) {
+		var _result = getCachedResult(operator1, operator2, equalOperatorsCache);
+		("Cache Hit: " + operator1.id + " === " + operator2.id + " -> " + (_result == true)).println();
+		return _result;
+	}
+	
+	if (operator1.type() <> operator2.type()) {
+		setCachedResult(operator1, operator2, equalOperatorsCache, false);
+		return false;
+	}
+	
+	if (operator1.conditions.size() <> operator2.conditions.size()) {
+		setCachedResult(operator1, operator2, equalOperatorsCache, false);
+		return false;
+	}
+	
+	if (operator1.actions.size() <> operator2.actions.size()) {
+		setCachedResult(operator1, operator2, equalOperatorsCache, false);
+		return false;
+	}
+	
+	if (operator1.operands.size() <> operator2.operands.size()) {
+		setCachedResult(operator1, operator2, equalOperatorsCache, false);
+		return false;
+	}
+	
+	if (not conditionSetsAreExaclyTheSame(operator1.conditions, operator2.conditions)) {
+		setCachedResult(operator1, operator2, equalOperatorsCache, false);
+		return false;
+	}
+	
+	if (not actionSetsAreExaclyTheSame(operator1.actions, operator2.actions)) {
+		setCachedResult(operator1, operator2, equalOperatorsCache, false);
+		return false;
+	}
+	
+	// this does not call equalPatterns. It just finds a mapping to the same pattern.
+	// if there were equivalent patterns, then they would have been joined already.
+	if (not patternSetsAreExaclyTheSame(getPatternPredecessorsFromOperator(operator1), getPatternPredecessorsFromOperator(operator2))) {
+		setCachedResult(operator1, operator2, equalOperatorsCache, false);
+		return false;
+	}
+	
+	setCachedResult(operator1, operator2, equalOperatorsCache, true);
+	return true;
+	
+}
+
+operation conditionSetsAreExaclyTheSame(conditions1, conditions2) {
+	// the algorithm followed here is the same as the one followed for nodeSetsAreExactlyTheSame
+	
+	if (conditions1.size <> conditions2.size) {
+		//throw "err8";
+		return false;
+	}
+	
+	// we follow pratically the same algorithm that nodeSetsAreExactlyTheSame follows with the expection that the equality of operators is the exact equality (==)
+	var potencialConditions2 = new Map;
+	for (condition1 in conditions1) {
+		var candidateConditions = getCandidateConditions(condition1, conditions2);
+		if (candidateConditions.isEmpty()) {
+			//impossible to have an isomorphism
+			//throw "err7";
+			return false;
+		}
+		potencialConditions2.put(condition1, candidateConditions);
+	}
+	
+	
+	var potencialConditions1 = new Map;
+	for (condition2 in conditions2) {
+		var candidateConditions = getCandidateConditions(condition2, conditions1);
+		if (candidateConditions.isEmpty()) {
+			//impossible to have an isomorphism
+			//throw "err6";
+			return false;
+		}
+		potencialConditions1.put(condition2, candidateConditions);
+	}
+	
+	for (condition1 in potencialConditions2.keySet) {
+		for (condition2 in potencialConditions2.get(condition1)) {
+			if (not potencialConditions1.get(condition2).contains(condition1)) {
+				potencialConditions2.get(condition1).remove(condition2);
+			}
+		}
+		if (potencialConditions2.get(condition1).isEmpty()) {
+			//throw "err5";
+			return false;
+		}
+	}
+	for (condition2 in potencialConditions1.keySet) {
+		for (condition1 in potencialConditions1.get(condition2)) {
+			if (not potencialConditions2.get(condition1).contains(condition2)) {
+				potencialConditions1.get(condition2).remove(condition1);
+			}
+		}
+		if (potencialConditions1.get(condition2).isEmpty()) {
+			//throw "err4";
+			return false;
+		}
+	}
+	
+	
+	for (condition1 in potencialConditions2.keySet) {
+		var conditions2Size = potencialConditions2.get(condition1).size;
+		for (condition2 in potencialConditions2.get(condition1))  {
+			if (conditions2Size <> potencialConditions1.get(condition2).size) {
+				//throw "err3" + conditions2Size  + " :::: "  + potencialConditions1.get(condition2).size;
+				//throw "err3" + potencialConditions2  + " :::: "  + potencialConditions1 + " :::: " + condition1 + "::::" + condition2;
+				return false;
+			}
+		}
+	}
+	for (condition2 in potencialConditions1.keySet) {
+		var conditions1Size = potencialConditions1.get(condition2).size;
+		for (condition1 in potencialConditions1.get(condition2))  {
+			if (conditions1Size <> potencialConditions2.get(condition1).size) {
+				//throw "err2";
+				return false;
+			}
+		}
+	}
+	
+	// it is not necessary to build the mapping. Although we could do it.
+	return true;	
+
+}
+
+operation actionSetsAreExaclyTheSame(actions1, actions2) {
+	// the algorithm followed here is the same as the one followed for nodeSetsAreExactlyTheSame
+	
+	if (actions1.size <> actions2.size) {
+		//throw "err8";
+		return false;
+	}
+	
+	// we follow pratically the same algorithm that nodeSetsAreExactlyTheSame follows with the expection that the equality of operators is the exact equality (==)
+	var potencialActions2 = new Map;
+	for (action1 in actions1) {
+		var candidateActions = getCandidateActions(action1, actions2);
+		if (candidateActions.isEmpty()) {
+			//impossible to have an isomorphism
+			//throw "err7";
+			return false;
+		}
+		potencialActions2.put(action1, candidateActions);
+	}
+	
+	
+	var potencialActions1 = new Map;
+	for (action2 in actions2) {
+		var candidateActions = getCandidateActions(action2, actions1);
+		if (candidateActions.isEmpty()) {
+			//impossible to have an isomorphism
+			//throw "err6";
+			return false;
+		}
+		potencialActions1.put(action2, candidateActions);
+	}
+	
+	for (action1 in potencialActions2.keySet) {
+		for (action2 in potencialActions2.get(action1)) {
+			if (not potencialActions1.get(action2).contains(action1)) {
+				potencialActions2.get(action1).remove(action2);
+			}
+		}
+		if (potencialActions2.get(action1).isEmpty()) {
+			//throw "err5";
+			return false;
+		}
+	}
+	for (action2 in potencialActions1.keySet) {
+		for (action1 in potencialActions1.get(action2)) {
+			if (not potencialActions2.get(action1).contains(action2)) {
+				potencialActions1.get(action2).remove(action1);
+			}
+		}
+		if (potencialActions1.get(action2).isEmpty()) {
+			//throw "err4";
+			return false;
+		}
+	}
+	
+	
+	for (action1 in potencialActions2.keySet) {
+		var actions2Size = potencialActions2.get(action1).size;
+		for (action2 in potencialActions2.get(action1))  {
+			if (actions2Size <> potencialActions1.get(action2).size) {
+				//throw "err3" + actions2Size  + " :::: "  + potencialActions1.get(action2).size;
+				//throw "err3" + potencialActions2  + " :::: "  + potencialActions1 + " :::: " + action1 + "::::" + action2;
+				return false;
+			}
+		}
+	}
+	for (action2 in potencialActions1.keySet) {
+		var actions1Size = potencialActions1.get(action2).size;
+		for (action1 in potencialActions1.get(action2))  {
+			if (actions1Size <> potencialActions2.get(action1).size) {
+				//throw "err2";
+				return false;
+			}
+		}
+	}
+	
+	// it is not necessary to build the mapping. Although we could do it.
+	return true;
+}
+
+operation patternSetsAreExaclyTheSame(patterns1, patterns2) {
+	// the algorithm followed here is the same as the one followed for nodeSetsAreExactlyTheSame
+	
+	if (patterns1.size <> patterns2.size) {
+		//throw "err8";
+		return false;
+	}
+	
+	// we follow pratically the same algorithm that nodeSetsAreExactlyTheSame follows with the expection that the equality of operators is the exact equality (==)
+	var potencialPatterns2 = new Map;
+	for (pattern1 in patterns1) {
+		var candidatePatterns = getCandidatePatterns(pattern1, patterns2);
+		if (candidatePatterns.isEmpty()) {
+			//impossible to have an isomorphism
+			//throw "err7";
+			return false;
+		}
+		potencialPatterns2.put(pattern1, candidatePatterns);
+	}
+	
+	
+	var potencialPatterns1 = new Map;
+	for (pattern2 in patterns2) {
+		var candidatePatterns = getCandidatePatterns(pattern2, patterns1);
+		if (candidatePatterns.isEmpty()) {
+			//impossible to have an isomorphism
+			//throw "err6";
+			return false;
+		}
+		potencialPatterns1.put(pattern2, candidatePatterns);
+	}
+	
+	for (pattern1 in potencialPatterns2.keySet) {
+		for (pattern2 in potencialPatterns2.get(pattern1)) {
+			if (not potencialPatterns1.get(pattern2).contains(pattern1)) {
+				potencialPatterns2.get(pattern1).remove(pattern2);
+			}
+		}
+		if (potencialPatterns2.get(pattern1).isEmpty()) {
+			//throw "err5";
+			return false;
+		}
+	}
+	for (pattern2 in potencialPatterns1.keySet) {
+		for (pattern1 in potencialPatterns1.get(pattern2)) {
+			if (not potencialPatterns2.get(pattern1).contains(pattern2)) {
+				potencialPatterns1.get(pattern2).remove(pattern1);
+			}
+		}
+		if (potencialPatterns1.get(pattern2).isEmpty()) {
+			//throw "err4";
+			return false;
+		}
+	}
+	
+	
+	for (pattern1 in potencialPatterns2.keySet) {
+		var patterns2Size = potencialPatterns2.get(pattern1).size;
+		for (pattern2 in potencialPatterns2.get(pattern1))  {
+			if (patterns2Size <> potencialPatterns1.get(pattern2).size) {
+				//throw "err3" + patterns2Size  + " :::: "  + potencialPatterns1.get(pattern2).size;
+				//throw "err3" + potencialPatterns2  + " :::: "  + potencialPatterns1 + " :::: " + pattern1 + "::::" + pattern2;
+				return false;
+			}
+		}
+	}
+	for (pattern2 in potencialPatterns1.keySet) {
+		var patterns1Size = potencialPatterns1.get(pattern2).size;
+		for (pattern1 in potencialPatterns1.get(pattern2))  {
+			if (patterns1Size <> potencialPatterns2.get(pattern1).size) {
+				//throw "err2";
+				return false;
+			}
+		}
+	}
+	
+	// it is not necessary to build the mapping. Although we could do it.
+	return true;
+}
+
+operation getCandidateConditions(condition1, conditions2) {
+	var result = new Set;
+	
+	for (condition2 in conditions2) {
+		if (equalConditions(condition1, condition2)) {
+			result.add(condition2);
+		}
+	}
+	
+	return result;
+}
+
+operation getCandidateActions(action1, actions2) {
+	var result = new Set;
+	
+	for (action2 in actions2) {
+		if (equalActions(action1, action2)) {
+			result.add(action2);
+		}
+	}
+	
+	return result;
+}
+
+operation getCandidatePatterns(pattern1, patterns2) {
+	var result = new Set;
+	
+	for (pattern2 in patterns2) {
+		if (pattern1 == pattern2) {
+			result.add(pattern2);
+		}
+	}
+	
+	return result;
+}
+
+operation getAttributesCreatedWithCalculations(attributes) {
+	return attributes.select(at | at.attributeExternalCalculationCall <> null);
+}
+
+
+operation equalActions(action1, action2) {
+	if (action1.type() <> action2.type()) {
+		return false;
+	}
+	
+	if (action1.isKindOf(VisualModel!ExternalActionCall)) {
+		return equalExternalActionCalls(action1, action2);
+	}
+	
+	return false;
+}
+
+operation equalConditions(condition1, condition2) {
+	/*
+	Two conditions are considered equal if they are of the same type and equal in that same type.
+	*/
+	if (condition1.type() <> condition2.type()) {
+		return false;
+	}
+	
+	if (condition1.isKindOf(VisualModel!ExternalConditionCall)) {
+		return equalExternalConditionCalls(condition1, condition2);
+	}
+	
+	return false;
+}
+
+operation equalExternalConditionCalls(condition1, condition2) {
+	/*
+	Two conditions are equal if they have the same qualified name and exactly the same parameters.
+	*/
+	
+	if (condition1.qualifiedName <> condition2.qualifiedName) {
+		return false;
+	}
+	
+	if (not parameterSetsAreExactlyTheSame(condition1.parameters.collect(pRef | pRef.parameter), condition2.parameters.collect(pRef | pRef.parameter))) {
+		return false;
+	}
+	
+	if (not parameterSetsHaveTheSameIndex(condition1.parameters, condition2.parameters)) {
+		return false;
+	}
+	
+	return true;
+}
+
+operation equalExternalActionCalls(action1, action2) {
+	if (action1.qualifiedName <> action2.qualifiedName) {
+		return false;
+	}
+	
+	if (not parameterSetsAreExactlyTheSame(action1.parameters.collect(pRef | pRef.parameter), action2.parameters.collect(pRef | pRef.parameter))) {
+		return false;
+	}
+	
+	if (not parameterSetsHaveTheSameIndex(action1.parameters, action2.parameters)) {
+		return false;
+	}
+	
+	return true;
+}
+
+operation equalExternalAttributeCalculationCall(attributeExternalCalculationCall1 , attributeExternalCalculationCall2) {
+	if (attributeExternalCalculationCall1.qualifiedName <> attributeExternalCalculationCall2.qualifiedName) {
+		return false;
+	}
+	
+	if (not parameterSetsAreExactlyTheSame(attributeExternalCalculationCall1.parameters.collect(pRef | pRef.parameter), attributeExternalCalculationCall2.parameters.collect(pRef | pRef.parameter))) {
+		return false;
+	}
+	
+	if (not parameterSetsHaveTheSameIndex(attributeExternalCalculationCall1.parameters, attributeExternalCalculationCall2.parameters)) {
+		return false;
+	}
+	
+	return true;
+}
+
+operation parameterSetsAreExactlyTheSame(parameters1, parameters2) {
+	// the algorithm followed here is the same as the one followed for nodeSetsAreExactlyTheSame
+	
+	if (parameters1.size <> parameters2.size) {
+		//throw "err8";
+		return false;
+	}
+	
+	// we follow pratically the same algorithm that nodeSetsAreExactlyTheSame follows with the expection that the equality of operators is the exact equality (==)
+	var potencialParameters2 = new Map;
+	for (parameter1 in parameters1) {
+		var candidateParameters = getCandidateParameters(parameter1, parameters2);
+		if (candidateParameters.isEmpty()) {
+			//impossible to have an isomorphism
+			//throw "err7";
+			return false;
+		}
+		potencialParameters2.put(parameter1, candidateParameters);
+	}
+	
+	
+	var potencialParameters1 = new Map;
+	for (parameter2 in parameters2) {
+		var candidateParameters = getCandidateParameters(parameter2, parameters1);
+		if (candidateParameters.isEmpty()) {
+			//impossible to have an isomorphism
+			//throw "err6";
+			return false;
+		}
+		potencialParameters1.put(parameter2, candidateParameters);
+	}
+	
+	for (parameter1 in potencialParameters2.keySet) {
+		for (parameter2 in potencialParameters2.get(parameter1)) {
+			if (not potencialParameters1.get(parameter2).contains(parameter1)) {
+				potencialParameters2.get(parameter1).remove(parameter2);
+			}
+		}
+		if (potencialParameters2.get(parameter1).isEmpty()) {
+			//throw "err5";
+			return false;
+		}
+	}
+	for (parameter2 in potencialParameters1.keySet) {
+		for (parameter1 in potencialParameters1.get(parameter2)) {
+			if (not potencialParameters2.get(parameter1).contains(parameter2)) {
+				potencialParameters1.get(parameter2).remove(parameter1);
+			}
+		}
+		if (potencialParameters1.get(parameter2).isEmpty()) {
+			//throw "err4";
+			return false;
+		}
+	}
+	
+	
+	for (parameter1 in potencialParameters2.keySet) {
+		var parameters2Size = potencialParameters2.get(parameter1).size;
+		for (parameter2 in potencialParameters2.get(parameter1))  {
+			if (parameters2Size <> potencialParameters1.get(parameter2).size) {
+				//throw "err3" + parameters2Size  + " :::: "  + potencialParameters1.get(parameter2).size;
+				//throw "err3" + potencialParameters2  + " :::: "  + potencialParameters1 + " :::: " + parameter1 + "::::" + parameter2;
+				return false;
+			}
+		}
+	}
+	for (parameter2 in potencialParameters1.keySet) {
+		var parameters1Size = potencialParameters1.get(parameter2).size;
+		for (parameter1 in potencialParameters1.get(parameter2))  {
+			if (parameters1Size <> potencialParameters2.get(parameter1).size) {
+				//throw "err2";
+				return false;
+			}
+		}
+	}
+	
+	// it is not necessary to build the mapping. Although we could do it.
+	return true;	
+
+
+}
+
+operation parameterSetsHaveTheSameIndex(parameterRefs1, parameterRefs2) {
+	// the algorithm followed here is the same as the one followed for nodeSetsAreExactlyTheSame
+	
+	if (parameterRefs1.size <> parameterRefs2.size) {
+		//throw "err8";
+		return false;
+	}
+	
+	// we follow pratically the same algorithm that nodeSetsAreExactlyTheSame follows with the expection that the equality of operators is the exact equality (==)
+	var potencialParameterRefs2 = new Map;
+	for (parameterRef1 in parameterRefs1) {
+		var candidateParameterRefs = getCandidateParameterRefsSameIndex(parameterRef1, parameterRefs2);
+		if (candidateParameterRefs.isEmpty()) {
+			//impossible to have an isomorphism
+			//throw "err7";
+			return false;
+		}
+		potencialParameterRefs2.put(parameterRef1, candidateParameterRefs);
+	}
+	
+	
+	var potencialParameterRefs1 = new Map;
+	for (parameterRef2 in parameterRefs2) {
+		var candidateParameterRefs = getCandidateParameterRefsSameIndex(parameterRef2, parameterRefs1);
+		if (candidateParameterRefs.isEmpty()) {
+			//impossible to have an isomorphism
+			//throw "err6";
+			return false;
+		}
+		potencialParameterRefs1.put(parameterRef2, candidateParameterRefs);
+	}
+	
+	for (parameterRef1 in potencialParameterRefs2.keySet) {
+		for (parameterRef2 in potencialParameterRefs2.get(parameterRef1)) {
+			if (not potencialParameterRefs1.get(parameterRef2).contains(parameterRef1)) {
+				potencialParameterRefs2.get(parameterRef1).remove(parameterRef2);
+			}
+		}
+		if (potencialParameterRefs2.get(parameterRef1).isEmpty()) {
+			//throw "err5";
+			return false;
+		}
+	}
+	for (parameterRef2 in potencialParameterRefs1.keySet) {
+		for (parameterRef1 in potencialParameterRefs1.get(parameterRef2)) {
+			if (not potencialParameterRefs2.get(parameterRef1).contains(parameterRef2)) {
+				potencialParameterRefs1.get(parameterRef2).remove(parameterRef1);
+			}
+		}
+		if (potencialParameterRefs1.get(parameterRef2).isEmpty()) {
+			//throw "err4";
+			return false;
+		}
+	}
+	
+	
+	for (parameterRef1 in potencialParameterRefs2.keySet) {
+		var parameterRefs2Size = potencialParameterRefs2.get(parameterRef1).size;
+		for (parameterRef2 in potencialParameterRefs2.get(parameterRef1))  {
+			if (parameterRefs2Size <> potencialParameterRefs1.get(parameterRef2).size) {
+				//throw "err3" + parameterRefs2Size  + " :::: "  + potencialParameterRefs1.get(parameterRef2).size;
+				//throw "err3" + potencialParameterRefs2  + " :::: "  + potencialParameterRefs1 + " :::: " + parameterRef1 + "::::" + parameterRef2;
+				return false;
+			}
+		}
+	}
+	for (parameterRef2 in potencialParameterRefs1.keySet) {
+		var parameterRefs1Size = potencialParameterRefs1.get(parameterRef2).size;
+		for (parameterRef1 in potencialParameterRefs1.get(parameterRef2))  {
+			if (parameterRefs1Size <> potencialParameterRefs2.get(parameterRef1).size) {
+				//throw "err2";
+				return false;
+			}
+		}
+	}
+	
+	// it is not necessary to build the mapping. Although we could do it.
+	return true;	
+
+	
+}
+
+operation getCandidateParameterRefsSameIndex(parameterRef1, parameterRefs2) {
+	var result = new Set;
+	
+	for (parameterRef2 in parameterRefs2) {
+		if ((parameterRef1.index == parameterRef2.index) 
+			and (parameterRef1.parameter == parameterRef2.parameter)) {
+			result.add(parameterRef2);
+		}
+	}
+	
+	return result;
+}
+
+operation getCandidateParameters(parameter1, parameters2) {
+	var result = new Set;
+	
+	for (parameter2 in parameters2) {
+		if (parameter1 == parameter2) {
+			result.add(parameter2);
+		}
+	}
+	
+	return result;
+}
+
+operation joinOperators(operator1, operator2) {
+	/*
+What do we know?
+
+We know that the condition sets for the two operators are exactly the same, meaning that each two corresponding conditions have exactly the same qualified name and parameter sets. Also, these parameters have the same indexes. Hence, this all of this will be deleted in case of a join.
+
+We know that the action sets are exactly the same, meaning that the qualified name, parameters and indexes are all the same. Hence, all of this will be deleted in case of a join.
+
+And we know that the patterns that feed the two operators must be exactly the same, which means the operands will be deleted also.
+
+What kind of information must be inherited from the operator that will be deleted?
+	The results have to be inherited.
+
+
+General algorithm: Similar to the Algorithm to join two equal patterns
+
+We choose one operator to leave: operator2
+
+Then we inherit its results.
+
+Then we delete the operator2.
+	*/
+	
+	inheritResults(operator2, operator1);
+	
+	deleteAndClearOperator(operator2);
+}
+
+operation joinPatterns(pattern1, pattern2, mapBetweenNodesPattern1ToNodesPattern2, mapBetweenNodesPattern2ToNodesPattern1, mapBetweenOperatorsPattern1ToOperatorsPattern2, mapBetweenOperatorsPattern2ToOperatorsPattern1) {
+/*
+We know that the two patterns we want to join are the same, this means:
+There is a bijection between the two node sets.
+And there is a bijection between the operators that feed the patterns.
+
+We start by choose one pattern to stay, and one to delete. Lets say, 1 stays and 2 goes.
+
+Then we copy the results going out of the pattern 2 to the pattern 1, except for those that are redundant. Results are redundant if they connect to exactly same target pattern.
+
+Then we have to iterate the node of the pattern that leaves and inherit its information to the corresponding node that stays. This information is: attributes that are not redundant (including the connections to other conditions/nodes/actions); connections to other conditions/nodes/actions.
+Ideally, this information would just be moved instead of creating new elements.
+
+Then, since 1 and 2 contain exactly the same nodes, we can delete pattern 2 and clean its remaining connections.
+
+*/
+	
+	// inherit from pattern2 to pattern 1
+	// there are no redundand operands
+	inheritOperands(pattern2, pattern1);
+	
+	for (nodeInPattern2 in pattern2.nodes) {
+		var correspondingNodeInPattern1 = mapBetweenNodesPattern2ToNodesPattern1.get(nodeInPattern2);
+		
+		assert(correspondingNodeInPattern1 <> null, "correspondingNodeInPattern1 <> null");
+		
+		// this includes attributes, connections of conditions, actions, etc...
+		inheritInformationFromNodeToNode(nodeInPattern2, correspondingNodeInPattern1);
+	}
+	
+	deleteAndClearPattern(pattern2);
+}
+
+operation inheritResults(operator2, operator1) {
+	while (not operator2.results.isEmpty()) {
+		var resultFromOperator2 = operator2.results.first;
+		if(not resultIsRedundant(resultFromOperator2, operator1.results)) {
+			// this can cause concurrent modification exeption
+			moveResultSourceFromOperatorToOperator(resultFromOperator2, operator1);
+		} else {
+			// this is done here to avoid concurrent modification exception because we are moving only some of the results.
+			deleteAndClearResult(resultFromOperator2);
+		}
+	}
+}
+
+operation inheritOperands(pattern2, pattern1) {
+
+	while (not pattern2.outgoingOperands.isEmpty()) {
+		var outGoingOperandFromPattern2 = pattern2.outgoingOperands.first;
+		if(not operandIsRedundant(outGoingOperandFromPattern2, pattern1.outgoingOperands)) {
+			// this can causa concurrent modification exeption
+			moveOperandSourceFromPatternToPattern(outGoingOperandFromPattern2, pattern1);
+		} else {
+			// the operand can be redundant only if the operator it feeds is a union kind operator, i.e., not a combinator.
+			assert(not outGoingOperandFromPattern2.operator.isKindOf(VisualModel!Combinator), "Trying to join two patterns connected to the same combinator operator!");
+			// this is done here to avoid concurrent modification exception because we are moving only some of the operands.
+			deleteAndClearOperand(outGoingOperandFromPattern2);
+		}
+	}
+
+}
+
+
+operation operandIsRedundant(possiblyRedundantOperand, operands) {
+	// an operand is redundant if it targets a different operador that then other operands.
+	var targetOperator = possiblyRedundantOperand.operator;
+	
+	return operands.collect(op | op.operator).includes(targetOperator);
+}
+
+operation resultIsRedundant(possiblyRedundantResult, results) {
+	//  A result is redundant when it has the same target as other result.
+	
+	var targetPattern = possiblyRedundantResult.pattern;
+	
+	return results.collect(res | res.pattern).includes(targetPattern);
+}
+
+operation keepIsRedundant(keep, keeps) {
+	var targetNode = keep.target;
+	
+	return keeps.collect(k | k.target).includes(targetNode);
+}
+
+operation restrictionIsRedundant(restriction, restrictions) {
+	return restrictions.exists(r | (r.source == restriction.source and r.target == restriction.target) or (r.target == restriction.source and r.source == restriction.target));
+}
+
+operation moveOperandSourceFromPatternToPattern(operandToMove, patternToReceiveOperand) {
+	operandToMove.pattern = patternToReceiveOperand;
+}
+
+operation moveResultSourceFromOperatorToOperator(resultToMove, operatorToReceive) {
+	resultToMove.operator = operatorToReceive;
+}
+
+operation inheritInformationFromNodeToNode(nodeSource, nodeTarget) {
+	
+	while (not nodeSource.attributes.isEmpty()) {
+		var attributeSource = nodeSource.attributes.first;
+		var attributeTargets = getCandidateAttributes(attributeSource, nodeTarget.attributes);
+		if (attributeTargets.isEmpty()) {
+			// just move the source attribute to the other node.
+			// this causes concurrent modification exception
+			nodeSource.attributes.remove(attributeSource);
+			nodeTarget.attributes.add(attributeSource);
+		} else {
+			assert (attributeTargets.size==1, "getCandidateAttributes(attribute, nodeTarget.attributes).size <> 1");
+			var attributeTarget = attributeTargets.first;
+			inheritInformationFromAttributeToAttribute(attributeSource,attributeTarget);
+			deleteAndClearAttribute(attributeSource);
+		}
+	}
+	
+	
+	while (not nodeSource.sameOut.isEmpty()) {
+		var restriction = nodeSource.sameOut.first;
+		if ((not restrictionIsRedundant(restriction, nodeTarget.sameOut)) and (not restrictionIsRedundant(restriction, nodeTarget.sameIn))) {
+			restriction.source = nodeTarget;
+		} else {
+			deleteAndClearRestriction(restriction);
+		}
+	}
+	
+	while (not nodeSource.sameIn.isEmpty()) {
+		var restriction = nodeSource.sameIn.first;
+		if ((not restrictionIsRedundant(restriction, nodeTarget.sameOut)) and (not restrictionIsRedundant(restriction, nodeTarget.sameIn))) {
+			restriction.target = nodeTarget;
+		} else {
+			deleteAndClearRestriction(restriction);
+		}
+	}
+	
+	
+	while (not nodeSource.differentOut.isEmpty()) {
+		var restriction = nodeSource.differentOut.first;
+		if ((not restrictionIsRedundant(restriction, nodeTarget.differentOut)) and (not restrictionIsRedundant(restriction, nodeTarget.differentIn))) {
+			restriction.source = nodeTarget;
+		} else {
+			deleteAndClearRestriction(restriction);
+		}
+	}
+	while (not nodeSource.differentIn.isEmpty()) {
+		var restriction = nodeSource.differentIn.first;
+		if ((not restrictionIsRedundant(restriction, nodeTarget.differentOut)) and (not restrictionIsRedundant(restriction, nodeTarget.differentIn))) {
+			restriction.target = nodeTarget;
+		} else {
+			deleteAndClearRestriction(restriction);
+		}
+	}
+	
+	while (not nodeSource.keepOut.isEmpty()) {
+		var keep = nodeSource.keepOut.first;
+		if (not keepIsRedundant(keep, nodeTarget.keepOut)) {
+			keep.source = nodeTarget;
+		} else {
+			deleteAndClearRestriction(keep);
+		}
+	}
+	
+	inheritInformationFromParameterToParameter(nodeSource, nodeTarget);
+	
+}
+
+operation inheritInformationFromParameterToParameter(parameterSource,parameterTarget){
+
+	while(not parameterSource.externalAttributeCalculationCallRef.isEmpty()) {
+		var parameterRef = parameterSource.externalAttributeCalculationCallRef.first;
+		parameterSource.externalAttributeCalculationCallRef.remove(parameterRef);
+		parameterTarget.externalAttributeCalculationCallRef.add(parameterRef);
+	}
+
+	while(not parameterSource.externalConditionCallRef.isEmpty()) {
+		var parameterRef = parameterSource.externalConditionCallRef.first;
+		parameterSource.externalConditionCallRef.remove(parameterRef);
+		parameterTarget.externalConditionCallRef.add(parameterRef);
+	}
+	
+	while(not parameterSource.externalActionCallRef.isEmpty()) {
+		var parameterRef = parameterSource.externalActionCallRef.first;
+		parameterSource.externalActionCallRef.remove(parameterRef);
+		parameterTarget.externalActionCallRef.add(parameterRef);
+	}
+	
+	while(not parameterSource.externalCalculationCallRef.isEmpty()) {
+		var parameterRef = parameterSource.externalCalculationCallRef.first;
+		parameterSource.externalCalculationCallRef.remove(parameterRef);
+		parameterTarget.externalCalculationCallRef.add(parameterRef);
+	}
+	
+}
+
+operation inheritInformationFromAttributeToAttribute(attributeSource,attributeTarget) {
+	inheritInformationFromParameterToParameter(attributeSource,attributeTarget);
+}
+
+operation deleteAndClearOperator(operator) {
+	// remove operands
+	while (not operator.operands.isEmpty()) {
+		deleteAndClearOperand(operator.operands.first);
+	}
+	
+	while (not operator.results.isEmpty()) {
+		deleteAndClearResult(operator.results.first);
+	}
+	
+	while (not operator.flowOut.isEmpty()) {
+		deleteAndClearFlowRule(operator.flowOut.first);
+	}
+	
+	while (not operator.flowIn.isEmpty()) {
+		deleteAndClearFlowRule(operator.flowIn.first);
+	}
+	
+	while (not operator.conditions.isEmpty()) {
+		deleteAndClearApplicationCondition(operator.conditions.first);
+	}
+	
+	while (not operator.actions.isEmpty()) {
+		deleteAndClearAction(operator.actions.first);
+	}
+	
+	delete operator;
+}
+
+operation deleteAndClearPattern(pattern) {
+	/*
+	This removes a pattern in a way that the resulting network is still valid.
+	*/
+	
+	// remove operands
+	while (not pattern.outgoingOperands.isEmpty()) {
+		deleteAndClearOperand(pattern.outgoingOperands.first);
+	}
+	
+	while (not pattern.incomingResults.isEmpty()) {
+		deleteAndClearResult(pattern.incomingResults.first);
+	}
+	
+	// remove all nodes
+	while (not pattern.nodes.isEmpty()) {
+		deleteAndClearNode(pattern.nodes.first);
+	}
+	
+	
+	// remove edges
+	while (not pattern.edges.isEmpty()) {
+		deleteAndClearEdge(pattern.edges.first);
+	}
+	
+	// remove itself.
+	delete pattern;
+}
+
+operation deleteAndClearEdge(edge) {
+	delete edge;
+}
+
+operation deleteAndClearRestriction( restriction) {
+	delete restriction;
+}
+
+operation deleteAndClearOperand(operand) {
+	delete operand;
+}
+
+operation deleteAndClearApplicationCondition(condition) {
+	deleteAndClearExternalConditionCall(condition);
+}
+
+operation deleteAndClearAction(action) {
+	deleteAndClearExternalActionCall(action);
+}
+
+
+operation deleteAndClearFlowRule(flowRule) {
+	delete flowRule;
+}
+
+operation deleteAndClearResult(result) {
+	delete result;
+}
+
+operation deleteAndClearNode(node) {
+	
+	// remove restrictions
+	
+	while (not node.sameIn.isEmpty()) {
+		deleteAndClearRestriction(node.sameIn.first);
+	}
+	
+	while (not node.sameOut.isEmpty()) {
+		deleteAndClearRestriction( node.sameOut.first );
+	}
+	
+	while (not node.keepIn.isEmpty()) {
+		deleteAndClearRestriction( node.keepIn.first );
+	}
+	
+	while (not node.keepOut.isEmpty()) {
+		deleteAndClearRestriction( node.keepOut.first );
+	}
+	
+	while (not node.differentIn.isEmpty()) {
+		deleteAndClearRestriction( node.differentIn.first );
+	}
+	
+	while (not node.differentOut.isEmpty()) {
+		deleteAndClearRestriction( node.differentOut.first );
+	}
+	
+	while (not node.attributes.isEmpty()) {
+		deleteAndClearAttribute(node.attributes.first);
+	}
+	
+	deleteAndClearParameter(node);
+	
+	delete node;
+}
+
+operation deleteAndClearAttribute(attribute) {
+	
+	if (attribute.attributeExternalCalculationCall <> null) {
+		deleteAndClearExternalAttributeCalculationCall(attribute.attributeExternalCalculationCall);
+	}
+	
+	deleteAndClearParameter(attribute);
+	
+	delete attribute;
+}
+
+operation deleteAndClearExternalAttributeCalculationCall(attributeExternalCalculationCall) {
+	while (not attributeExternalCalculationCall.parameters.isEmpty) {
+		var parameter = attributeExternalCalculationCall.parameters.first;
+		delete parameter;
+	}
+	
+	delete attributeExternalCalculationCall;
+}
+
+operation deleteAndClearExternalActionCall(action) {
+	while (not action.parameters.isEmpty) {
+		var parameter = action.parameters.first;
+		delete parameter;
+	}
+	
+	delete action;
+}
+
+operation deleteAndClearExternalConditionCall(condition) {
+	
+	while (not condition.parameters.isEmpty) {
+		var parameter = condition.parameters.first;
+		delete parameter;
+	}
+	
+	delete condition;
+}
+
+operation deleteAndClearParameter(parameter) {
+	delete parameter.externalAttributeCalculationCallRef;
+	
+	delete parameter.externalConditionCallRef;
+	
+	delete parameter.externalActionCallRef;
+	
+	delete parameter.externalCalculationCallRef;
+}
+
+
+operation applyOverlappedPM(node, equalPatternsCache, equalOperatorsCache) {
+	(">applyOverlappedPM: " + node.id).println();
+	if (node.isKindOf(VisualModel!Combinator) or node.isKindOf(VisualModel!External)) {
+		var result = applyOverlappedPMCombinator(node, equalPatternsCache, equalOperatorsCache);
+		("<applyOverlappedPM: " + result).println();
+		return result;
+	} else if (node.isKindOf(VisualModel!Pattern)) {
+		var result = applyOverlappedPMPattern(node, equalPatternsCache, equalOperatorsCache);
+		("<applyOverlappedPM: " + result).println();
+		return result;
+	} else {
+		("<applyOverlappedPM: " + false).println();
+		return false;
+	}
+}
+
+operation applyOverlappedPMCombinator(combinator, equalPatternsCache, equalOperatorsCache) {
+	(">applyOverlappedPMCombinator: " + combinator.id).println();
+	/*
+	Will try to find patterns fed by this operator that are equal.
+	*/
+	var successorPatterns = getPatternSucessorsFromOperator(combinator); 
+	
+	// use the cartesian product to find equal patterns.
+	for (pattern1 in successorPatterns) {
+		for (pattern2 in successorPatterns) {
+			if (pattern1 <> pattern2) {
+				("# " + pattern1.id + " === " + pattern2.id + " ??").println();
+				var mappingsBetweenPatterns = equalPatterns(pattern1, pattern2, equalPatternsCache);
+				if (mappingsBetweenPatterns <> null) {
+					("# " + pattern1.id + " === " + pattern2.id ).println();
+					var mapBetweenNodesPattern1ToNodesPattern2 = mappingsBetweenPatterns.at(0);
+					var mapBetweenNodesPattern2ToNodesPattern1 = mappingsBetweenPatterns.at(1);
+					var mapBetweenOperatorsPattern1ToOperatorsPattern2 = mappingsBetweenPatterns.at(2);
+					var mapBetweenOperatorsPattern2ToOperatorsPattern1 = mappingsBetweenPatterns.at(3);
+					
+					joinPatterns(pattern1, pattern2, mapBetweenNodesPattern1ToNodesPattern2, mapBetweenNodesPattern2ToNodesPattern1, mapBetweenOperatorsPattern1ToOperatorsPattern2, mapBetweenOperatorsPattern2ToOperatorsPattern1);
+					
+					("<applyOverlappedPMCombinator:  " + combinator.id + " < joinPatterns " + true).println();
+					return true;
+				}
+			}
+		}
+	}
+	
+	// if no two pattern were found until here, we can go deeper to find if it is possible to overlapped some.
+	// we go deeper by calling the function for each pattern successor.
+	
+	for (pattern in successorPatterns) {
+		if (applyOverlappedPM(pattern, equalPatternsCache, equalOperatorsCache)) {
+			// if we have an overlaped pm deeper in this path, we propagate the results.	
+			("<applyOverlappedPMCombinator:  " + combinator.id + " < deep " + true).println();
+			return true;
+		}
+	}
+	
+	// if none was found, return false, so a sibling operator can be tried.
+	("<applyOverlappedPMCombinator:  " + combinator.id + " < " + false).println();
+	return false;
+}
+
+
+operation applyOverlappedPMPattern(pattern, equalPatternsCache, equalOperatorsCache) {
+	(">applyOverlappedPMPattern: " + pattern.id).println();
+	
+	/*
+	Will try to find operators fed by this pattern that are equal.
+	*/
+	var successorOperators = getOperatorSucessorsFromPattern(pattern); //acho que isto ja ta feito.
+	
+	// use the cartesian product to find equal operators.
+	for (operator1 in successorOperators) {
+		for (operator2 in successorOperators) {
+			if (operator1 <> operator2 ) {
+				("# " + operator1.id + " === " + operator2.id + " ??").println();
+				if (equalOperators(operator1, operator2, equalOperatorsCache)) {
+					("# " + operator1.id + " === " + operator2.id ).println();
+					joinOperators(operator1, operator2);
+					("<applyOverlappedPMPattern:  " + pattern.id + " < joinOperators " + true).println();
+					return true;
+				}
+			}
+		}
+	}
+	
+	// if no two operators were found until here, we can go deeper to find if it is possible to overlapped some.
+	// we go deeper by calling the function for each operators successor.
+	
+	for (operator in successorOperators) {
+		if (applyOverlappedPM(operator, equalPatternsCache, equalOperatorsCache)) {
+			("<applyOverlappedPMPattern:  " + pattern.id + " < deep " + true).println();
+			// if we have an overlaped pm deeper in this path, we propagate the results.
+			return true;
+		}
+	}
+	
+	// if none was found, return false, so a sibling operator can be tried.
+	("<applyOverlappedPMPattern:  " + pattern.id + " < " + false).println();
+	return false;
+}
+
+
+operation getCommonOperators(operators1, operators2) {
+	return operators1.select(op | not getCandidateOperators(op, operators2).isEmpty);
+}

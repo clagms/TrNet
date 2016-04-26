@@ -1,0 +1,6 @@
+import "nat.adt"
+
+Adt Attribute
+	Sorts Attribute;
+	Generators
+		AttributeNodeConstructor: nat -> Attribute;

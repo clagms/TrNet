@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="CompileTrNet" default="main" basedir=".">
+
+	<target name="main">
+
+		
+		<epsilon.emf.loadModel name="OutputMetamodel" aliases="Metamodel" 
+			modelfile="model/DB.ecore" 
+			metamodeluri="http://www.eclipse.org/emf/2002/Ecore" 
+			read="true" 
+			store="false" />
+
+
+		<!-- Generate Output Visitor Code -->
+		<epsilon.egl src="Ecore2OutputVisitor.egl">
+			<model ref="OutputMetamodel" />
+		</epsilon.egl>
+
+		
+	</target>
+
+</project>

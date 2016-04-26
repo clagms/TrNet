@@ -1,0 +1,21 @@
+import "../Utils.eol";
+import "OverlappedPMLib.eol";
+
+var equalPatternsCache = new Map;
+var equalOperatorsCache = new Map;
+
+
+
+"Trying to overlap PM...".println();
+
+("#Number Of Patterns: " + VisualModel!Pattern.all.size).println();
+("#Number Of Operators: " + VisualModel!Operator.all.size).println();
+
+remSteps = fixedPointIterateOPM(700, equalPatternsCache, equalOperatorsCache);
+
+("#Number Of Patterns: " + VisualModel!Pattern.all.size).println();
+("#Number Of Operators: " + VisualModel!Operator.all.size).println();
+("#stepCounter: " + remSteps).println();
+
+"Trying to overlap PM... DONE".println();
+

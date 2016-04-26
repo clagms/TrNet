@@ -1,0 +1,82 @@
+[%
+import "UtilsAlpina.eol";
+
+var outputDir = ".";
+
+var srcGenDir = outputDir + "/generated";
+
+
+generateBasicAdts(srcGenDir);
+
+generateNodeAdts(srcGenDir);
+
+generatePatternAdts(srcGenDir);
+
+
+operation generateBasicAdts(srcGenDir){
+	
+	generateNatAdt(srcGenDir);
+	
+	generateBoolAdt(srcGenDir);
+	
+}
+
+operation generateNodeAdts(srcGenDir){
+	
+	for (nodeName in getNodeNamesSet()) {
+		generateNodeAdt(srcGenDir, nodeName);
+	}
+	
+}
+
+operation generatePatternAdts(srcGenDir){
+	
+	for (pattern in TrNetModel!Pattern.all.select(pat | isConnectedPattern(pat))) {
+		generatePatternAdt(srcGenDir, pattern);
+	}
+	
+}
+
+operation getNodeNamesSet() {
+	var namesSet = new Set;
+	
+	for (nodePattern in TrNetModel!MandatoryNode.all) {
+		namesSet.add(nodePattern.name);
+	}
+	
+	return namesSet;
+}
+
+operation generateNodeAdt(srcGenDir, nodeName) {
+	var template = TemplateFactory.load("GenerateNodePatternAdt.egl");
+	
+	template.populate("nodeName", nodeName);
+	
+	template.generate(srcGenDir + "/" + nodeName +  ".adt");
+	
+}
+
+operation generatePatternAdt(srcGenDir, pattern) {
+	var template = TemplateFactory.load("GeneratePatternAdt.egl");
+	
+	template.populate("pattern", pattern);
+	
+	template.generate(srcGenDir + "/" + getPatternSortName(pattern.id) +  ".adt");
+	
+}
+
+operation generateNatAdt(srcGenDir) {
+	var templateClasses = TemplateFactory.load("GenerateNatAdt.egl");
+	
+	templateClasses.generate(srcGenDir + "/nat.adt");
+	
+}
+
+operation generateBoolAdt(srcGenDir) {
+	var templateClasses = TemplateFactory.load("GenerateBoolAdt.egl");
+	
+	templateClasses.generate(srcGenDir + "/boolean.adt");
+	
+}
+
+%]

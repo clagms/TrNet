@@ -1,0 +1,10 @@
+import "../Utils.eol";
+
+(countExplicitDecompositions()).println();
+
+operation countExplicitDecompositions(){
+	var result = Decomposition!Split.all.select(split|split.op == null and split.minCost > 0 and split.maxCost > 0);
+	// verify invariants
+	// assert(result.forAll(split| split.minCost > 0 and split.maxCost > 0 ), "Zero cost found in explicit decomposition.");
+	return result.size();
+}

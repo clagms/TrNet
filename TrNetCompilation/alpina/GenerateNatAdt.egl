@@ -1,0 +1,6 @@
+Adt nat
+	Sorts
+		nat;
+	Generators
+		zero: nat;
+		suc : nat -> nat;

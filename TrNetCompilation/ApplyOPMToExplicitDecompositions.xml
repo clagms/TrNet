@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="DecomposeImplicitDepthFirst" default="main" basedir=".">
+
+	<property name="trnet" 
+		value="model/implicit/class2relational_implicit.trnetvisual"/>
+	
+	<property name="catalog" 
+			value="model/CatalogModel.catalog"/>
+	
+	<property name="decomposition" 
+				value="model/implicit/DecompositionClass2Relational.xmi"/>
+	
+	<target name="main">
+		<antcall target="runDecompose" />
+		<antcall target="runDecompose" />
+		<antcall target="runDecompose" />
+		<antcall target="runDecompose" />
+		<antcall target="runDecompose" />
+		<antcall target="runDecompose" />
+		<antcall target="runDecompose" />
+		<antcall target="runDecompose" />
+	</target>
+	
+	<target name="runDecompose">
+		
+		<epsilon.emf.register file="../TrNetDecompositionProcess/model/DecompositionProcess.ecore" />
+		
+		<epsilon.emf.loadModel name="TrNetModel" 
+			aliases="VisualModel,CoreModel" 
+			modelfile="${trnet}" 
+			metamodeluri="http://trnetvisual/1.0" 
+			read="true" store="false" />
+		
+		<epsilon.emf.loadModel 
+			name="CatalogModel" 
+			modelfile="${catalog}" 
+			metamodeluri="http://catalog/1.0" 
+			read="true" store="false" />
+		
+		<epsilon.emf.loadModel 
+					name="Decomposition" 
+					modelfile="${decomposition}" 
+					metamodeluri="http://decompositionprocess/1.0" 
+					read="true" store="true" />
+
+		<!--
+		<epsilon.eol src="analysis/ClearMinCost.eol">
+			<model ref="Decomposition" />
+		</epsilon.eol>
+		-->
+		
+		<epsilon.eol src="analysis/ApplyOPMToExplicitDecompositions.eol">
+			<model ref="TrNetModel" />
+			<model ref="CatalogModel" />
+			<model ref="Decomposition" />	
+			<parameter name="transformationFile" value="${trnet}" />
+		</epsilon.eol>
+
+		<epsilon.eol src="analysis/CountExplicitDecompositions.eol">
+			<model ref="Decomposition" />
+		</epsilon.eol>
+		
+		<epsilon.disposeModels />
+		
+	</target>
+
+</project>

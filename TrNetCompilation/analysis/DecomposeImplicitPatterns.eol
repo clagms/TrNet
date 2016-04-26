@@ -1,0 +1,31 @@
+import "./DecompositionOperations.eol";
+
+var trace = false;
+
+var computationEffort = 1200;
+
+if(trace){
+	"Decomposing model...".println();
+}
+
+var trnetmodel = TrNetModel!TrNetModel.all.first;
+
+var implicitOperators = findAllImplicitOperators(trnetmodel);
+
+if(trace){
+	("Implicit operators: " + 
+			implicitOperators.collect(op | op.id)).println();
+}
+
+var transformationNativeFile = getTransformationNativeFile(transformationFile);
+var rootFolder = transformationNativeFile.getParent() + "/" + transformationNativeFile.getName().replace(".trnetvisual", "");
+
+if(trace){
+	("rootFolder: " + rootFolder).println();
+}
+
+var rootDecompositionProcess = Decomposition!Decomposition.all.first;
+
+decompose(rootDecompositionProcess, trnetmodel, rootFolder, computationEffort, implicitOperators.first, "");
+
+

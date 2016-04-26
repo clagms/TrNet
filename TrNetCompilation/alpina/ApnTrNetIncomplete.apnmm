@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="ASCII"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:adtmm="http://alpina.unige.ch/adtmm" xmlns:apnmm="http://alpina.unige.ch/apnmm" xmlns:multisetmm="http://alpina.unige.ch/multisetmm">
+  <apnmm:APN name="Class2ClassAttributes">
+    <ownedImports importURI="CClass.adt"/>
+    <ownedImports importURI="Attribute.adt"/>
+    <ownedImports importURI="TrNetPat4.adt"/>
+    <ownedImports importURI="TrNetPat8.adt"/>
+    <ownedImports importURI="TrNetPat5.adt"/>
+    <ownedImports importURI="TrNetPat6.adt"/>
+    <ownedImports importURI="TrNetPat7.adt"/>
+    <ownedNodes xsi:type="apnmm:Place" name="TrNetPat4Place">
+      <ownedPlaceMultiset>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="TrNetPat4.adt"/>
+        <msSort xsi:type="adtmm:AtomicSort"/>
+      </ownedPlaceMultiset>
+      <sort xsi:type="adtmm:AtomicSort"/>
+    </ownedNodes>
+    <ownedNodes xsi:type="apnmm:Place" name="TrNetPat8Place">
+      <ownedPlaceMultiset>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat8.adt"/>
+        <msSort xsi:type="adtmm:AtomicSort"/>
+      </ownedPlaceMultiset>
+      <sort xsi:type="adtmm:AtomicSort"/>
+    </ownedNodes>
+    <ownedNodes xsi:type="apnmm:Place" name="TrNetPat5Place">
+      <ownedPlaceMultiset>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat5.adt"/>
+        <msSort xsi:type="adtmm:AtomicSort"/>
+      </ownedPlaceMultiset>
+      <sort xsi:type="adtmm:AtomicSort"/>
+    </ownedNodes>
+    <ownedNodes xsi:type="apnmm:Place" name="TrNetPat6Place">
+      <ownedPlaceMultiset>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat6.adt"/>
+        <msSort xsi:type="adtmm:AtomicSort"/>
+      </ownedPlaceMultiset>
+      <sort xsi:type="adtmm:AtomicSort"/>
+    </ownedNodes>
+    <ownedNodes xsi:type="apnmm:Place" name="TrNetPat7Place">
+      <ownedPlaceMultiset>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat7.adt"/>
+        <msSort xsi:type="adtmm:AtomicSort"/>
+      </ownedPlaceMultiset>
+      <sort xsi:type="adtmm:AtomicSort"/>
+    </ownedNodes>
+    <ownedNodes xsi:type="apnmm:Transition" name="TrNetOp1Transition">
+      <ownedGuard>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat4.adt"/>
+        <ownedImports importURI="TrNetPat8.adt"/>
+        <ownedImports importURI="TrNetPat5.adt"/>
+        <ownedImports importURI="TrNetPat6.adt"/>
+        <ownedImports importURI="TrNetPat7.adt"/>
+        <ownedEquations xsi:type="adtmm:Equation">
+          <ownedRightTerm xsi:type="adtmm:CTerm" opSymbol="true"/>
+          <ownedLeftTerm xsi:type="adtmm:CTerm" opSymbol="nand">
+            <ownedTerms xsi:type="adtmm:CTerm" opSymbol="isMarkedTrNetOp1">
+              <ownedTerms xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.0"/>
+            </ownedTerms>
+            <ownedTerms xsi:type="adtmm:CTerm" opSymbol="isMarkedTrNetOp1">
+              <ownedTerms xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.1"/>
+            </ownedTerms>
+          </ownedLeftTerm>
+        </ownedEquations>
+        <ownedEquations xsi:type="adtmm:Equation">
+          <ownedRightTerm xsi:type="adtmm:CTerm" opSymbol="getCClass0">
+            <ownedTerms xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.1"/>
+          </ownedRightTerm>
+          <ownedLeftTerm xsi:type="adtmm:CTerm" opSymbol="getCClass1">
+            <ownedTerms xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.0"/>
+          </ownedLeftTerm>
+        </ownedEquations>
+      </ownedGuard>
+    </ownedNodes>
+    <ownedNodes xsi:type="apnmm:Transition" name="TrNetOp2Transition">
+      <ownedGuard>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat4.adt"/>
+        <ownedImports importURI="TrNetPat8.adt"/>
+        <ownedImports importURI="TrNetPat5.adt"/>
+        <ownedImports importURI="TrNetPat6.adt"/>
+        <ownedImports importURI="TrNetPat7.adt"/>
+        <ownedEquations xsi:type="adtmm:Equation">
+          <ownedRightTerm xsi:type="adtmm:CTerm" opSymbol="false"/>
+          <ownedLeftTerm xsi:type="adtmm:CTerm" opSymbol="isMarkedTrNetOp2">
+            <ownedTerms xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.2"/>
+          </ownedLeftTerm>
+        </ownedEquations>
+      </ownedGuard>
+    </ownedNodes>
+    <ownedNodes xsi:type="apnmm:Transition" name="TrNetOp3Transition">
+      <ownedGuard>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat4.adt"/>
+        <ownedImports importURI="TrNetPat8.adt"/>
+        <ownedImports importURI="TrNetPat5.adt"/>
+        <ownedImports importURI="TrNetPat6.adt"/>
+        <ownedImports importURI="TrNetPat7.adt"/>
+        <ownedEquations xsi:type="adtmm:Equation">
+          <ownedRightTerm xsi:type="adtmm:CTerm" opSymbol="false"/>
+          <ownedLeftTerm xsi:type="adtmm:CTerm" opSymbol="isMarkedTrNetOp3">
+            <ownedTerms xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.3"/>
+          </ownedLeftTerm>
+        </ownedEquations>
+      </ownedGuard>
+    </ownedNodes>
+    <ownedArcs from="/0/@ownedNodes.0" to="/0/@ownedNodes.5">
+      <ownedArcMultiset>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat4.adt"/>
+        <ownedImports importURI="TrNetPat8.adt"/>
+        <ownedImports importURI="TrNetPat5.adt"/>
+        <ownedImports importURI="TrNetPat6.adt"/>
+        <ownedImports importURI="TrNetPat7.adt"/>
+        <msSort xsi:type="adtmm:AtomicSort"/>
+        <ownedNumOfTerms>
+          <ownedElement xsi:type="multisetmm:TermReference">
+            <termReferenced xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.0"/>
+          </ownedElement>
+        </ownedNumOfTerms>
+      </ownedArcMultiset>
+    </ownedArcs>
+    <ownedArcs from="/0/@ownedNodes.5" to="/0/@ownedNodes.0">
+      <ownedArcMultiset>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat4.adt"/>
+        <ownedImports importURI="TrNetPat8.adt"/>
+        <ownedImports importURI="TrNetPat5.adt"/>
+        <ownedImports importURI="TrNetPat6.adt"/>
+        <ownedImports importURI="TrNetPat7.adt"/>
+        <msSort xsi:type="adtmm:AtomicSort"/>
+        <ownedNumOfTerms>
+          <ownedElement xsi:type="multisetmm:TermReference">
+            <termReferenced xsi:type="adtmm:CTerm" opSymbol="MarkOpTrNetOp1">
+              <ownedTerms xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.0"/>
+            </termReferenced>
+          </ownedElement>
+        </ownedNumOfTerms>
+      </ownedArcMultiset>
+    </ownedArcs>
+    <ownedArcs from="/0/@ownedNodes.1" to="/0/@ownedNodes.5">
+      <ownedArcMultiset>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat4.adt"/>
+        <ownedImports importURI="TrNetPat8.adt"/>
+        <ownedImports importURI="TrNetPat5.adt"/>
+        <ownedImports importURI="TrNetPat6.adt"/>
+        <ownedImports importURI="TrNetPat7.adt"/>
+        <msSort xsi:type="adtmm:AtomicSort"/>
+        <ownedNumOfTerms>
+          <ownedElement xsi:type="multisetmm:TermReference">
+            <termReferenced xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.1"/>
+          </ownedElement>
+        </ownedNumOfTerms>
+      </ownedArcMultiset>
+    </ownedArcs>
+    <ownedArcs from="/0/@ownedNodes.5" to="/0/@ownedNodes.1">
+      <ownedArcMultiset>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat4.adt"/>
+        <ownedImports importURI="TrNetPat8.adt"/>
+        <ownedImports importURI="TrNetPat5.adt"/>
+        <ownedImports importURI="TrNetPat6.adt"/>
+        <ownedImports importURI="TrNetPat7.adt"/>
+        <msSort xsi:type="adtmm:AtomicSort"/>
+        <ownedNumOfTerms>
+          <ownedElement xsi:type="multisetmm:TermReference">
+            <termReferenced xsi:type="adtmm:CTerm" opSymbol="MarkOpTrNetOp1">
+              <ownedTerms xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.1"/>
+            </termReferenced>
+          </ownedElement>
+        </ownedNumOfTerms>
+      </ownedArcMultiset>
+    </ownedArcs>
+    <ownedArcs from="/0/@ownedNodes.2" to="/0/@ownedNodes.6">
+      <ownedArcMultiset>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat4.adt"/>
+        <ownedImports importURI="TrNetPat8.adt"/>
+        <ownedImports importURI="TrNetPat5.adt"/>
+        <ownedImports importURI="TrNetPat6.adt"/>
+        <ownedImports importURI="TrNetPat7.adt"/>
+        <msSort xsi:type="adtmm:AtomicSort"/>
+        <ownedNumOfTerms>
+          <ownedElement xsi:type="multisetmm:TermReference">
+            <termReferenced xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.2"/>
+          </ownedElement>
+        </ownedNumOfTerms>
+      </ownedArcMultiset>
+    </ownedArcs>
+    <ownedArcs from="/0/@ownedNodes.6" to="/0/@ownedNodes.2">
+      <ownedArcMultiset>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat4.adt"/>
+        <ownedImports importURI="TrNetPat8.adt"/>
+        <ownedImports importURI="TrNetPat5.adt"/>
+        <ownedImports importURI="TrNetPat6.adt"/>
+        <ownedImports importURI="TrNetPat7.adt"/>
+        <msSort xsi:type="adtmm:AtomicSort"/>
+        <ownedNumOfTerms>
+          <ownedElement xsi:type="multisetmm:TermReference">
+            <termReferenced xsi:type="adtmm:CTerm" opSymbol="MarkOpTrNetOp2">
+              <ownedTerms xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.2"/>
+            </termReferenced>
+          </ownedElement>
+        </ownedNumOfTerms>
+      </ownedArcMultiset>
+    </ownedArcs>
+    <ownedArcs from="/0/@ownedNodes.3" to="/0/@ownedNodes.7">
+      <ownedArcMultiset>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat4.adt"/>
+        <ownedImports importURI="TrNetPat8.adt"/>
+        <ownedImports importURI="TrNetPat5.adt"/>
+        <ownedImports importURI="TrNetPat6.adt"/>
+        <ownedImports importURI="TrNetPat7.adt"/>
+        <msSort xsi:type="adtmm:AtomicSort"/>
+        <ownedNumOfTerms>
+          <ownedElement xsi:type="multisetmm:TermReference">
+            <termReferenced xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.3"/>
+          </ownedElement>
+        </ownedNumOfTerms>
+      </ownedArcMultiset>
+    </ownedArcs>
+    <ownedArcs from="/0/@ownedNodes.7" to="/0/@ownedNodes.3">
+      <ownedArcMultiset>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat4.adt"/>
+        <ownedImports importURI="TrNetPat8.adt"/>
+        <ownedImports importURI="TrNetPat5.adt"/>
+        <ownedImports importURI="TrNetPat6.adt"/>
+        <ownedImports importURI="TrNetPat7.adt"/>
+        <msSort xsi:type="adtmm:AtomicSort"/>
+        <ownedNumOfTerms>
+          <ownedElement xsi:type="multisetmm:TermReference">
+            <termReferenced xsi:type="adtmm:CTerm" opSymbol="MarkOpTrNetOp3">
+              <ownedTerms xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.3"/>
+            </termReferenced>
+          </ownedElement>
+        </ownedNumOfTerms>
+      </ownedArcMultiset>
+    </ownedArcs>
+    <ownedArcs from="/0/@ownedNodes.5" to="/0/@ownedNodes.2">
+      <ownedArcMultiset>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat4.adt"/>
+        <ownedImports importURI="TrNetPat8.adt"/>
+        <ownedImports importURI="TrNetPat5.adt"/>
+        <ownedImports importURI="TrNetPat6.adt"/>
+        <ownedImports importURI="TrNetPat7.adt"/>
+        <msSort xsi:type="adtmm:AtomicSort"/>
+        <ownedNumOfTerms>
+          <ownedElement xsi:type="multisetmm:TermReference">
+            <termReferenced xsi:type="adtmm:CTerm" opSymbol="newTrNetPat5">
+              <ownedTerms xsi:type="adtmm:CTerm" opSymbol="getCClass0">
+                <ownedTerms xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.0"/>
+              </ownedTerms>
+              <ownedTerms xsi:type="adtmm:CTerm" opSymbol="getCClass0">
+                <ownedTerms xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.1"/>
+              </ownedTerms>
+              <ownedTerms xsi:type="adtmm:CTerm" opSymbol="getAttribute0">
+                <ownedTerms xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.1"/>
+              </ownedTerms>
+            </termReferenced>
+          </ownedElement>
+        </ownedNumOfTerms>
+      </ownedArcMultiset>
+    </ownedArcs>
+    <ownedArcs from="/0/@ownedNodes.6" to="/0/@ownedNodes.3">
+      <ownedArcMultiset>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat4.adt"/>
+        <ownedImports importURI="TrNetPat8.adt"/>
+        <ownedImports importURI="TrNetPat5.adt"/>
+        <ownedImports importURI="TrNetPat6.adt"/>
+        <ownedImports importURI="TrNetPat7.adt"/>
+        <msSort xsi:type="adtmm:AtomicSort"/>
+        <ownedNumOfTerms>
+          <ownedElement xsi:type="multisetmm:TermReference">
+            <termReferenced xsi:type="adtmm:CTerm" opSymbol="newTrNetPat6">
+              <ownedTerms xsi:type="adtmm:CTerm" opSymbol="getCClass0">
+                <ownedTerms xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.2"/>
+              </ownedTerms>
+              <ownedTerms xsi:type="adtmm:CTerm" opSymbol="AttributeNodeConstructor">
+                <ownedTerms xsi:type="adtmm:CTerm" opSymbol="zero"/>
+              </ownedTerms>
+            </termReferenced>
+          </ownedElement>
+        </ownedNumOfTerms>
+      </ownedArcMultiset>
+    </ownedArcs>
+    <ownedArcs from="/0/@ownedNodes.7" to="/0/@ownedNodes.4">
+      <ownedArcMultiset>
+        <ownedImports importURI="CClass.adt"/>
+        <ownedImports importURI="Attribute.adt"/>
+        <ownedImports importURI="TrNetPat4.adt"/>
+        <ownedImports importURI="TrNetPat8.adt"/>
+        <ownedImports importURI="TrNetPat5.adt"/>
+        <ownedImports importURI="TrNetPat6.adt"/>
+        <ownedImports importURI="TrNetPat7.adt"/>
+        <msSort xsi:type="adtmm:AtomicSort"/>
+        <ownedNumOfTerms>
+          <ownedElement xsi:type="multisetmm:TermReference">
+            <termReferenced xsi:type="adtmm:CTerm" opSymbol="newTrNetPat7">
+              <ownedTerms xsi:type="adtmm:CTerm" opSymbol="getAttribute0">
+                <ownedTerms xsi:type="adtmm:VariableRef" variable="/0/@ownedVariables.3"/>
+              </ownedTerms>
+            </termReferenced>
+          </ownedElement>
+        </ownedNumOfTerms>
+      </ownedArcMultiset>
+    </ownedArcs>
+    <ownedVariables name="TrNetPat4Var">
+      <variableSort xsi:type="adtmm:AtomicSort"/>
+    </ownedVariables>
+    <ownedVariables name="TrNetPat8Var">
+      <variableSort xsi:type="adtmm:AtomicSort"/>
+    </ownedVariables>
+    <ownedVariables name="TrNetPat5Var">
+      <variableSort xsi:type="adtmm:AtomicSort"/>
+    </ownedVariables>
+    <ownedVariables name="TrNetPat6Var">
+      <variableSort xsi:type="adtmm:AtomicSort"/>
+    </ownedVariables>
+    <ownedVariables name="TrNetPat7Var">
+      <variableSort xsi:type="adtmm:AtomicSort"/>
+    </ownedVariables>
+  </apnmm:APN>
+  <adtmm:Equation/>
+  <adtmm:Equation/>
+  <adtmm:Equation/>
+  <adtmm:Equation/>
+</xmi:XMI>

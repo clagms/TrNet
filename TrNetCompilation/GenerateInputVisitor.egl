@@ -1,0 +1,359 @@
+[%
+import "UtilsGen.eol";
+%]
+package [%=getInputVisitorPackage()%];
+
+import [%=getRootEcorePackageJava()%].*;
+import [%=getGenericPackage()%].*;
+
+import org.eclipse.emf.ecore.EObject;
+
+
+[% // Helps to prevent ambiguities
+for (eclass in InputMetamodel!EClass.all) {
+	generateExplicitImport(eclass);
+	generateExplicitImportImpl(eclass);
+}
+%]
+
+import java.util.HashMap;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import java.util.Map;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
+import java.util.LinkedList;
+
+public class [%=getClassNameInputVisitor()%]
+implements [%=getGenericPatternInterfacePublisher()%]
+{
+
+LinkedList<[%=getGenericPatternInterfaceListener()%]> listeners;
+
+HashMap<EObject, ModelNode> nodesMap;
+
+public [%=getClassNameInputVisitor()%]() {
+	listeners = new LinkedList<[%=getGenericPatternInterfaceListener()%]>();
+	nodesMap = new HashMap<EObject, ModelNode>(10);
+}
+
+public void registerListener([%=getGenericPatternInterfaceListener()%] listener){
+	listeners.add(listener);
+}
+	
+public void notifyListeners([%=getGenericPatternClass()%] element){
+	for ([%=getGenericPatternInterfaceListener()%] listener : listeners){
+		listener.notify(element);
+	}
+}
+
+public [%=getRootEClass().name%] load(String path){
+	[%=getRootPackageJavaClass()%].eINSTANCE.eClass();
+	
+	Resource.Factory.Registry reg = Resource.Factory.Registry.INSTANCE;
+    Map<String, Object> m = reg.getExtensionToFactoryMap();
+    m.put("xmi", new XMIResourceFactoryImpl());
+	
+	ResourceSet resSet = new ResourceSetImpl();
+	
+	Resource resource = resSet.getResource(URI
+        .createURI(path), true);
+    
+    [%=getRootEClass().name%] rootEClass = ([%=getRootEClass().name%]) resource.getContents().get(0);
+    return rootEClass;
+}
+
+
+[%
+for(eclass in InputMetamodel!EClass.all){
+	generateMethodVisitEClass(eclass);
+}
+%]
+
+
+}
+[%
+
+operation generateMethodVisitEClass(eclass){
+%]
+public void visit[%=getEClassJavaName(eclass)%]([%=getEClassJavaName(eclass)%] element){
+	[%
+	generateSnippetPublishElement(eclass);
+	generateSnippetPublishReferences(eclass);
+	generateSnippetRecursiveCallVisit(eclass);
+	%]
+}
+[%
+}
+
+
+
+operation generateSnippetPublishElement(eclass){
+	%]
+	
+	[%=getGenericNodeClass()%] node;
+	
+	[%
+	generateNodesMapAccess("element", "node", eclass);
+	%]
+	
+	[%=getGenericPatternClass()%] pattern = new [%=getGenericPatternClass()%]();
+	pattern.nodes.add(node);
+	notifyListeners(pattern);
+	[%
+}
+
+operation getMethodNewModelNodeUpdate(eclass) {
+	return "updateModelNodeFrom" + getJavaNameFeature(eclass.name);
+}
+
+
+operation generateSnippetPublishReferences(eclass){
+	for (reference in getReferencesEClassIncludingInherited(eclass)) {
+		if (isSet(reference)) {
+			generateSnippetPublishReferenceSet(reference);
+		} else {
+			generateSnippetPublishReferenceSingleton(reference);
+		}
+	}
+}
+
+operation generateSnippetPublishReferenceSingleton(reference) {
+	%]
+	if (element.get[%=getJavaNameFeature(reference.name)%]() != null) {
+		[%=getEClassJavaName(reference.eType)%] elementTarget = element.get[%=getJavaNameFeature(reference.name)%]();
+		ModelEdge modelEdge = new [%=getGenericEdgeClass()%]();
+		modelEdge.name = "[%=reference.name%]";
+		ModelNode nodeTarget;
+		
+		[%
+		generateNodesMapAccess("elementTarget", "nodeTarget", reference.eType);
+		%]
+		
+		modelEdge.source = node;
+		modelEdge.target = nodeTarget;
+		pattern = new ModelPattern();
+		pattern.nodes.add(node);
+		pattern.nodes.add(nodeTarget);
+		pattern.edges.add(modelEdge);
+		
+		notifyListeners(pattern);
+	}
+	[%
+}
+
+operation generateNodesMapAccess(elementVar, nodeVar, elementEClass) {
+	%]
+	if (! nodesMap.containsKey([%=elementVar%])) {
+		[%=nodeVar%] = new ModelNode();
+		
+		[%
+		for (possibleConcreteType in getAllPossibleConcreteTypes(elementEClass)) {
+			generateNodesMapNewElementConditionalCreation(possibleConcreteType, elementVar, nodeVar);
+		}
+		%]
+		
+		nodesMap.put([%=elementVar%], [%=nodeVar%]);
+	} else {
+		[%=nodeVar%] = nodesMap.get([%=elementVar%]);
+	}
+	[%
+}
+
+operation generateSnippetPublishReferenceSet(reference){
+	%]
+	for ([%=getEClassJavaName(reference.eType)%] elementTarget : element.get[%=getJavaNameFeature(reference.name)%]() ){
+		ModelEdge edge = new ModelEdge();
+		edge.name = "[%=reference.name%]";
+		ModelNode nodeTarget;
+		
+		[%
+		generateNodesMapAccess("elementTarget", "nodeTarget", reference.eType);
+		%]
+		
+		edge.source = node;
+		edge.target = nodeTarget;
+		
+		pattern = new ModelPattern();
+		pattern.nodes.add(node);
+		pattern.nodes.add(nodeTarget);
+		pattern.edges.add(edge);
+		
+		notifyListeners(pattern);
+	}
+	[%
+}
+
+operation getEAttributeGetter(attribute) {
+	if (attribute.eType.name="EBoolean"){
+		return "is" + getJavaNameFeature(attribute.name);
+	} else if (attribute.eType.name="EString") {
+		return "get" + getJavaNameFeature(attribute.name);
+	} else if (attribute.eType.isKindOf(InputMetamodel!EEnum)) {
+		return "get" + getJavaNameFeature(attribute.name);
+	} else {
+		throw "Unexpected attribute type";
+	}
+}
+
+operation getAllAttributes(eclass) {
+	return eclass.eStructuralFeatures.select(attr: InputMetamodel!EAttribute | true); // TOOD: For now we dont care about inheritted attributes.
+}
+
+operation generateSnippetRecursiveCallVisit(eclass){
+	for (containRef in getReferencesEClassIncludingInherited(eclass).select(ref: InputMetamodel!EReference | ref.containment)){
+		generateSnippetCallVisit(containRef);
+	}
+}
+
+operation generateSnippetCallVisit(containRef) {
+	if (isSet(containRef)) {
+		generateSnippetCallVisitSet(containRef);
+	} else {
+		generateSnippetCallVisitSingleton(containRef.eType, "element.get" + getJavaNameFeature(containRef.name) + "()" );   %][%
+	}
+}
+
+operation isSet(reference){
+	return (reference.many);
+}
+
+operation generateSnippetCallVisitSingleton(eclass, parameter){
+%]
+{
+	[%=getEClassJavaName(eclass)%] child = [%=parameter%];
+	if (child != null) {
+		[%
+		for (possibleConcreteType in getAllPossibleConcreteTypes(eclass)) {
+			generateSnippetTypeConditionAndVisitMethodCall(possibleConcreteType, "child");
+		}
+		%]
+	}
+}
+[%
+}
+
+operation generateSnippetTypeConditionAndVisitMethodCall(possibleConcreteType, elementVar){
+	%]
+	if ([%=elementVar%].getClass() == [%=getEClassImplementationJavaName(possibleConcreteType)%].class) {
+		visit[%=getEClassJavaName(possibleConcreteType)%](([%=getJavaNameFeature(possibleConcreteType.name)%])[%=elementVar%]);
+	}
+	[%
+}
+
+operation generateNodesMapNewElementConditionalCreation(possibleConcreteType, elementVar, nodeVar) {
+	%]
+	if ([%=elementVar%].getClass() == [%=getEClassImplementationJavaName(possibleConcreteType)%].class) {
+		[%
+		for (type in getAllSuperTypes(possibleConcreteType)) {
+			%]
+			[%=nodeVar%].types.add("[%=getJavaNameFeature(type.name)%]");
+			[%
+		}
+		%]
+		[%
+		for (attribute in getAllAttributesIncludingInherited(possibleConcreteType)){
+			%]
+			[%=nodeVar%].attributes.put("[%=attribute.name%]", (([%=getJavaNameFeature(possibleConcreteType.name)%]) [%=elementVar%]).[%=getEAttributeGetter(attribute)%]()+"");
+			[%
+		}
+		%]
+	}
+	[%
+}
+
+operation getEClassImplementationJavaName(eclass) {
+	return getEClassJavaName(eclass)+"Impl";
+}
+
+operation getAllPossibleConcreteTypes(eclass) {
+	return InputMetamodel!EClass.all.select(class | isPossibleConcreteType(class, eclass));
+}
+
+operation isPossibleConcreteType(sclass, eclass) {
+	return (not sclass.abstract) and (isSubTypeOf(sclass, eclass));
+}
+
+operation sameEClasses(sclass, eclass) {
+	//( sclass + "==" + eclass + " ? " + (sclass==eclass) ).println();
+	return sclass==eclass;
+}
+
+operation getAllAttributesIncludingInherited(eclass) {
+	var result = new Set;
+	for (superType in eclass.eSuperTypes) {
+		result.addAll(getAllAttributesIncludingInherited(superType));
+	}
+	result.addAll(getAllAttributes(eclass));
+	return result;
+}
+
+operation getReferencesEClassIncludingInherited(eclass) {
+	var result = new Set;
+	for (superType in eclass.eSuperTypes) {
+		result.addAll(getReferencesEClassIncludingInherited(superType));
+	}
+	result.addAll(getReferencesEClass(eclass));
+	return result;
+}
+
+operation generateSnippetCallVisitSet(containRef){
+%]
+for ([%=getEClassJavaName(containRef.eType)%] child : element.get[%=getJavaNameFeature(containRef.name)%]()) {
+	[%
+	//("Classes for " + containRef.eType).println();
+	for (possibleConcreteType in getAllPossibleConcreteTypes(containRef.eType)) {
+		//("possibleConcreteType " + possibleConcreteType).println();
+		generateSnippetTypeConditionAndVisitMethodCall(possibleConcreteType, "child");
+	}
+	%]
+}
+[%
+}
+
+operation generateExplicitImportImpl(eclass){
+%]
+import [%=getRootEcorePackageJava()%].impl.[%=getEClassImplementationJavaName(eclass)%];
+[%
+}
+
+operation generateExplicitImport(eclass){
+%]
+import [%=getRootEcorePackageJava()%].[%=getEClassJavaName(eclass)%];
+[%
+}
+
+operation getEClassJavaName(eclass){
+	return eclass.name.firstToUpperCase();
+}
+
+operation getJavaNameFeature(name) {
+	return name.firstToUpperCase();
+}
+
+operation getRootPackageJavaClass(){
+	return getRootEcorePackage().name.firstToUpperCase() + "Package";
+}
+
+operation hasSubTypesOfSomeEClass(eclass, possibleCandidates) {
+	for (possibleSubType in possibleCandidates) {
+		if (possibleSubType <> eclass and isSubTypeOf(possibleSubType, eclass)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+operation getInputVisitorPackage(){
+	return getRootEcorePackageJava() + "_visitor";
+}
+
+operation getClassNameInputVisitor() {
+	return getRootEcorePackage().name.toLowerCase().firstToUpperCase() + "InputVisitor";
+}
+
+operation getJavaClassNameInputVisitor() {
+	return getClassNameInputVisitor() + ".java";
+}
+%]

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="DecomposeImplicitDepthFirst" default="main" basedir=".">
+
+	<property name="decomposition" 
+				value="model/implicit/DecompositionClass2Relational.xmi"/>
+			
+	<target name="main">
+		
+		<epsilon.emf.register file="../TrNetDecompositionProcess/model/DecompositionProcess.ecore" />
+		
+		<epsilon.emf.loadModel 
+					name="Decomposition" 
+					modelfile="${decomposition}" 
+					metamodeluri="http://decompositionprocess/1.0" 
+					read="true" store="false" />
+		
+		<epsilon.eol src="analysis/OutputAllCostsCSV.eol">
+			<model ref="Decomposition" />
+		</epsilon.eol>
+		
+	</target>
+
+</project>

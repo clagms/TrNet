@@ -1,0 +1,501 @@
+
+
+operation isInternalOperand(operand) {
+	return operand.operator.isKindOf(VisualModel!Combinator);
+}
+
+operation isInternalResult(result) {
+	return result.operator.isKindOf(VisualModel!Combinator);
+}
+
+operation isConnectedPattern(pattern) {
+	
+	return hasRelevantIncommingResults(pattern) or hasRelevantOutgoingOperands(pattern);
+}
+
+operation hasRelevantOutgoingOperands(pattern) {
+	if (pattern.outgoingOperands == null or pattern.outgoingOperands.isEmpty()) {
+		return false;
+	}
+	
+	for (operand in pattern.outgoingOperands) {
+		if (operand.isKindOf(VisualModel!AnyOperand) and  operand.operator.isKindOf(VisualModel!Combinator)) {
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+operation hasRelevantIncommingResults(pattern) {
+	if (pattern.incomingResults == null or pattern.incomingResults.isEmpty()) {
+		return false;
+	}
+	
+	for (result in pattern.incomingResults) {
+		if (result.isKindOf(VisualModel!AnyResult) and result.operator.isKindOf(VisualModel!Combinator)) {
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+operation getAllImports(trnetmodel) {
+	var importCollection = new Bag;
+	var connectedPatterns = trnetmodel.patterns.select(pat | isConnectedPattern(pat));
+
+	importCollection.addAll(getAllImportsForNodePatterns(connectedPatterns));
+
+	for (pattern in connectedPatterns) {
+		importCollection.addAll(getAllImportsFromPattern(pattern));
+	}
+	
+	
+	
+	return importCollection;
+}
+
+operation getAllImportsForNodePatterns(connectedPatterns) {
+	var importCollection = new Bag;
+	
+	var nameSet = getNodePatternsNameSet(connectedPatterns);
+	
+	for (nodeName in nameSet) {
+		var importAux = new ApnModel!Import;
+		importAux.importURI = nodeName + ".adt";
+		importCollection.add(importAux);
+	}
+	
+	return importCollection;
+}
+
+operation getNodePatternsNameSet(connectedPatterns) {
+	var namesSet = new Set;
+	
+	for (nodePatternList in connectedPatterns.collect(pat | pat.nodes)) {
+		for (nodePattern in nodePatternList) {
+			namesSet.add(nodePattern.name);
+		}
+	}
+	
+	return namesSet;
+}
+
+operation getAllImportsFromPattern(pattern) {
+	var importCollection = new Bag;
+	
+	var importAux = new ApnModel!Import;
+	importAux.importURI = getPatternSortName(pattern.id) + ".adt";
+	
+	importCollection.add(importAux);
+	
+	return importCollection;
+}
+
+operation getPatternSortName(patternId) {
+	return patternId;
+}
+
+operation getPlaceMultiset(pattern) {
+	var multiset = new ApnModel!Multiset;
+	
+	var connectedPatterns = new Bag;
+	connectedPatterns.add(pattern);
+	
+	multiset.ownedImports.addAll(getAllImportsForNodePatterns(connectedPatterns));
+	
+	multiset.ownedImports.addAll(getAllImportsFromPattern(pattern));
+	
+	multiset.msSort = new ApnModel!AtomicSort;
+	
+	return multiset;
+}
+
+operation getTransitionGuard(combinator) {
+	var result = new ApnModel!Guard;
+	
+	result.ownedImports.addAll(getAllImports(VisualModel!TrNetModel.all.first));
+	
+	result.ownedEquations.addAll(getAllGuardEquations(combinator));
+	
+	return result;
+}
+
+
+operation getAllGuardEquations(combinator) {
+	var resultEquations = new Sequence;
+	
+	/*
+	for (incomingPattern in getPatternPredecessorsFromOperator(combinator)) {
+		var eq1 = new ApnModel!Equation;
+	
+		eq1.ownedLeftTerm = new ApnModel!CTerm;
+		eq1.ownedLeftTerm.opSymbol=getMarkedConditionName(combinator);
+		var varRef = new ApnModel!VariableRef;
+		//("incomingPattern: " + incomingPattern).println();
+		//("incomingPattern.equivalent: " + incomingPattern.equivalents()).println();
+		
+		varRef.variable = incomingPattern.equivalents().selectOne(obj | obj.isKindOf(ApnModel!Variable));
+		eq1.ownedLeftTerm.ownedTerms.add(varRef);
+		
+		eq1.ownedRightTerm = new ApnModel!CTerm;
+		eq1.ownedRightTerm.opSymbol="false";
+		
+		resultEquations.add(eq1);
+		
+	}
+	*/
+	
+	// Add the equations to keep duplicates away
+	/*
+	for (operand in combinator.operands) {
+		var equation = getEquivalentMarkedEquation(operand);
+		
+		("equation: " + equation).println();
+		
+		resultEquations.add(equation);
+	}
+	*/
+	
+	// Add the equations to keep duplicates away
+	var listOfPatternOperands = getPatternPredecessorsFromOperator(combinator);
+	if (listOfPatternOperands.size() == 2) {
+		// add xor equation
+		
+		var pat1 = listOfPatternOperands.first;
+		var pat2 = listOfPatternOperands.last;
+		
+		
+		var eq1 = new ApnModel!Equation;
+		eq1.ownedRightTerm = new ApnModel!CTerm;
+		eq1.ownedRightTerm.opSymbol="true";
+		
+		eq1.ownedLeftTerm = new ApnModel!CTerm;
+		eq1.ownedLeftTerm.opSymbol="nand";
+		
+		var firstOpCond = new ApnModel!CTerm;
+		firstOpCond.opSymbol=getMarkedConditionName(combinator);
+		var varRef1 = new ApnModel!VariableRef;
+		varRef1.variable = pat1.equivalents().selectOne(obj | obj.isKindOf(ApnModel!Variable));
+		firstOpCond.ownedTerms.add(varRef1);
+		
+		eq1.ownedLeftTerm.ownedTerms.add(firstOpCond);
+		
+		var secOpCond = new ApnModel!CTerm;
+		secOpCond.opSymbol=getMarkedConditionName(combinator);
+		var varRef2 = new ApnModel!VariableRef;
+		varRef2.variable = pat2.equivalents().selectOne(obj | obj.isKindOf(ApnModel!Variable));
+		secOpCond.ownedTerms.add(varRef2);
+		
+		eq1.ownedLeftTerm.ownedTerms.add(secOpCond);
+		
+		resultEquations.add(eq1);
+		
+	} else {
+		var incomingPattern = listOfPatternOperands.first;
+		var eq1 = new ApnModel!Equation;
+	
+		eq1.ownedLeftTerm = new ApnModel!CTerm;
+		eq1.ownedLeftTerm.opSymbol=getMarkedConditionName(combinator);
+		var varRef = new ApnModel!VariableRef;
+		
+		varRef.variable = incomingPattern.equivalents().selectOne(obj | obj.isKindOf(ApnModel!Variable));
+		eq1.ownedLeftTerm.ownedTerms.add(varRef);
+		
+		eq1.ownedRightTerm = new ApnModel!CTerm;
+		eq1.ownedRightTerm.opSymbol="false";
+		
+		resultEquations.add(eq1);
+	}
+	
+	
+	// Add the equations for the same relations.
+	if (listOfPatternOperands.size() == 2) {
+		var listOfSameRelations = getAllSameRelationsBetweenOperandPatterns(combinator);
+		
+		for (sameRelation in listOfSameRelations) {
+			resultEquations.add(generateSameEquation(sameRelation));
+		}
+	}
+	
+	
+	return resultEquations;
+}
+
+
+operation getAllSameRelationsBetweenOperandPatterns(operator) {
+	return findOperatorSameRestrictions(operator);
+}
+
+operation findOperatorSameRestrictions(operator) {
+	var incomingPatterns = getIncomingPatternsSet(operator);
+	return TrNetModel!Same.all.select(sameRestriction | hasSourceInSomePatternSameRestriction(sameRestriction, incomingPatterns) and hasTargetInSomePatternSameRestriction(sameRestriction, incomingPatterns));
+}
+
+operation hasTargetInSomePatternSameRestriction(sameRestriction, setOfPatterns){
+	return setOfPatterns.exists(somePattern | hasTargetInPatternSameRestriction(sameRestriction, somePattern));
+}
+
+operation hasTargetInPatternSameRestriction(sameRestriction, somePattern){
+	return somePattern.nodes.exists(someNode | sameRestriction.target = someNode);
+}
+
+operation getIncomingPatternsSet(operator){
+	return operator.operands.collect(operand | operand.pattern).asSet();
+}
+
+operation hasSourceInPatternSameRestriction(sameRestriction, somePattern){
+	return somePattern.nodes.exists(someNode | sameRestriction.source = someNode);
+}
+
+operation hasSourceInSomePatternSameRestriction(sameRestriction, setOfPatterns){
+	return setOfPatterns.exists(somePattern | hasSourceInPatternSameRestriction(sameRestriction, somePattern));
+}
+
+operation getEquivalentMarkedEquation(operand) {
+	return operand.equivalents().selectOne(obj | obj.isKindOf(ApnModel!Equation));
+}
+
+operation generateSameEquation(sameRelation) {
+
+	var sourceNodePattern = sameRelation.source;
+	var targetNodePattern = sameRelation.target;
+	
+	var resultEquation = new ApnModel!Equation;
+	
+	var leftTerm = new ApnModel!CTerm;
+	leftTerm.opSymbol = getProjectionNodePatternName(sourceNodePattern);
+	var ltVarRef = new ApnModel!VariableRef;
+	ltVarRef.variable = getCorrespondingVariable(sourceNodePattern.pattern);
+	leftTerm.ownedTerms.add(ltVarRef);
+	resultEquation.ownedLeftTerm = leftTerm;
+	
+	var rightTerm = new ApnModel!CTerm;
+	rightTerm.opSymbol = getProjectionNodePatternName(targetNodePattern);
+	var rtVarRef = new ApnModel!VariableRef;
+	rtVarRef.variable = getCorrespondingVariable(targetNodePattern.pattern);
+	rightTerm.ownedTerms.add(rtVarRef);
+	resultEquation.ownedRightTerm = rightTerm;
+	
+	return resultEquation;
+}
+
+operation getCorrespondingVariable(pattern) {
+	return pattern.equivalents().selectOne(obj | obj.isKindOf(ApnModel!Variable));
+}
+
+operation getArcOperandMultiset(operand) {
+	var multiset = new ApnModel!Multiset;
+	
+	multiset.ownedImports.addAll(getAllImports(VisualModel!TrNetModel.all.first));
+	
+	multiset.msSort = new ApnModel!AtomicSort;
+	
+	var numTerm = new ApnModel!NumOfTerms;
+	
+	numTerm.ownedElement = new ApnModel!TermReference;
+	numTerm.ownedElement.termReferenced = new ApnModel!VariableRef;
+	numTerm.ownedElement.termReferenced.variable = operand.pattern.equivalents().selectOne(obj | obj.isKindOf(ApnModel!Variable));
+	
+	multiset.ownedNumOfTerms.add(numTerm);
+	
+	return multiset;
+}
+
+operation getArcOperandMarkDuplicateMultiset(operand) {
+	var multiset = new ApnModel!Multiset;
+	
+	multiset.ownedImports.addAll(getAllImports(VisualModel!TrNetModel.all.first));
+	
+	multiset.msSort = new ApnModel!AtomicSort;
+	
+	var numTerm = new ApnModel!NumOfTerms;
+	
+	numTerm.ownedElement = new ApnModel!TermReference;
+	
+	var markTerm = new ApnModel!CTerm;
+	markTerm.opSymbol = getOperatorMarkOperation(operand.operator);
+	
+	var varRef = new ApnModel!VariableRef;
+	varRef.variable = operand.pattern.equivalents().selectOne(obj | obj.isKindOf(ApnModel!Variable));
+	
+	markTerm.ownedTerms.add(varRef);
+	
+	numTerm.ownedElement.termReferenced = markTerm;
+	
+	multiset.ownedNumOfTerms.add(numTerm);
+	
+	return multiset;
+}
+
+operation getOperatorMarkOperation(operator) {
+	return "MarkOp" + operator.id;
+}
+
+operation getOperatorMarkOperationCondition(operator) {
+	return getMarkedConditionName(operator);
+}
+
+operation getArcResultMultiset(result) {
+	var multiset = new ApnModel!Multiset;
+	
+	multiset.ownedImports.addAll(getAllImports(VisualModel!TrNetModel.all.first));
+	
+	multiset.msSort = new ApnModel!AtomicSort;
+	
+	var numTerm = new ApnModel!NumOfTerms;
+	
+	numTerm.ownedElement = new ApnModel!TermReference;
+	
+	numTerm.ownedElement.termReferenced = new ApnModel!CTerm;
+	
+	numTerm.ownedElement.termReferenced.opSymbol = getPatternConstructorName(result.pattern);
+	
+	numTerm.ownedElement.termReferenced.ownedTerms.addAll(getPatternConstructorArguments(result.pattern, getPatternPredecessorsFromOperator(result.operator)));
+	
+	multiset.ownedNumOfTerms.add(numTerm);
+	
+	return multiset;
+}
+
+operation getPatternPredecessorsFromOperator(operator){
+	return operator.operands.collect(element | element.pattern );
+}
+
+operation getMarkedConditionName(combinator) {
+	return "isMarked" + combinator.id;
+}
+
+operation getPatternConstructorArguments(resultPattern, listOfPatternOperands) {
+	
+	var results = new Sequence;
+	
+	if (listOfPatternOperands == null or listOfPatternOperands.isEmpty()) {
+		throw "Unexpected case!";
+	}
+	
+	for (nodePattern in resultPattern.nodes) {
+		
+		if (listOfPatternOperands.size() == 1) {
+			if (isNewNodePattern(nodePattern, listOfPatternOperands.first)) {
+				
+				results.add(getDefaultNodeConstructorCall(nodePattern));
+				
+			} else {
+				
+				var correspondingNode = getCorrespondingNode(nodePattern, listOfPatternOperands.first);
+				var patternVariable = listOfPatternOperands.first.equivalents().selectOne(obj | obj.isKindOf(ApnModel!Variable));
+				
+				results.add(getProjectionCall(correspondingNode, patternVariable));
+				
+			}
+		} else if (listOfPatternOperands.size() == 2) {
+			
+			if (isNewNodePattern(nodePattern, listOfPatternOperands.first)) {
+				if (isNewNodePattern(nodePattern, listOfPatternOperands.last)) {
+					results.add(getDefaultNodeConstructorCall(nodePattern));
+				} else {
+					// is a keep from second operand
+					
+					var correspondingNode = getCorrespondingNode(nodePattern, listOfPatternOperands.last);
+					var patternVariable = listOfPatternOperands.last.equivalents().selectOne(obj | obj.isKindOf(ApnModel!Variable));
+					
+					results.add(getProjectionCall(correspondingNode, patternVariable));
+					
+				}
+			} else if (isNewNodePattern(nodePattern, listOfPatternOperands.last)){
+				if (isNewNodePattern(nodePattern, listOfPatternOperands.first)) {
+					
+					results.add(getDefaultNodeConstructorCall(nodePattern));
+					
+				} else {
+					// is a keep from first pattern
+					
+					var correspondingNode = getCorrespondingNode(nodePattern, listOfPatternOperands.first);
+					var patternVariable = listOfPatternOperands.first.equivalents().selectOne(obj | obj.isKindOf(ApnModel!Variable));
+					
+					results.add(getProjectionCall(correspondingNode, patternVariable));
+					
+				}
+			} else {
+				throw "Unexpected case!";
+			}
+			
+		} else {
+			throw "Unexpected case!";
+		}
+		
+	}
+	
+	return results;
+}
+
+
+operation getProjectionCall(correspondingNode, patternVariable) {
+	var projectionCall = new ApnModel!CTerm;
+	
+	projectionCall.opSymbol = getProjectionNodePatternName(correspondingNode);
+	
+	var varRef = new ApnModel!VariableRef;
+	
+	varRef.variable = patternVariable;
+	
+	projectionCall.ownedTerms.add(varRef);
+	
+	return projectionCall;
+}
+
+
+operation getDefaultNodeConstructorCall(nodePattern) {
+	var nodeConstructorCall = new ApnModel!CTerm;
+				
+	nodeConstructorCall.opSymbol = getNodeConstructorName(nodePattern.name);
+	
+	var constructorArg = new ApnModel!CTerm;
+	
+	constructorArg.opSymbol = "zero";
+	
+	nodeConstructorCall.ownedTerms.add(constructorArg);
+	
+	return 	nodeConstructorCall;
+}
+
+operation getProjectionNodePatternName(nodePattern) {
+	return "get" + nodePattern.id;
+}
+
+
+operation getCorrespondingNode(node, pattern) {
+	return node.keepIn.selectOne(rel : CoreModel!Keep | patternContains(pattern, rel.source)).source;
+}
+
+
+operation getNodeConstructorName(name) {
+	return name + "NodeConstructor";
+}
+
+operation isNewNodePattern(node, sourcePattern){
+	return not hasAKeepRelationInSourcePattern(node, sourcePattern);
+}
+
+operation patternContains(pattern, node) {
+	return pattern.nodes.includes(node);
+}
+
+operation getPatternConstructorName(pattern) {
+	return "new" + pattern.id;
+}
+
+operation hasAKeepRelationInSourcePattern(node, sourcePattern){
+	return sourcePattern.nodes.exists(sourceNode: CoreModel!NodePattern | hasAKeepRelation(sourceNode, node));
+}
+
+operation hasAKeepRelation(sourceNode, targetNode){
+	return sourceNode.keepOut.exists(relation:CoreModel!Keep | relation.target = targetNode);
+}
+
+operation getOperatorSucessorsFromPattern(pattern) {
+	return pattern.outgoingOperands.collect(element : CoreModel!Operand | element.operator).select( op | op.isKindOf(TrNetModel!Combinator));
+}
+

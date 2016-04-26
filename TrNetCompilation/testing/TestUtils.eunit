@@ -1,0 +1,127 @@
+import "../UtilsGen.eol";
+import "UtilsTest.eol";
+
+
+@test
+operation testGetOperatorContainingSameRelation1() {
+	var pattern24 = Class2Relational!Pattern.all.selectOne(pat | pat.id="TrNetPat24");
+	
+	assertNotEquals("pat24 not found", null, pattern24);
+	
+	var attribute0 = pattern24.nodes.selectOne(n | n.id="Attribute0");
+	
+	assertNotEquals("Attribute0 not found", null, attribute0);
+	
+	var firstRelation = attribute0.sameOut.first;
+	
+	assertNotEquals("firstRelation not found", null, firstRelation);
+	
+	var pattern46 = firstRelation.target.pattern;
+	
+	assertEquals("pattern46 not found!", "TrNetPat46", pattern46.id);
+		
+	var correspondingOperator = getOperatorContainingSameRelation(Class2Relational!Operator.all, firstRelation).first;
+	
+	assertNotEquals("correspondingOperator not found", null, correspondingOperator);
+
+	assertEquals("TrNetOp28", correspondingOperator.id);
+	
+}
+
+@test
+operation testJoinableNodes() {
+	var TrNetPat25 = getPattern("TrNetPat25", Class2Relational!Pattern.all);
+	var TrNetPat44 = getPattern("TrNetPat44", Class2Relational!Pattern.all);
+	
+	var joinableNodes1 = getJoinableNodes(TrNetPat25.nodes);
+	var joinableNodes2 = getJoinableNodes(TrNetPat44.nodes);
+	
+	assertEquals(0, joinableNodes1.size);
+	assertEquals(1, joinableNodes2.size);
+	
+	var node2 = joinableNodes2.first;
+	
+	assertEquals("Datatype0", node2.id);
+	
+	var TrNetPat7 = getPattern("TrNetPat7", Class2Relational!Pattern.all);
+	var joinableNodesTrNetPat7 = getJoinableNodes(TrNetPat7.nodes);
+	
+	assertEquals(1, joinableNodesTrNetPat7.size);
+	
+	assertEquals("CClass0", joinableNodesTrNetPat7.first.id);
+	
+	assertEquals(0, getJoinableNodes(getPattern("TrNetPat6", Class2Relational!Pattern.all).nodes).size );
+	
+	assertEquals(0, getJoinableNodes(getPattern("TrNetPat42", Class2Relational!Pattern.all).nodes).size );
+}
+
+
+$with Map {"VisualModel" = "ActivityMigration"}
+@test
+operation testDependsOnlyOnOnePattern() {
+	
+	var TrNetOp38 = getOperator("TrNetOp38", VisualModel!Operator.all);
+	
+	assertEquals(1, TrNetOp38.conditions.size);
+	
+	assertFalse(dependsOnlyOnOnePattern(TrNetOp38.conditions.first, getFirstOperand(TrNetOp38).pattern));
+	assertFalse(dependsOnlyOnOnePattern(TrNetOp38.conditions.first, getSecondOperand(TrNetOp38).pattern));
+	
+	var TrNetOp25 = getOperator("TrNetOp25", VisualModel!Operator.all);
+	assertEquals(2, TrNetOp25.conditions.size);
+	assertTrue(dependsOnlyOnOnePattern(TrNetOp25.conditions.first, getSecondOperand(TrNetOp25).pattern));	
+	assertFalse(dependsOnlyOnOnePattern(TrNetOp25.conditions.first, getFirstOperand(TrNetOp25).pattern));
+}
+
+$with Map {"VisualModel" = "ActivityMigration"}
+@test
+operation test_collectAllConditionParameters() {
+	
+	var TrNetOp38 = getOperator("TrNetOp38", VisualModel!Operator.all);
+	assertEquals(1, TrNetOp38.conditions.size);
+	assertEquals(2, collectAllConditionParameters(TrNetOp38.conditions.first.parameters).size());
+	assertEquals("StateVertex0", collectAllConditionParameters(TrNetOp38.conditions.first.parameters).first.id);
+	
+	var TrNetOp25 = getOperator("TrNetOp25", VisualModel!Operator.all);
+	assertEquals(2, TrNetOp25.conditions.size);
+	assertEquals(1, collectAllConditionParameters(TrNetOp25.conditions.first.parameters).size());
+	assertEquals("StateVertex0", collectAllConditionParameters(TrNetOp25.conditions.first.parameters).first.id);
+	
+	var TrNetOp50 = getOperator("TrNetOp50", VisualModel!Operator.all);
+	assertEquals(1, TrNetOp50.conditions.size);
+	assertEquals(1, collectAllConditionParameters(TrNetOp50.conditions.first.parameters).size());
+	assertEquals("kind", collectAllConditionParameters(TrNetOp50.conditions.first.parameters).first.name);
+	
+	
+}
+
+$with Map {"VisualModel" = "ActivityMigration"}
+@test
+operation test_parameterBelongsToPattern() {
+	// parameterBelongsToPattern(parameter, pattern)
+	
+	var TrNetPat35 = getPattern("TrNetPat35", VisualModel!Pattern.all);
+	
+	for (node in TrNetPat35.nodes) {
+		assertTrue(parameterBelongsToPattern(node,TrNetPat35));
+	}
+	
+	for (attrList in TrNetPat35.nodes.collect(n | n.attributes)) {
+		if (not attrList.isEmpty()) {
+			assertTrue(parameterBelongsToPattern(attrList.first,TrNetPat35));
+		}
+	}
+	
+	var TrNetPat34 = getPattern("TrNetPat34", VisualModel!Pattern.all);
+	
+	for (node in TrNetPat34.nodes) {
+		assertFalse(parameterBelongsToPattern(node,TrNetPat35));
+	}
+	
+	for (attrList in TrNetPat34.nodes.collect(n | n.attributes)) {
+		if (not attrList.isEmpty()) {
+			assertFalse(parameterBelongsToPattern(attrList.first,TrNetPat34));
+		}
+	}
+	
+}

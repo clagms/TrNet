@@ -1,0 +1,17 @@
+var rootDecompositionProcess = Decomposition!Decomposition.all.first;
+
+recVisitAllSearchPlans(rootDecompositionProcess.op, "");
+
+"DONE.".println();
+
+operation recVisitAllSearchPlans(operatorToBeDecomposed, prefix){
+	for (operandToBeUsedToSplit in operatorToBeDecomposed.splits) { 
+		if (operandToBeUsedToSplit.op.isDefined()){
+			// Continue recursively:
+			recVisitAllSearchPlans(operandToBeUsedToSplit.op, prefix + operatorToBeDecomposed.id + ":" + operandToBeUsedToSplit.id + ":");
+		} else {
+			// base case reached.
+			(prefix + operatorToBeDecomposed.id + ":" + operandToBeUsedToSplit.id + "," + operandToBeUsedToSplit.minCost).println();
+		}
+	}
+}

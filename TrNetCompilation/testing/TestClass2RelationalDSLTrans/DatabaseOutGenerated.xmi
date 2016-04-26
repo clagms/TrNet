@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="ASCII"?>
+<DB:Database xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:DB="DB">
+  <contents xsi:type="DB:Table" name="Class6_Attribute7" primaryKeys="//@contents.0/@columns.0 //@contents.0/@columns.1">
+    <columns name="Class6ID" type="//@contents.15"/>
+    <columns name="Attribute7ID" type="//@contents.15"/>
+  </contents>
+  <contents xsi:type="DB:Table" name="Class7_Attribute8" primaryKeys="//@contents.1/@columns.0 //@contents.1/@columns.1">
+    <columns name="Class7ID" type="//@contents.15"/>
+    <columns name="Attribute8ID" type="//@contents.15"/>
+  </contents>
+  <contents xsi:type="DB:Table" name="Class8_Attribute3" primaryKeys="//@contents.2/@columns.0 //@contents.2/@columns.1">
+    <columns name="Class8ID" type="//@contents.15"/>
+    <columns name="Attribute3ID" type="//@contents.15"/>
+  </contents>
+  <contents xsi:type="DB:Table" name="Class10_Attribute5" primaryKeys="//@contents.3/@columns.0 //@contents.3/@columns.1">
+    <columns name="Class10ID" type="//@contents.15"/>
+    <columns name="Attribute5ID" type="//@contents.15"/>
+  </contents>
+  <contents xsi:type="DB:Table" name="Class1" primaryKeys="//@contents.4/@columns.0">
+    <columns name="ID" type="//@contents.15"/>
+  </contents>
+  <contents xsi:type="DB:Table" name="Class2" primaryKeys="//@contents.5/@columns.0">
+    <columns name="ID" type="//@contents.15"/>
+    <columns name="Attribute9ID" type="//@contents.15"/>
+    <columns name="Attribute10ID" type="//@contents.15"/>
+  </contents>
+  <contents xsi:type="DB:Table" name="Class3" primaryKeys="//@contents.6/@columns.0">
+    <columns name="ID" type="//@contents.15"/>
+  </contents>
+  <contents xsi:type="DB:Table" name="Class4" primaryKeys="//@contents.7/@columns.0">
+    <columns name="ID" type="//@contents.15"/>
+  </contents>
+  <contents xsi:type="DB:Table" name="Class5" primaryKeys="//@contents.8/@columns.0">
+    <columns name="ID" type="//@contents.15"/>
+  </contents>
+  <contents xsi:type="DB:Table" name="Class6" primaryKeys="//@contents.9/@columns.0">
+    <columns name="ID" type="//@contents.15"/>
+  </contents>
+  <contents xsi:type="DB:Table" name="Class7" primaryKeys="//@contents.10/@columns.0">
+    <columns name="ID" type="//@contents.15"/>
+    <columns name="Attribute2" type="//@contents.16"/>
+  </contents>
+  <contents xsi:type="DB:Table" name="Class8" primaryKeys="//@contents.11/@columns.0">
+    <columns name="ID" type="//@contents.15"/>
+    <columns name="Attribute4ID" type="//@contents.15"/>
+    <columns name="Class8ID" type="//@contents.15"/>
+    <columns name="Class4ID" type="//@contents.15"/>
+  </contents>
+  <contents xsi:type="DB:Table" name="Class9" primaryKeys="//@contents.12/@columns.0">
+    <columns name="ID" type="//@contents.15"/>
+    <columns name="Attribute6ID" type="//@contents.15"/>
+    <columns name="Class6ID" type="//@contents.15"/>
+  </contents>
+  <contents xsi:type="DB:Table" name="Class10" primaryKeys="//@contents.13/@columns.0">
+    <columns name="ID" type="//@contents.15"/>
+  </contents>
+  <contents xsi:type="DB:Table" name="Class3_Attribute1" primaryKeys="//@contents.14/@columns.0 //@contents.14/@columns.1">
+    <columns name="Class3ID" type="//@contents.15"/>
+    <columns name="Attribute1Value" type="//@contents.15"/>
+  </contents>
+  <contents xsi:type="DB:Type" name="Integer"/>
+  <contents xsi:type="DB:Type" name="String"/>
+</DB:Database>

@@ -1,0 +1,19 @@
+import "boolean.adt"
+	import "CClass.adt"
+
+Adt CClass_super_CClass
+	Sorts CClass_super_CClass;
+	Generators
+		newCClass_super_CClass: CClass,CClass -> CClass_super_CClass;
+	Operations
+	getCClass0: CClass_super_CClass -> CClass;
+	getCClass1: CClass_super_CClass -> CClass;
+	Axioms
+	
+	getCClass0(newCClass_super_CClass($CClass0Var,$CClass1Var)) = $CClass0Var;
+	
+	getCClass1(newCClass_super_CClass($CClass0Var,$CClass1Var)) = $CClass1Var;
+	Variables
+		CClass_super_CClassVar : CClass_super_CClass;
+			CClass0Var : CClass;
+			CClass1Var : CClass;

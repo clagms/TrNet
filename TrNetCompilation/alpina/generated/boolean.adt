@@ -1,0 +1,14 @@
+Adt boolean
+	Sorts bool;
+	Generators
+		true : bool;
+		false : bool;
+	Operations 
+		nand : bool, bool -> bool;
+
+	Axioms
+		nand(true, true) = false;
+		nand(true, false) = true;
+		nand(false, true) = true;
+		nand(false, false) = true;
+		

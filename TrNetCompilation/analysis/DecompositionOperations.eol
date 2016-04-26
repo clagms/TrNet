@@ -1,0 +1,1003 @@
+import "../Utils.eol";
+import "../TrNetManipulationUtils.eol";
+import "./OverlappedPMLib.eol";
+
+var trace = true;
+
+operation countPossibleSplits(decompositionOperator, implicitOperatorToBeDecomposed, trnetmodel){
+	// This is the function that will allow us to change the way splits are done.
+	return implicitOperatorToBeDecomposed.operands.size();
+}
+
+operation getPossibleSplits(decompositionOperator, implicitOperatorToBeDecomposed, trnetmodel){
+	// This is the function that will allow us to change the way splits are done.
+	var candidateSplits = new Sequence;
+	for (operand in implicitOperatorToBeDecomposed.operands) { 
+		var operandSplit = new Decomposition!OperandSplit;
+		operandSplit.id = operand.pattern.id;
+		candidateSplits.add(operandSplit);
+	}
+	return candidateSplits;
+}
+
+operation decomposeAndApplyOPM(modelToBeDecomposed, trnetmodel, computationEffort, implicitOperatorToBeDecomposed, callIdent){
+	(callIdent + ">decomposeAndApplyOPM(" + modelToBeDecomposed + ", " + implicitOperatorToBeDecomposed.id + ", " + computationEffort +  ")").println();
+	
+	if (implicitOperatorToBeDecomposed == null){
+		throw "Inconsistency found";
+	}
+	
+	var resCompEffort = computationEffort;
+	
+	// The base case is one of the two following:
+	// - The implicitOperatorToBeDecomposed is explicit
+	// - There are no more explicit operators in the transformation.
+	if (implicitOperatorToBeDecomposed.operands.size() <= 2){
+	
+		if (trace){
+			(callIdent + "Finished decomposition of one operator.").println();
+			(callIdent + "Implicit operators to go: " + findAllImplicitOperators(trnetmodel).collect(op | op.id)).println();
+		}
+	
+		// If this happens, we need to proceed to the next operator in the whole transformation
+		// and decompose it.
+		var nextImplicitOperator = findAllImplicitOperators(trnetmodel).first;
+		
+		// If there are no more operators in the whole transformation, then we have an explicit transformation.
+		// In that case, we need to calculate its cost and then propagate it to the parent.
+		if (nextImplicitOperator == null){
+			// This is the base case: there are no implicit operators left.
+			// Apply OPM and then compute cost.
+			
+			assert(modelToBeDecomposed.maxCost > 0.0d, "Invalid maxCost found. It should have been previously calculated.");
+			
+			// If the cost is not interesting, we will just skip this one and assume that its minimum cost is the same as the maximum.
+			if (modelToBeDecomposed.maxCost < 1e07d){
+				if (trace){
+					(callIdent + "Applying OPM...").println();
+				}
+				
+				// We cannot reuse the cache maps accross transformations for obvious reasons.
+				var remSteps = fixedPointIterateOPM(1000, new Map, new Map);
+				
+				if (trace){
+					(callIdent + "Applying OPM... DONE").println();
+					(callIdent + "Remaining Steps: " + remSteps).println();
+				}
+				
+				if (trace){
+					(callIdent + "Computing new cost...").println();
+				}
+				
+				var cost = computeTransformationCost(trnetmodel);
+				
+				assert(cost > 0.0d, "Invalid cost calculated.");
+				
+				if (trace){
+					(callIdent + "Computing new cost... DONE").println();
+					(callIdent + "New Cost: " + cost).println();
+					(callIdent + "Old Cost: " + modelToBeDecomposed.maxCost).println();
+					(callIdent + "Difference: " + modelToBeDecomposed.maxCost - cost).println();
+				}
+				
+				if (modelToBeDecomposed.maxCost > cost){
+					(callIdent + "Improvement found: " + cost).println();
+				}
+				
+				if (cost < 194934){ // 194934 is the minimum cost of all the decompositions.
+					(callIdent + "New minimum found! " + cost).println();
+				}
+				
+				if (cost < 194934 and modelToBeDecomposed.maxCost > 194934){ // 194934 is the minimum cost of all the decompositions.
+					(callIdent + "New significant minimum found! " + cost).println();
+				}
+				
+				modelToBeDecomposed.minCost = cost;	
+			} else {
+				
+				if (trace){
+					(callIdent + "Skipping this explicit decomposition with a non-interesting cost...").println();
+				}
+				
+				modelToBeDecomposed.minCost = modelToBeDecomposed.maxCost;
+			}
+			
+		} else {
+			// There is at least one implicit operator to go.
+			// we repeat the same call, but with that operator as the one to be decomposed.
+			
+			resCompEffort = decomposeAndApplyOPM(modelToBeDecomposed, trnetmodel, resCompEffort, nextImplicitOperator, callIdent + " ");
+			
+		}
+		
+		(callIdent + "<decomposeAndApplyOPM(" + modelToBeDecomposed + ", " + implicitOperatorToBeDecomposed.id + ") = " + resCompEffort).println();
+		
+		return resCompEffort;
+	}
+	
+	// Below is the general case.
+	
+	// The child of the decompositionNode is assumed to exist in this algorithm.
+	assert(modelToBeDecomposed.op <> null, "modelToBeDecomposed.op should always exist for this algorithm: " + modelToBeDecomposed);
+	assert(modelToBeDecomposed.op.id == implicitOperatorToBeDecomposed.id, "Inconsistency found between the decomposition model and the transformation.");
+	
+	// If there is no computation effort left, we terminate here.
+	if (resCompEffort <= 0){
+		if(trace){
+			(callIdent + "Computation effort exausted.").println();
+		}
+		(callIdent + "<decomposeAndApplyOPM(" + modelToBeDecomposed + ", " + implicitOperatorToBeDecomposed.id + ") = " + resCompEffort).println();
+		return resCompEffort;
+	}
+	
+	// Two cases are possible here:
+	// 1. The operator has been partially explored.
+	// 2. The operator has already been fully explored.
+	
+	assert(not modelToBeDecomposed.op.splits.isEmpty(), "The decomposition process is assumed to be fully modeled.");
+	
+	// All the children must be there.
+	var splitCount = countPossibleSplits(modelToBeDecomposed.op, implicitOperatorToBeDecomposed, trnetmodel);
+	
+	// The correct way to do this would be to actually compare each split and ensure they are all equal
+	// but this would mean a lot of computation to ensure they are the same, which is always the case
+	// provided no one changes the way splits are done at the middle of the same decomposition process.
+	assert(splitCount == modelToBeDecomposed.op.splits.size(), "Inconsistency found in the model of the decomposition process.");
+	
+	for (partiallyExploredSplit in findPartiallyExploredSplits(modelToBeDecomposed.op.splits)) { 
+		if(trace){
+			(callIdent + "Exploring Split: " + partiallyExploredSplit.id).println();
+		}
+		
+		// Decompose the first child that has not yet been decomposed.
+		
+		// The transaction is limited to the TrNetModel.
+		transaction TrNetModel{
+		
+			if (not partiallyExploredSplit.isKindOf(Decomposition!OperandSplit)){
+				throw "Unsuported kind of split";
+			}
+			
+			var newOperator = decomposeOperatorBySplitID(implicitOperatorToBeDecomposed, partiallyExploredSplit.id, trnetmodel, callIdent);
+			
+			// and proceed recursively to decompose the remaining implicit operator.
+			resCompEffort = decomposeAndApplyOPM(partiallyExploredSplit, trnetmodel, resCompEffort, newOperator, callIdent + " ");
+			
+			abort;
+		}
+		
+	}
+	
+	// When we get here, there might be no more children left unexplored.
+	// If so, then propagate the minimum and maximum costs to the parent 
+	// and update the computation effort
+	
+	if (allSplitsHaveACost(modelToBeDecomposed.op.splits)){
+		
+		if(trace){
+			(callIdent + "All splits explored.").println();
+		}
+		
+		var minSplit = modelToBeDecomposed.op.splits.first;
+		var maxSplit = modelToBeDecomposed.op.splits.first;
+		for (split in modelToBeDecomposed.op.splits) { 
+			if (split.minCost < minSplit.minCost){
+				minSplit = split;
+			}
+			if (split.maxCost > maxSplit.maxCost){
+				maxSplit = split;
+			}
+		}
+		modelToBeDecomposed.op.min = minSplit;
+		modelToBeDecomposed.op.max = maxSplit;
+		
+		modelToBeDecomposed.minCost = minSplit.minCost;
+		modelToBeDecomposed.maxCost = maxSplit.maxCost;
+		
+		// decrease one to the computation effort
+		resCompEffort = resCompEffort - 1;
+	
+	} else {
+		assert(resCompEffort <= 0, "Computational effort should be less than zero now.");
+		if(trace){
+			(callIdent + "Computation effort exausted while exploring splits.").println();
+			(callIdent + "Splits remaining: " + findPartiallyExploredSplits(modelToBeDecomposed.op.splits)).println();
+		}
+	}
+	
+	(callIdent + "<decomposeAndApplyOPM(" + modelToBeDecomposed + ", " + implicitOperatorToBeDecomposed.id + ") = " + resCompEffort).println();
+	
+	return resCompEffort;
+}
+
+operation decompose(modelToBeDecomposed, trnetmodel, rootFolder, computationEffort, implicitOperatorToBeDecomposed, callIdent){
+	(callIdent + ">decompose(" + modelToBeDecomposed + ", " + implicitOperatorToBeDecomposed.id + ", " + computationEffort +  ")").println();
+	
+	if (implicitOperatorToBeDecomposed == null){
+		throw "Inconsistency found";
+	}
+	
+	// The base case is one of the two following:
+	// - The implicitOperatorToBeDecomposed is explicit
+	// - There are no more explicit operators in the transformation.
+	if (implicitOperatorToBeDecomposed.operands.size() <= 2){
+	
+		if (trace){
+			(callIdent + "Finished decomposition of one operator.").println();
+			(callIdent + "Implicit operators to go: " + findAllImplicitOperators(trnetmodel).collect(op | op.id)).println();
+		}
+	
+		// If this happens, we need to proceed to the next operator in the whole transformation
+		// and decompose it.
+		var nextImplicitOperator = findAllImplicitOperators(trnetmodel).first;
+		
+		var resCompEffort = computationEffort;
+		
+		// If there are no more operators in the whole transformation, then we have an explicit transformation.
+		// In that case, we need to calculate its cost and then propagate it to the parent.
+		if (nextImplicitOperator == null){
+			// This is the base case: there are no implicit operators left.
+			
+			var cost = computeTransformationCost(trnetmodel);
+			
+			assert(cost > 0.0d, "Invalid cost calculated.");
+			
+			modelToBeDecomposed.minCost = cost;
+			modelToBeDecomposed.maxCost = cost;
+			
+			
+		} else {
+			// There is at least one implicit operator to go.
+			// we repeat the same call, but with that operator as the one to be decomposed.
+			
+			resCompEffort = decompose(modelToBeDecomposed, trnetmodel, rootFolder, computationEffort, nextImplicitOperator, callIdent + " ");
+			
+		}
+		
+		(callIdent + "<decompose(" + modelToBeDecomposed + ", " + implicitOperatorToBeDecomposed.id + ") = " + resCompEffort).println();
+		
+		return resCompEffort;
+	}
+	
+	// Create the child of the decompositionNode, if it does not exist yet.
+	if (modelToBeDecomposed.op == null){
+		var newDecompositionOperator = createDecompositionOperator(implicitOperatorToBeDecomposed);
+		modelToBeDecomposed.op = newDecompositionOperator;
+	} else if (modelToBeDecomposed.op.id <> implicitOperatorToBeDecomposed.id) {
+		throw "Inconsistency found";
+	}
+	
+	// If there is no computation effort left, we terminate here.
+	if (computationEffort <= 0){
+		if(trace){
+			(callIdent + "Computation effort exausted.").println();
+		}
+		(callIdent + "<decompose(" + modelToBeDecomposed + ", " + implicitOperatorToBeDecomposed.id + ") = " + computationEffort).println();
+		return computationEffort;
+	}
+	
+	// Three cases are possible here:
+	// 1. The operator has never been explored.
+	// 2. The operator has been partially explored.
+	// 3. The operator has already been fully explored.
+	
+	// Check case 1
+	if (modelToBeDecomposed.op.splits.isEmpty()){
+		// The operator has never been explored
+		
+		var splits = getPossibleSplits(modelToBeDecomposed.op, implicitOperatorToBeDecomposed, trnetmodel);
+		
+		for (split in splits) { 
+			modelToBeDecomposed.op.splits.add(split);
+		}
+		
+	} else {
+		// the node has been touched before.
+		
+		// All the children must be there.
+		var splitCount = countPossibleSplits(modelToBeDecomposed.op, implicitOperatorToBeDecomposed, trnetmodel);
+		if (splitCount <> modelToBeDecomposed.op.splits.size()){
+			throw "Inconsistency found";
+			// The correct way to do this would be to actually compare each split and ensure they are all equal
+			// but this would mean a lot of computation to ensure they are the same, which is allways the case
+			// provided no one changes the way splits are done at the middle of the same decomposition process.
+		}
+	}
+	
+	// Here the node has either been initialized, or it was already initialized with all possible splits.
+	// So now either case 2. or 3. will hold.
+	
+	var resultComputationEffort = computationEffort;
+	
+	for (partiallyExploredSplit in findPartiallyExploredSplits(modelToBeDecomposed.op.splits)) { 
+		if(trace){
+			(callIdent + "Exploring Split: " + partiallyExploredSplit.id).println();
+		}
+		
+		// Decompose the first child that has not yet been decomposed.
+		
+		// The transaction is limited to the TrNetModel.
+		transaction TrNetModel{
+		
+			resultComputationEffort = decomposeOperatorBySplit(implicitOperatorToBeDecomposed, partiallyExploredSplit, trnetmodel, rootFolder, resultComputationEffort,  callIdent+" ");
+			
+			abort;
+		}
+		
+	}
+	
+	// When we get here, there might be no more children left unexplored.
+	// If so, then propagate the minimum and maximum costs to the parent 
+	// and update the computation effort
+	
+	if (allSplitsHaveACost(modelToBeDecomposed.op.splits)){
+		
+		if(trace){
+			(callIdent + "All splits explored.").println();
+		}
+		
+		var minSplit = modelToBeDecomposed.op.splits.first;
+		var maxSplit = modelToBeDecomposed.op.splits.first;
+		for (split in modelToBeDecomposed.op.splits) { 
+			if (split.minCost < minSplit.minCost){
+				minSplit = split;
+			}
+			if (split.maxCost > maxSplit.maxCost){
+				maxSplit = split;
+			}
+		}
+		modelToBeDecomposed.op.min = minSplit;
+		modelToBeDecomposed.op.max = maxSplit;
+		
+		modelToBeDecomposed.minCost = minSplit.minCost;
+		modelToBeDecomposed.maxCost = maxSplit.maxCost;
+		
+		// decrease one to the computation effort
+		resultComputationEffort = resultComputationEffort - 1;
+	
+	} else {
+		assert(resultComputationEffort <= 0, "Computational effort should be less that zero now.");
+		if(trace){
+			(callIdent + "Computation effort exausted while exploring splits.").println();
+			(callIdent + "Splits remaining: " + findPartiallyExploredSplits(modelToBeDecomposed.op.splits)).println();
+		}
+	}
+	
+	(callIdent + "<decompose(" + modelToBeDecomposed + ", " + implicitOperatorToBeDecomposed.id + ") = " + resultComputationEffort).println();
+	
+	return resultComputationEffort;
+}
+
+
+operation decomposeOperatorBySplit(operator, partiallyExploredSplit, trnetmodel, decompositionFolder, computationEffort, callIdent){
+	
+	if (not partiallyExploredSplit.isKindOf(Decomposition!OperandSplit)){
+		throw "Unsuported kind of split";
+	}
+	
+	var splitID = partiallyExploredSplit.id;
+	
+	(callIdent + ">decomposeOperatorBySplit(" + operator.id + ", " + splitID + ", " + computationEffort + ")").println();
+	
+	var newOperator = decomposeOperatorBySplitID(operator, splitID, trnetmodel, callIdent);
+	
+	// and proceed recursively to decompose the remaining implicit operator.
+	var resultComputationEffort = decompose(partiallyExploredSplit, trnetmodel, rootFolder, computationEffort, newOperator, callIdent + " ");
+	
+	(callIdent + "<decomposeOperatorBySplit(" + operator.id + "," + splitID + ", " + computationEffort + ")=" + resultComputationEffort).println();
+	
+	return resultComputationEffort;
+}
+
+operation decomposeOperatorBySplitID(operator, splitID, trnetmodel, callIdent){
+
+	(callIdent + ">decomposeOperatorBySplitID(" + operator.id + ", " + splitID + ")").println();
+
+	
+	// create the union pattern of the operands that are not the split operand
+	var splitPattern = operator.operands.collect(operand| operand.pattern)
+						.select(pattern|pattern.id == splitID).first;
+	var otherOperands = operator.operands.collect(operand| operand.pattern)
+						.select(pattern|pattern.id <> splitID);
+	
+	var node2CloneMap = new Map;
+	var attribute2CloneMap = new Map;
+	
+	// create an empty union pattern
+	var unionPattern = createPattern(trnetmodel);
+	unionPattern.id = generateFreshId(
+							"union"+otherOperands.collect(pat|pat.id).concat("_") + "_", 
+							TrNetModel!Pattern.all.collect(pat | pat.id));
+	
+	if(trace){
+		(callIdent + "Union pattern  " + unionPattern.id + " created.").println();
+	}
+	
+	// create a new operator between the operands that formed the union pattern and 
+	// the union pattern itself. The keep and the same restrictions will be added later.
+	var newOperator = createCombinator(trnetmodel);
+	newOperator.id = "op"+unionPattern.id;
+	for (pattern in otherOperands) { 
+		addAsAnyOperand(newOperator, pattern, trnetmodel);
+	}
+	addAsAnyResult(newOperator, unionPattern, trnetmodel);
+	
+	if(trace){
+		(callIdent + "New operator  " + newOperator.id + " created.").println();
+	}
+	
+	// those operands are no longer operands of the operator operator.
+	for (pattern in otherOperands) { 
+		removeOperandsFromPattern(operator, pattern);
+	}
+	
+	if (operator.operands.size()<>1){
+		throw "Operator should have only one operand by now.";
+	}
+	
+	if(trace){
+		(callIdent + "Operands moved to the new operator.").println();
+	}
+	
+	// the operator has only two operands now: the split and the union pattern.
+	addAsAnyOperand(operator, unionPattern, trnetmodel);
+	
+	if(trace){
+		(callIdent + "Old operator got new operands.").println();
+	}
+	
+	
+	// copy all the nodes and edges of the operands into the union patterns
+	// copy also the attributes
+	for (pattern in otherOperands) { 
+		for (node in pattern.nodes){
+			var clone = copyNode(node);
+			
+			if (unionPattern.nodes.exists(n | n.id == node.id)){
+				clone.id = generateFreshId(node.id + "_", unionPattern.nodes.collect(n | n.id));
+			} else {
+				clone.id = node.id;
+			}
+			
+			unionPattern.nodes.add(clone);
+			node2CloneMap.put(node, clone);
+			
+			// create a keep restriction between each node and its copy.		
+			connectByKeepRestriction(node, clone, trnetmodel);
+			
+			// copy attributes
+			for (attribute in node.attributes) { 
+				var attrClone = copyAttributePattern(attribute);
+				clone.attributes.add(attrClone);
+				attribute2CloneMap.put(attribute, attrClone);
+			}
+		}
+		for (edge in pattern.edges) { 
+			var edgeClone = copyEdge(edge, node2CloneMap);
+			unionPattern.edges.add(edgeClone);
+		}
+	}
+	
+	if(trace){
+		(callIdent + "Nodes added to the union pattern.").println();
+	}
+	
+	// move the parameters of the attribute calculations that 
+	// depend on nodes or attributes of the OtherOperands.
+	// we only care about the calculation that affect some of the operator operator
+	// results.
+	for (attrCalculation in 
+			TrNetModel!ExternalAttributeCalculationCall.all
+				.select(attrCalc|operator.results
+				  .collect(res|res.pattern.nodes.collect(node| node.attributes))
+				  .flatten().includes(attrCalc.result))) { 
+		for (param in attrCalculation.parameters) { 
+			var nodeOrAttribute = param.parameter;
+			if (node2CloneMap.containsKey(nodeOrAttribute)){
+				// set the parameter to point to the clone of the node.
+				param.parameter = node2CloneMap.get(nodeOrAttribute);
+			} else if (attribute2CloneMap.containsKey(nodeOrAttribute)){
+				// set the parameter to point to the clone of the attribute.
+				param.parameter = attribute2CloneMap.get(nodeOrAttribute);
+			}
+		}
+	}
+	
+	if(trace){
+		(callIdent + "Attribute calculations moved to the new nodes.").println();
+	}
+	
+	// do the same thing for the conditions that belong to the operator.
+	for (cond in operator.conditions){
+		for (param in cond.parameters) { 
+			var nodeOrAttribute = param.parameter;
+			if (node2CloneMap.containsKey(nodeOrAttribute)){
+				// set the parameter to point to the clone of the node.
+				param.parameter = node2CloneMap.get(nodeOrAttribute);
+			} else if (attribute2CloneMap.containsKey(nodeOrAttribute)){
+				// set the parameter to point to the clone of the attribute.
+				param.parameter = attribute2CloneMap.get(nodeOrAttribute);
+			}
+		}
+	}
+	
+	if(trace){
+		(callIdent + "Conditions moved to the new nodes.").println();
+	}
+	
+	// copy also the same restrictions, even those that link to nodes in the split pattern.
+	var sameCounter = 0;
+	for (same in Same.all) { 
+		
+		// if the source of the same fall into one of the nodes 
+		//  belonging to the union pattern, 
+		//  create a clone of the same and connect its source to the clone node and
+		//  target to its original target.
+		//  then check if the target of the same fall into one of the nodes belonging to
+		//  the union pattern. If so, move the same clone target to the clone node.
+		// otherwise, repeat the same thing but for the target node of the same.
+		
+		
+		if (node2CloneMap.containsKey(same.source)){
+			if (node2CloneMap.containsKey(same.target)){
+				connectBySameRestriction(
+					node2CloneMap.get(same.source), 
+					node2CloneMap.get(same.target), 
+					trnetmodel);
+				
+				if(trace){
+					(callIdent + "Same created: " 
+					+ node2CloneMap.get(same.source).pattern.id
+					+"_"+node2CloneMap.get(same.source).id + " -> "
+					+ node2CloneMap.get(same.target).pattern.id
+					+"_"+node2CloneMap.get(same.target).id ).println();
+				}
+			} else {
+				connectBySameRestriction(
+					node2CloneMap.get(same.source), 
+					same.target, 
+					trnetmodel);
+				if(trace){
+					(callIdent + "Same created: " 
+					+ node2CloneMap.get(same.source).pattern.id
+					+"_"+node2CloneMap.get(same.source).id + " -> "
+					+ same.target.pattern.id
+					+"_"+same.target.id ).println();
+				}
+				
+			}
+			sameCounter = sameCounter+1;
+		} else if (node2CloneMap.containsKey(same.target)){
+			if (node2CloneMap.containsKey(same.source)){
+				throw "This never occurs.";
+			} else {
+				connectBySameRestriction(
+					same.source, 
+					node2CloneMap.get(same.target), 
+					trnetmodel);
+				if(trace){
+					(callIdent + "Same created: " 
+					+ same.source.pattern.id
+					+"_"+same.source.id + " -> "
+					+ node2CloneMap.get(same.target).pattern.id
+					+"_"+node2CloneMap.get(same.target).id ).println();
+				}
+				sameCounter = sameCounter+1;
+			}
+		}
+	}
+	
+	if(trace){
+		(callIdent + "Same restrictions copied to the new nodes: " 
+		+ sameCounter).println();
+	}
+	
+	// any keep restrictions whose source is in some node of the otheroperands,
+	//  must be change to the new node in the union pattern.
+	var operatorsResultNodes = operator.results
+									.collect(res|res.pattern
+											.collect(pat | pat.nodes))
+									.flatten();
+	for (keep in Keep.all.select(keep|node2CloneMap.containsKey(keep.source))) { 
+		// make sure that this keep is pointing to a node that belongs to some 
+		// result of operator operator.
+		if (operatorsResultNodes.includes(keep.target)){
+			keep.source = node2CloneMap.get(keep.source);
+		}
+	}
+	
+	if(trace){
+		(callIdent + "Keep restrictions moved to the new nodes.").println();
+	}
+	
+	
+	// look at the same restrictions between the nodes of the 
+	// unionPattern,  merge those nodes  
+	// and then delete the same restriction
+	
+	
+	while(not Same.all
+				.select(same|unionPattern.nodes.includes(same.source) and
+							unionPattern.nodes.includes(same.target))
+				.isEmpty()){
+		
+		// pick one
+		var sameBetweenNodesToBeMerged = Same.all
+				.selectOne(same|unionPattern.nodes.includes(same.source) and
+							unionPattern.nodes.includes(same.target));
+		
+		if(trace){
+			(callIdent + "Same restrictions between nodes to be merged left: " 
+			+ Same.all
+				.selectOne(same|unionPattern.nodes.includes(same.source) and
+							unionPattern.nodes.includes(same.target)).size()).println();
+		}
+		
+		// get the corresponding nodes in the operands:
+		// we need to later correct the dictionary to the merged node.
+		var origNodeSources = node2CloneMap.keySet
+									.select(key | 
+										node2CloneMap.get(key)==sameBetweenNodesToBeMerged.source);
+		var origNodeTargets = node2CloneMap.keySet
+									.select(key | 
+										node2CloneMap.get(key)==sameBetweenNodesToBeMerged.target);
+		
+		if (origNodeSources.size() <> 1 or origNodeTargets.size()<> 1){
+			throw "Unexpected";
+		}
+		
+		var origNodeSource = origNodeSources.first;
+		var origNodeTarget = origNodeTargets.first;
+		
+		//merge the nodes
+		var mergedNode = mergeNodes(sameBetweenNodesToBeMerged.source,
+									sameBetweenNodesToBeMerged.target);
+		
+		// correct the nodes map.
+		node2CloneMap.put(origNodeSource, mergedNode);
+		node2CloneMap.put(origNodeTarget, mergedNode);
+		
+		// remove the restriction
+		delete sameBetweenNodesToBeMerged;
+		
+	}
+	
+	if(trace){
+		(callIdent + "All nodes merged.").println();
+	}
+	
+	
+	// remove the redundant keep restrictions
+	//  those that point to the same element and whose sources are two nodes
+	//  connected by a same restriction
+	var unionPatternNodes = unionPattern.nodes;
+	var keepsMarkedForDeletion = new Sequence;
+	var sameRestrictionsBetweenOtherOperandsNodes = 
+			Same.all.select(same| node2CloneMap.containsKey(same.source)
+									and node2CloneMap.containsKey(same.target));
+	
+	var sameRestrictionsBetweenOperandsIds = 
+				sameRestrictionsBetweenOtherOperandsNodes.collect(s | 
+						"(" + s.source.pattern.id + "_" + s.source.id + "," 
+						+ s.target.pattern.id + "_" + s.target.id + ")");
+	
+	if(trace){
+		(callIdent + "Sames between operands: " + 
+				sameRestrictionsBetweenOperandsIds).println();
+	}
+	
+	
+	
+	for (keep in Keep.all
+				.select(keep|unionPattern.nodes.includes(keep.target)
+							and node2CloneMap.containsKey(keep.source))) { 
+		var redundantKeeps = 
+				Keep.all
+				.select(keep2|keep2.target == keep.target
+								and keep2.source <> keep.source
+								and node2CloneMap.containsKey(keep2.source)
+								and sameRestrictionsBetweenOtherOperandsNodes
+									.exists(same| (same.source == keep.source 
+													and same.target == keep2.source)
+												 or (same.source == keep2.source 
+													and same.target == keep.source) )
+								);
+		
+		var redundantKeepsIds = 
+				redundantKeeps.collect(k | 
+						"(" + k.source.pattern.id + "_" + k.source.id + "," 
+						+ k.target.pattern.id + "_" + k.target.id + ")");
+			
+			if(trace){
+				(callIdent +  "Redundant Keeps with keep " + 
+						"(" + keep.source.pattern.id + "_" + keep.source.id + "," 
+								+ keep.target.pattern.id + "_" + keep.target.id + ")"
+					 + ": " + redundantKeepsIds).println();
+			}
+						
+			
+		
+		for (redundantKeep in redundantKeeps) { 
+			if (not keepsMarkedForDeletion.includes(redundantKeep)){
+				keepsMarkedForDeletion.add(keep);
+			}
+		}
+	}
+	
+	if(trace){
+		(callIdent + "Redundant keeps found: " 
+			+ keepsMarkedForDeletion.size()).println();
+	}
+	
+	for (keep in keepsMarkedForDeletion) { 
+		delete keep;
+	}
+	
+	if(trace){
+		(callIdent + "Redundant keeps deleted.").println();
+	}
+	
+	// ensure that no ambiguous keep restrictions were introduced.
+	//  I have a validation for this already, so assert that.
+	for (keep in Keep.all) { 
+		var ambiguousKeeps =
+			Keep.all.select(keep2|keep.target == keep2.target
+									and keep.source <> keep2.source
+									and Operator
+										.all
+										.exists(op|
+											op.operands
+												.collect(o|o.pattern)
+												.includes(keep.source.pattern)
+											and 
+											op.operands
+												.collect(o|o.pattern)
+												.includes(keep2.source.pattern))
+									);
+		if (not ambiguousKeeps.isEmpty()){
+			var ambiguousKeepsIds = 
+				ambiguousKeeps.collect(k | 
+						"(" + k.source.pattern.id + "_" + k.source.id + "," 
+						+ k.target.pattern.id + "_" + k.target.id + ")");
+			throw "Ambiguous Keeps with keep " + 
+				"(" + keep.source.pattern.id + "_" + keep.source.id + "," 
+						+ keep.target.pattern.id + "_" + keep.target.id + ")"
+			 + " found: " + ambiguousKeepsIds;
+		}
+	}
+	
+	if(trace){
+		(callIdent + "No ambiguous keeps found.").println();
+	}
+	
+	
+	
+	// ensure that no keeps remain between the otheroperands and the results.
+	if (not 
+		Keep.all
+		.select(keep|node2CloneMap.containsKey(keep.source)
+				and operatorsResultNodes.includes(keep.target)).isEmpty()){
+		throw "Unexpected keeps found.";
+	}
+	
+	if(trace){
+		(callIdent + "No useless keeps found.").println();
+	}
+	
+	
+	// remove the useless same restrictions
+	//  those that are between patterns that are not operands of the same operator.
+	var sameMarkedForDeletion = Same.all
+			.reject(same | // now we reject those that affect an operator.
+				Operator.all.exists(op | sameAffectsOperator(same, op)));
+	
+	if(trace){
+		(callIdent + "Useless sames found: " + sameMarkedForDeletion.size()).println();
+	}
+	
+	for (same in sameMarkedForDeletion) { 
+		delete same;
+	}
+	
+	if(trace){
+		(callIdent + "Useless sames deleted. ").println();
+	}
+	
+	
+	// remove the useless calculations and conditions
+	//  those that do not affect the outcome of any operator.
+	// I should introduce a validation for this.
+	// These should not even occur. If they occur, it is a bug in the algorithm
+	if (not 
+		ExternalAttributeCalculationCall.all
+		.select(calc| 
+		  calc.parameters.collect(param | param.parameter)
+		  .exists(attrPattern | not calc.result.ownerNode.pattern.incomingResults
+								  .collect(res| 
+								  	res.operator.operands.collect(operand | 
+								  		operand.pattern.nodes.collect(node | node.attributes)))
+								  .flatten().includes(attrPattern))).isEmpty()){
+		throw "Attribute calculations that do not affect anything found.";							  
+	}
+	
+	if(trace){
+		(callIdent + "No useless calculations found.").println();
+	}
+	
+	if (not 
+		ExternalConditionCall.all
+		.select(cond| cond.parameters.collect(param | param.parameter)
+			.exists(attrPattern | not (Operator.all.selectOne(op|op.conditions.includes(cond))
+									.operands.collect(operand | 
+								  		operand.pattern.nodes.collect(node | node.attributes)))
+								  		.flatten().includes(attrPattern)) ).isEmpty()){
+		throw "Conditions that do not affect anything found.";								  		
+	}
+	
+	if(trace){
+		(callIdent + "No useless conditions founds.").println();
+	}
+	
+	(callIdent + "<decomposeOperatorBySplitID(" + operator.id + "," + splitID + ")").println();
+	
+	return newOperator;
+}
+
+
+operation allSplitsHaveACost(decompositionSplits){
+	return decompositionSplits.forAll(split | split.minCost > 0.0d);
+}
+
+operation mergeNodes(node1,node2){
+	
+	// the two nodes must have the same name and "live" in the same pattern.
+	if (node1.name <> node2.name){
+		throw "Nodes must have same name.";
+	}
+	if (node1.pattern <> node2.pattern){
+		throw "Nodes must live in the same pattern.";
+	}
+	
+	// merge the nodes attributes.
+	// This involves checking if the attributes of node2 is already present in node1.
+	// if it is, then we must go through all parameter refs to point to the attribute in
+	//  node2 and set them to point to the same attribute in node1.
+	// if it is not, then we can simply remove the attribute from node2 and add it 
+	//  to node 1. The parameter references that point to that attribute do not need to be changed.
+	while(not node2.attributes.isEmpty()){
+		var attr2 = node2.attributes.first;
+		if (node1.attributes.exists(attr1|attr1.name == attr2.name)){
+			for (param in ExternalCalculationCallParameter.all
+						.select(param|param.parameter==attr2)) { 
+				param.parameter = attr1;
+			}
+			for (param in ExternalAttributeCalculationCallParameter.all
+						.select(param|param.parameter==attr2)) { 
+				param.parameter = attr1;
+			}
+			for (param in ExternalConditionCallParameter.all
+						.select(param|param.parameter==attr2)) { 
+				param.parameter = attr1;
+			}
+			for (param in ExternalActionCallParameter.all
+						.select(param|param.parameter==attr2)) { 
+				param.parameter = attr1;
+			}
+			// and remove the attr2 from node2.
+			node2.attributes.remove(attr2);
+			delete attr2;
+		} else {
+			node2.attributes.remove(attr2);
+			node1.attributes.add(attr2);
+		}
+	}
+	
+	// update the edges that end/start in node2 to end/start in node1
+	for (edge in EdgePattern.all.select(edge| edge.target==node2)) { 
+		edge.target = node1;
+	}
+	for (edge in EdgePattern.all.select(edge| edge.source==node2)) { 
+		edge.source = node1;
+	}
+	
+	// update the keep references that are pointing to node2, to point to node1 instead.
+	for (keep in Keep.all.select(keep| keep.target==node2)) { 
+		keep.target = node1;
+	}
+	
+	// update the keep references that start at node2 to start at node1 instead
+	for (keep in Keep.all.select(keep| keep.source==node2)) { 
+		keep.source = node1;
+	}
+	
+	// do the same for the same references.
+	for (same in Same.all.select(same| same.target==node2)) { 
+		same.target = node1;
+	}
+	for (same in Same.all.select(same| same.source==node2)) { 
+		same.source = node1;
+	}
+	
+	
+	// delete node2.
+	delete node2;
+	
+	return node1;
+}
+
+operation generateFreshId(prefix, ids){
+	var idSufix = 0;
+	// avoid clashes of ids
+	while (ids.exists(id | id == (prefix + idSufix))){
+		idSufix = idSufix + 1;
+	}
+	return (prefix + idSufix);
+}
+
+operation getTransformationNativeFile(transformationFile){
+	var file = new Native("java.io.File")(transformationFile);
+	return file;
+}
+
+operation hasAlreadyBeenDecomposed(operator_id, rootFolder){
+	return hasFolderWithName(operator_id, rootFolder);
+}
+
+operation hasFolderWithName(operator_id, rootFolder){
+	var file = new Native("java.io.File")(rootFolder + "/"  + operator_id);
+	return 	file.exists();
+}
+
+
+operation findUndecomposedImplicitOperator(trnetmodel, rootFolder){
+	var unDecomposedOperator = null;
+
+	for (operator in findAllImplicitOperators(trnetmodel)) { 
+		if (not hasAlreadyBeenDecomposed(operator.id, rootFolder)){
+			unDecomposedOperator = operator;
+			break;
+		}
+	}
+	
+	return unDecomposedOperator;
+}
+
+operation findPartiallyExploredSplits(splits){
+	// a partially explored split is a split that does not have a defined minimum or that minimum is negative.
+	var result = new Sequence;
+	for (split in splits) { 
+		if (split.op == null){
+			result.add(split);
+		} else if (split.op.min == null){
+			result.add(split);
+		}else if (split.op.min < 0.0d){
+			result.add(split);
+		}
+	}
+	return result;
+}
+
+
+operation createDecompositionOperator(trNetOperator){
+	var newDecompositionOperator = new Decomposition!DecomposeOp;
+	newDecompositionOperator.id = trNetOperator.id;
+	return newDecompositionOperator;
+}
+
+operation pushStack(s, o){
+	s.add(o);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

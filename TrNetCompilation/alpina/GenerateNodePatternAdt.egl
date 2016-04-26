@@ -1,0 +1,9 @@
+[%
+import "UtilsAlpina.eol";
+%]
+import "nat.adt"
+
+Adt [%=nodeName%]
+	Sorts [%=nodeName%];
+	Generators
+		[%=getNodeConstructorName(nodeName)%]: nat -> [%=nodeName%];

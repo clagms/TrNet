@@ -1,0 +1,9 @@
+$with Map {"VisualModel" = "VisualModel1", "CatalogModel" = "CatalogModel1", "ExpectedVisualModel" = "ExpectedVisualModel1"}
+$with Map {"VisualModel" = "VisualModel2", "CatalogModel" = "CatalogModel2", "ExpectedVisualModel" = "ExpectedVisualModel2"}
+$with Map {"VisualModel" = "VisualModel3", "CatalogModel" = "CatalogModel3", "ExpectedVisualModel" = "ExpectedVisualModel3"}
+$with Map {"VisualModel" = "VisualModel4", "CatalogModel" = "CatalogModel4", "ExpectedVisualModel" = "ExpectedVisualModel4"}
+@test
+operation testGenerateExpectedSizes() {
+	runTarget("RunGenerateExpectedSizes");
+	assertEqualModels("VisualModel", "ExpectedVisualModel");
+}

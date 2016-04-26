@@ -1,0 +1,68 @@
+/*
+This file defines an operation that will generate the minimal/maximal (in terms of cost) explicit decomposition queried
+from a decomposition model (in this case, the DecompositionClass2Relational.xmi).
+
+The general algorithm is as follows:
+1. Find the operator that was first decomposed in the decomposition model.
+2. Locate the same operator in the transformation.
+3. In the decomposition, search for the operand that yeilds the lowest cost.
+3. Locate the same operand in the transformation.
+4. Decompose the operator with that chosen operand.
+5. Repeat steps 1-4 recursively for the resulting transformation.
+6. The recursion ends when there is no more operators left to decompose in the decomposition model. 
+This should also coincide with the fact that no more operators to decompose will be left in the transformation.
+*/
+import "./DecompositionOperations.eol";
+
+var trace = true;
+
+var trnetmodel = TrNetModel!TrNetModel.all.first;
+
+var rootDecompositionProcess = Decomposition!Decomposition.all.first;
+
+recGenerateExplicitDecomposition(rootDecompositionProcess.op, trnetmodel, "");
+
+operation recGenerateExplicitDecomposition(operatorToBeDecomposed, trnetmodel, callIdent){
+	(callIdent + ">recGenerateExplicitDecomposition(" + operatorToBeDecomposed.id + ")").println();
+	
+	var operator = trnetmodel.operators.selectOne(op| op.id == operatorToBeDecomposed.id);
+	assert(operator.isDefined(), "Operator "+operatorToBeDecomposed.id+" not found in the transformation.");
+	
+	assert(operator.operands.size() > 2, "Unexpected binary operator to be decomposed: " + operator.id);
+	
+	var selectedOperandToBeUsedToSplit = operatorToBeDecomposed.splits.first;
+	for (operandToBeUsedToSplit in operatorToBeDecomposed.splits) { 
+		if (operandToBeUsedToSplit.maxCost > selectedOperandToBeUsedToSplit.maxCost){
+			selectedOperandToBeUsedToSplit = operandToBeUsedToSplit;
+		}
+	}
+	
+	printTrace(callIdent, "Operand selected: " + selectedOperandToBeUsedToSplit.id);
+	printTrace(callIdent, "With cost: " + selectedOperandToBeUsedToSplit.maxCost);
+	
+	
+	var splitOperand = operator.operands.collect(operand| operand.pattern)
+						.select(pattern|pattern.id == selectedOperandToBeUsedToSplit.id).first;
+	
+	assert(splitOperand.isDefined(), "Operand "+selectedOperandToBeUsedToSplit.id+" not found in the transformation.");
+	
+	decomposeOperatorBySplitID(operator, splitOperand.id, trnetmodel, callIdent);
+	
+	if (selectedOperandToBeUsedToSplit.op.isDefined()){
+		// Continue recursively:
+		recGenerateExplicitDecomposition(selectedOperandToBeUsedToSplit.op, trnetmodel, callIdent + " ");
+	} else {
+		// base case reached.
+		printTrace(callIdent, "Base case reached.");
+	}
+	
+	(callIdent + "<recGenerateExplicitDecomposition(" + operatorToBeDecomposed.id + ")").println();
+}
+
+
+
+operation printTrace(callIdent, msg){
+	if (trace){
+		(callIdent + msg).println();
+	}
+}

@@ -1,0 +1,123 @@
+import "Utils.eol";
+
+
+operation getRootEClass(){
+	("Searching for root EClass in metamodel... ").println();
+	
+	var rootClass = null;
+	
+	var possibleCandidates = Metamodel!EClass.all.reject(eclass | eclass.abstract).reject(eclass | isContainedBySomeOtherClass(eclass)).reject(eclass | hasSuperClassContainedBySomeClass(eclass));
+	
+	("possibleCandidates ("+possibleCandidates.size()+"): " + possibleCandidates).println();
+	
+	if (possibleCandidates.size() == 1) {
+		// no need for the big guns.
+		rootClass = possibleCandidates.first;
+	} else {
+		var rootClasses = possibleCandidates.select(eclass | isSubTypeOfSomeECLass(eclass, possibleCandidates) and (not hasSubTypesOfSomeEClass(eclass, possibleCandidates)));
+		
+		("rootClasses ("+rootClasses.size()+"): " + rootClasses).println();
+		
+		if (rootClasses.size<>1) {
+			throw "Invalid metamodel";
+		}
+		
+		rootClass = rootClasses.first;
+	}
+	
+	("Searching for root EClass in metamodel... DONE").println();
+	return rootClass;
+}
+
+operation getRootEcorePackageJava() {
+	return getRootEcorePackage().name;
+}
+
+operation getRootEcorePackage() {
+	// For now we do this. Models with multiple packages will result in problems.
+	return Metamodel!EPackage.all.first;
+}
+
+
+operation getAllSuperTypes(eclass) {
+	var result = new Set;
+	for (superType in eclass.eSuperTypes) {
+		result.addAll(getAllSuperTypes(superType));
+	}
+	result.add(eclass);
+	return result;
+}
+
+operation isSubTypeOfSomeECLass(eclass, possibleCandidates) {
+	for (superType in getAllSuperTypes(eclass)) {
+		if (superType <> eclass and possibleCandidates.includes(superType)) {
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+operation isContainedBySomeOtherClass(eclass){
+	return Metamodel!EClass.all.exists(class | eclass <> class and contains(class, eclass));
+}
+
+operation hasSuperClassContainedBySomeClass(eclass) {
+	for (superClass in eclass.eSuperTypes) {
+		if (isContainedBySomeOtherClass(superClass)) {
+			return true;
+		}
+		if (hasSuperClassContainedBySomeClass(superClass)) {
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+operation contains(class, eclass){
+	return getContainedClasses(class).exists(c: Metamodel!EClass | c = eclass);
+}
+
+operation getContainmentReferences(eclass) {
+	return eclass.eStructuralFeatures.select(ref: Metamodel!EReference | ref.containment);
+}
+
+operation getReferencesEClass(eclass) {
+	return eclass.eStructuralFeatures.select(ref: Metamodel!EReference | true);
+}
+
+operation getContainedClasses(eclass){
+	return getContainmentReferences(eclass).collect(ref: Metamodel!EReference | ref.eType);
+}
+
+operation isSubTypeOf(sclass, eclass) {
+	if (sameEClasses(sclass, eclass)) {
+		return true; // WE consider that an element is a subtype of itself.
+	} else if (sclass.eSuperTypes.includes(eclass)) {
+		//("sclass direct: " + sclass).println();
+		//("eclass direct: " + eclass).println();
+		return true;
+	} else {
+		//("sclass transitive: " + sclass).println();
+		//("eclass transitive: " + eclass).println();
+		return sclass.eSuperTypes.exists(ssclass | isSubTypeOf(ssclass, eclass));
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

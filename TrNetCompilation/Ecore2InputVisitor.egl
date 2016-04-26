@@ -1,0 +1,42 @@
+[%
+
+var outputDir = ".";
+
+var srcGenDir = outputDir + "/" + "src-gen";
+
+srcGenDir.println();
+
+generateInputVisitorClass(srcGenDir);
+
+operation generateInputVisitorClass(srcGenDir){
+	var classDir = srcGenDir + "/" + getInputVisitorPackage();
+	
+	var templateVisitor = TemplateFactory.load("GenerateInputVisitor.egl");
+	
+	templateVisitor.generate(classDir + "/" + getJavaClassNameInputVisitor());
+}
+
+
+
+operation getInputVisitorPackage(){
+	return getRootEcorePackageJava() + "_visitor";
+}
+
+operation getRootEcorePackageJava() {
+	return getRootEcorePackage().name;
+}
+
+operation getRootEcorePackage() {
+	// For now we do this. Models with multiple packages will result in problems.
+	return InputMetamodel!EPackage.all.first;
+}
+
+operation getClassNameInputVisitor() {
+	return getRootEcorePackage().name.toLowerCase().firstToUpperCase() + "InputVisitor";
+}
+
+operation getJavaClassNameInputVisitor() {
+	return getClassNameInputVisitor() + ".java";
+}
+
+%]

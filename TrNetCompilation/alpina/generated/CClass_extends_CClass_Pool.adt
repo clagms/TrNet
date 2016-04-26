@@ -1,0 +1,35 @@
+import "boolean.adt"
+	import "CClass.adt"
+
+Adt CClass_extends_CClass_Pool
+	Sorts CClass_extends_CClass_Pool;
+	Generators
+		newCClass_extends_CClass_Pool: CClass,CClass -> CClass_extends_CClass_Pool;
+	MarkOpOpDecision: CClass_extends_CClass_Pool -> CClass_extends_CClass_Pool;
+	MarkOpOpIn: CClass_extends_CClass_Pool -> CClass_extends_CClass_Pool;
+	Operations
+	getCClass0: CClass_extends_CClass_Pool -> CClass;
+	getCClass1: CClass_extends_CClass_Pool -> CClass;
+	isMarkedOpDecision: CClass_extends_CClass_Pool -> bool;
+	isMarkedOpIn: CClass_extends_CClass_Pool -> bool;
+	Axioms
+	
+	getCClass0(newCClass_extends_CClass_Pool($CClass0Var,$CClass1Var)) = $CClass0Var;
+		getCClass0(MarkOpOpDecision($CClass_extends_CClass_PoolVar)) = getCClass0($CClass_extends_CClass_PoolVar);
+		getCClass0(MarkOpOpIn($CClass_extends_CClass_PoolVar)) = getCClass0($CClass_extends_CClass_PoolVar);
+	
+	getCClass1(newCClass_extends_CClass_Pool($CClass0Var,$CClass1Var)) = $CClass1Var;
+		getCClass1(MarkOpOpDecision($CClass_extends_CClass_PoolVar)) = getCClass1($CClass_extends_CClass_PoolVar);
+		getCClass1(MarkOpOpIn($CClass_extends_CClass_PoolVar)) = getCClass1($CClass_extends_CClass_PoolVar);
+	
+	isMarkedOpDecision(newCClass_extends_CClass_Pool($CClass0Var,$CClass1Var)) = false;
+	isMarkedOpDecision(MarkOpOpDecision($CClass_extends_CClass_PoolVar)) = true;
+			isMarkedOpDecision(MarkOpOpIn($CClass_extends_CClass_PoolVar)) = isMarkedOpDecision($CClass_extends_CClass_PoolVar);
+	
+	isMarkedOpIn(newCClass_extends_CClass_Pool($CClass0Var,$CClass1Var)) = false;
+	isMarkedOpIn(MarkOpOpIn($CClass_extends_CClass_PoolVar)) = true;
+			isMarkedOpIn(MarkOpOpDecision($CClass_extends_CClass_PoolVar)) = isMarkedOpIn($CClass_extends_CClass_PoolVar);
+	Variables
+		CClass_extends_CClass_PoolVar : CClass_extends_CClass_Pool;
+			CClass0Var : CClass;
+			CClass1Var : CClass;

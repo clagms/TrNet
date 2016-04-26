@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<trnetvisual:TrNetModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:trnetvisual="http://trnetvisual/1.0" id="Class2ClassAttributes">
+  <patterns incomingResults="//@results.0" id="P1" expected_size="5.0">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.0/@edges.0 //@patterns.0/@edges.1" name="N1" id="N1" expectedNumberOfDistinctValues="1.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.0/@edges.0 //@patterns.0/@edges.1" name="N2" id="N2" expectedNumberOfDistinctValues="5.0"/>
+    <edges source="//@patterns.0/@nodes.0" target="//@patterns.0/@nodes.1" name="e1"/>
+    <edges source="//@patterns.0/@nodes.0" target="//@patterns.0/@nodes.1" name="e2"/>
+  </patterns>
+  <patterns incomingResults="//@results.1 //@results.2 //@results.4" id="P2" expected_size="5.0">
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.1/@edges.1" outgoing="//@patterns.1/@edges.0" name="N1" id="N1" expectedNumberOfDistinctValues="1.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.1/@edges.0" outgoing="//@patterns.1/@edges.1" name="N2" id="N2" expectedNumberOfDistinctValues="5.0"/>
+    <edges source="//@patterns.1/@nodes.0" target="//@patterns.1/@nodes.1" name="e1"/>
+    <edges source="//@patterns.1/@nodes.1" target="//@patterns.1/@nodes.0" name="e2"/>
+  </patterns>
+  <patterns incomingResults="//@results.3 //@results.5" id="P3" expected_size="5.0">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.2/@edges.0" name="N1" id="N1" expectedNumberOfDistinctValues="1.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.2/@edges.0 //@patterns.2/@edges.1" name="N2" id="N2" expectedNumberOfDistinctValues="5.0">
+      <attributes name="name"/>
+    </nodes>
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.2/@edges.1" name="N1" id="N1_2" expectedNumberOfDistinctValues="1.0"/>
+    <edges source="//@patterns.2/@nodes.0" target="//@patterns.2/@nodes.1" name="e1"/>
+    <edges source="//@patterns.2/@nodes.2" target="//@patterns.2/@nodes.1" name="e1"/>
+  </patterns>
+  <patterns id="P4" expected_size="5.0">
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.3/@edges.3" outgoing="//@patterns.3/@edges.0" name="N1" id="N1" expectedNumberOfDistinctValues="1.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.3/@edges.0 //@patterns.3/@edges.1" name="N2" id="N2" expectedNumberOfDistinctValues="5.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.3/@edges.1 //@patterns.3/@edges.2" name="N1" id="N1_2" expectedNumberOfDistinctValues="1.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.3/@edges.2" outgoing="//@patterns.3/@edges.3" name="N2" id="N2_2" expectedNumberOfDistinctValues="5.0"/>
+    <edges source="//@patterns.3/@nodes.0" target="//@patterns.3/@nodes.1" name="e1"/>
+    <edges source="//@patterns.3/@nodes.2" target="//@patterns.3/@nodes.1" name="e1"/>
+    <edges source="//@patterns.3/@nodes.2" target="//@patterns.3/@nodes.3" name="e2"/>
+    <edges source="//@patterns.3/@nodes.3" target="//@patterns.3/@nodes.0" name="e2"/>
+  </patterns>
+  <patterns incomingResults="//@results.6" id="P5" expected_size="5.0">
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.4/@edges.0" outgoing="//@patterns.4/@edges.3" name="N1" id="N1" expectedNumberOfDistinctValues="1.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.4/@edges.0 //@patterns.4/@edges.1" name="N2" id="N2" expectedNumberOfDistinctValues="5.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.4/@edges.1 //@patterns.4/@edges.2" name="N1" id="N1_2" expectedNumberOfDistinctValues="1.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.4/@edges.3" outgoing="//@patterns.4/@edges.2" name="N2" id="N2_2" expectedNumberOfDistinctValues="5.0"/>
+    <edges source="//@patterns.4/@nodes.1" target="//@patterns.4/@nodes.0" name="e1"/>
+    <edges source="//@patterns.4/@nodes.1" target="//@patterns.4/@nodes.2" name="e1"/>
+    <edges source="//@patterns.4/@nodes.3" target="//@patterns.4/@nodes.2" name="e2"/>
+    <edges source="//@patterns.4/@nodes.0" target="//@patterns.4/@nodes.3" name="e2"/>
+  </patterns>
+  <patterns incomingResults="//@results.7" id="P6" expected_size="5.0">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.5/@edges.0" name="N1" id="N1" expectedNumberOfDistinctValues="1.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.5/@edges.0 //@patterns.5/@edges.1" name="N2" id="N2" expectedNumberOfDistinctValues="5.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.5/@edges.1" name="N3" id="N1_2" expectedNumberOfDistinctValues="1.0"/>
+    <edges source="//@patterns.5/@nodes.0" target="//@patterns.5/@nodes.1" name="e1"/>
+    <edges source="//@patterns.5/@nodes.2" target="//@patterns.5/@nodes.1" name="e1"/>
+  </patterns>
+  <patterns incomingResults="//@results.10 //@results.11 //@results.12" id="P2d" expected_size="5.0">
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.6/@edges.1" outgoing="//@patterns.6/@edges.0" name="N1" id="N1" expectedNumberOfDistinctValues="1.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.6/@edges.0" outgoing="//@patterns.6/@edges.1" name="N2" id="N2" expectedNumberOfDistinctValues="5.0"/>
+    <edges source="//@patterns.6/@nodes.0" target="//@patterns.6/@nodes.1" name="e1"/>
+    <edges source="//@patterns.6/@nodes.1" target="//@patterns.6/@nodes.0" name="e2"/>
+  </patterns>
+  <patterns incomingResults="//@results.15" id="P6d" expected_size="5.0">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.7/@edges.0" name="N1" id="N1" expectedNumberOfDistinctValues="1.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.7/@edges.0 //@patterns.7/@edges.1" name="N2" id="N2" expectedNumberOfDistinctValues="5.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.7/@edges.1" name="N3" id="N1_2" expectedNumberOfDistinctValues="1.0"/>
+    <edges source="//@patterns.7/@nodes.0" target="//@patterns.7/@nodes.1" name="e1"/>
+    <edges source="//@patterns.7/@nodes.2" target="//@patterns.7/@nodes.1" name="e1"/>
+  </patterns>
+  <patterns id="P4d" expected_size="5.0">
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.8/@edges.3" outgoing="//@patterns.8/@edges.0" name="N1" id="N1" expectedNumberOfDistinctValues="1.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.8/@edges.0 //@patterns.8/@edges.1" name="N2" id="N2" expectedNumberOfDistinctValues="5.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.8/@edges.1 //@patterns.8/@edges.2" name="N1" id="N1_2" expectedNumberOfDistinctValues="1.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.8/@edges.2" outgoing="//@patterns.8/@edges.3" name="N2" id="N2_2" expectedNumberOfDistinctValues="5.0"/>
+    <edges source="//@patterns.8/@nodes.0" target="//@patterns.8/@nodes.1" name="e1"/>
+    <edges source="//@patterns.8/@nodes.2" target="//@patterns.8/@nodes.1" name="e1"/>
+    <edges source="//@patterns.8/@nodes.2" target="//@patterns.8/@nodes.3" name="e2"/>
+    <edges source="//@patterns.8/@nodes.3" target="//@patterns.8/@nodes.0" name="e2"/>
+  </patterns>
+  <patterns incomingResults="//@results.14" id="P5d" expected_size="5.0">
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.9/@edges.0" outgoing="//@patterns.9/@edges.3" name="N1" id="N1" expectedNumberOfDistinctValues="1.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.9/@edges.0 //@patterns.9/@edges.1" name="N2" id="N2" expectedNumberOfDistinctValues="5.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.9/@edges.1 //@patterns.9/@edges.2" name="N1" id="N1_2" expectedNumberOfDistinctValues="1.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.9/@edges.3" outgoing="//@patterns.9/@edges.2" name="N2" id="N2_2" expectedNumberOfDistinctValues="5.0"/>
+    <edges source="//@patterns.9/@nodes.1" target="//@patterns.9/@nodes.0" name="e1"/>
+    <edges source="//@patterns.9/@nodes.1" target="//@patterns.9/@nodes.2" name="e1"/>
+    <edges source="//@patterns.9/@nodes.3" target="//@patterns.9/@nodes.2" name="e2"/>
+    <edges source="//@patterns.9/@nodes.0" target="//@patterns.9/@nodes.3" name="e2"/>
+  </patterns>
+  <patterns incomingResults="//@results.13" id="P3d" expected_size="5.0">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.10/@edges.0" name="N1" id="N1" expectedNumberOfDistinctValues="1.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.10/@edges.0 //@patterns.10/@edges.1" name="N2" id="N2" expectedNumberOfDistinctValues="5.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.10/@edges.1" name="N1" id="N1_2" expectedNumberOfDistinctValues="1.0"/>
+    <edges source="//@patterns.10/@nodes.0" target="//@patterns.10/@nodes.1" name="e1"/>
+    <edges source="//@patterns.10/@nodes.2" target="//@patterns.10/@nodes.1" name="e1"/>
+  </patterns>
+  <patterns incomingResults="//@results.8 //@results.9" id="P1d" expected_size="5.0">
+    <nodes xsi:type="trnetvisual:MandatoryNode" outgoing="//@patterns.11/@edges.0 //@patterns.11/@edges.1" name="N1" id="N1" expectedNumberOfDistinctValues="1.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" incoming="//@patterns.11/@edges.0 //@patterns.11/@edges.1" name="N2" id="N2" expectedNumberOfDistinctValues="5.0"/>
+    <edges source="//@patterns.11/@nodes.0" target="//@patterns.11/@nodes.1" name="e1"/>
+    <edges source="//@patterns.11/@nodes.0" target="//@patterns.11/@nodes.1" name="e2"/>
+  </patterns>
+  <patterns outgoingOperands="//@operands.0 //@operands.1" id="P7" expected_size="5.0">
+    <nodes xsi:type="trnetvisual:MandatoryNode" externalConditionCallRef="//@operators.0/@conditions.0/@parameters.0 //@operators.3/@conditions.0/@parameters.1 //@operators.3/@conditions.1/@parameters.0" externalActionCallRef="//@operators.0/@actions.0/@parameters.0 //@operators.3/@actions.0/@parameters.0 //@operators.3/@actions.1/@parameters.0" outgoing="//@patterns.12/@edges.0" name="N1" id="N1" expectedNumberOfDistinctValues="1.0"/>
+    <nodes xsi:type="trnetvisual:MandatoryNode" externalConditionCallRef="//@operators.3/@conditions.0/@parameters.2 //@operators.1/@conditions.2/@parameters.1 //@operators.5/@conditions.2/@parameters.1" externalActionCallRef="//@operators.1/@actions.2/@parameters.1 //@operators.3/@actions.0/@parameters.2 //@operators.5/@actions.2/@parameters.1" incoming="//@patterns.12/@edges.0 //@patterns.12/@edges.1" name="N2" id="N2" expectedNumberOfDistinctValues="5.0">
+      <attributes externalConditionCallRef="//@operators.0/@conditions.1/@parameters.0 //@operators.1/@conditions.1/@parameters.0 //@operators.3/@conditions.0/@parameters.0 //@operators.1/@conditions.2/@parameters.0 //@operators.5/@conditions.1/@parameters.0 //@operators.5/@conditions.2/@parameters.0" externalActionCallRef="//@operators.0/@actions.1/@parameters.0 //@operators.1/@actions.1/@parameters.0 //@operators.1/@actions.2/@parameters.0 //@operators.3/@actions.0/@parameters.1 //@operators.5/@actions.1/@parameters.0 //@operators.5/@actions.2/@parameters.0" name="name"/>
+    </nodes>
+    <nodes xsi:type="trnetvisual:MandatoryNode" externalConditionCallRef="//@operators.1/@conditions.0/@parameters.0 //@operators.5/@conditions.0/@parameters.0" externalActionCallRef="//@operators.1/@actions.0/@parameters.0 //@operators.5/@actions.0/@parameters.0" outgoing="//@patterns.12/@edges.1" name="N1" id="N1_2" expectedNumberOfDistinctValues="1.0"/>
+    <edges source="//@patterns.12/@nodes.0" target="//@patterns.12/@nodes.1" name="e1"/>
+    <edges source="//@patterns.12/@nodes.2" target="//@patterns.12/@nodes.1" name="e1"/>
+  </patterns>
+  <operators xsi:type="trnetvisual:Combinator" results="//@results.0 //@results.1 //@results.8 //@results.10" id="Op1">
+    <conditions xsi:type="trnetvisual:ExternalConditionCall" id="cond1" qualifiedName="qualfied1">
+      <parameters parameter="//@patterns.12/@nodes.0"/>
+    </conditions>
+    <conditions xsi:type="trnetvisual:ExternalConditionCall" id="cond2" qualifiedName="qualfied2">
+      <parameters parameter="//@patterns.12/@nodes.1/@attributes.0"/>
+    </conditions>
+    <actions xsi:type="trnetvisual:ExternalActionCall" id="act1" qualifiedName="qualfied1">
+      <parameters parameter="//@patterns.12/@nodes.0"/>
+    </actions>
+    <actions xsi:type="trnetvisual:ExternalActionCall" id="act2" qualifiedName="qualfied2">
+      <parameters parameter="//@patterns.12/@nodes.1/@attributes.0"/>
+    </actions>
+  </operators>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.1" results="//@results.2 //@results.9 //@results.11" id="Op2">
+    <conditions xsi:type="trnetvisual:ExternalConditionCall" id="cond3" qualifiedName="qualfied1">
+      <parameters parameter="//@patterns.12/@nodes.2"/>
+    </conditions>
+    <conditions xsi:type="trnetvisual:ExternalConditionCall" id="cond4" qualifiedName="qualified2">
+      <parameters parameter="//@patterns.12/@nodes.1/@attributes.0"/>
+    </conditions>
+    <conditions xsi:type="trnetvisual:ExternalConditionCall" id="cond7" qualifiedName="qualfied1">
+      <parameters index="1" parameter="//@patterns.12/@nodes.1/@attributes.0"/>
+      <parameters parameter="//@patterns.12/@nodes.1"/>
+    </conditions>
+    <actions xsi:type="trnetvisual:ExternalActionCall" id="act3" qualifiedName="qualfied1">
+      <parameters parameter="//@patterns.12/@nodes.2"/>
+    </actions>
+    <actions xsi:type="trnetvisual:ExternalActionCall" id="act4" qualifiedName="qualified2">
+      <parameters parameter="//@patterns.12/@nodes.1/@attributes.0"/>
+    </actions>
+    <actions xsi:type="trnetvisual:ExternalActionCall" id="act7" qualifiedName="qualfied1">
+      <parameters index="1" parameter="//@patterns.12/@nodes.1/@attributes.0"/>
+      <parameters parameter="//@patterns.12/@nodes.1"/>
+    </actions>
+  </operators>
+  <operators xsi:type="trnetvisual:Combinator" results="//@results.5 //@results.6 //@results.13 //@results.14 //@results.15" id="Op4"/>
+  <operators xsi:type="trnetvisual:Combinator" results="//@results.3 //@results.4 //@results.12" id="Op3">
+    <conditions xsi:type="trnetvisual:ExternalConditionCall" id="cond5" qualifiedName="qualfied1">
+      <parameters parameter="//@patterns.12/@nodes.1/@attributes.0"/>
+      <parameters index="1" parameter="//@patterns.12/@nodes.0"/>
+      <parameters index="1" parameter="//@patterns.12/@nodes.1"/>
+    </conditions>
+    <conditions xsi:type="trnetvisual:ExternalConditionCall" id="cond6" qualifiedName="qualfied1">
+      <parameters parameter="//@patterns.12/@nodes.0"/>
+    </conditions>
+    <actions xsi:type="trnetvisual:ExternalActionCall" id="act5" qualifiedName="qualfied1">
+      <parameters index="1" parameter="//@patterns.12/@nodes.0"/>
+      <parameters parameter="//@patterns.12/@nodes.1/@attributes.0"/>
+      <parameters index="1" parameter="//@patterns.12/@nodes.1"/>
+    </actions>
+    <actions xsi:type="trnetvisual:ExternalActionCall" id="act6" qualifiedName="qualfied1">
+      <parameters parameter="//@patterns.12/@nodes.0"/>
+    </actions>
+  </operators>
+  <operators xsi:type="trnetvisual:Combinator" results="//@results.7" id="Op5"/>
+  <operators xsi:type="trnetvisual:Combinator" operands="//@operands.0" id="Op2d">
+    <conditions xsi:type="trnetvisual:ExternalConditionCall" id="cond3" qualifiedName="qualfied1">
+      <parameters parameter="//@patterns.12/@nodes.2"/>
+    </conditions>
+    <conditions xsi:type="trnetvisual:ExternalConditionCall" id="cond4" qualifiedName="qualified2">
+      <parameters parameter="//@patterns.12/@nodes.1/@attributes.0"/>
+    </conditions>
+    <conditions xsi:type="trnetvisual:ExternalConditionCall" id="cond7" qualifiedName="qualfied1">
+      <parameters index="1" parameter="//@patterns.12/@nodes.1/@attributes.0"/>
+      <parameters parameter="//@patterns.12/@nodes.1"/>
+    </conditions>
+    <actions xsi:type="trnetvisual:ExternalActionCall" id="act3" qualifiedName="qualfied1">
+      <parameters parameter="//@patterns.12/@nodes.2"/>
+    </actions>
+    <actions xsi:type="trnetvisual:ExternalActionCall" id="act4" qualifiedName="qualified2">
+      <parameters parameter="//@patterns.12/@nodes.1/@attributes.0"/>
+    </actions>
+    <actions xsi:type="trnetvisual:ExternalActionCall" id="act7" qualifiedName="qualfied1">
+      <parameters index="1" parameter="//@patterns.12/@nodes.1/@attributes.0"/>
+      <parameters parameter="//@patterns.12/@nodes.1"/>
+    </actions>
+  </operators>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.5" pattern="//@patterns.12"/>
+  <operands xsi:type="trnetvisual:AnyOperand" operator="//@operators.1" pattern="//@patterns.12"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.0" operator="//@operators.0"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.1" operator="//@operators.0"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.1" operator="//@operators.1"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.2" operator="//@operators.3"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.1" operator="//@operators.3"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.2" operator="//@operators.2"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.4" operator="//@operators.2"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.5" operator="//@operators.4"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.11" operator="//@operators.0"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.11" operator="//@operators.1"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.6" operator="//@operators.0"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.6" operator="//@operators.1"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.6" operator="//@operators.3"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.10" operator="//@operators.2"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.9" operator="//@operators.2"/>
+  <results xsi:type="trnetvisual:AnyResult" pattern="//@patterns.7" operator="//@operators.2"/>
+</trnetvisual:TrNetModel>

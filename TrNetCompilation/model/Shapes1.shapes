@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shapes:Circle xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:shapes="http://shapes/1.0" id="c4">
+  <squares id="s1">
+    <squares id="s5">
+      <squares id="s6" pentagons="//@pentagons.0"/>
+    </squares>
+    <triangles id="t2"/>
+    <triangles id="t7"/>
+  </squares>
+  <pentagons id="p3"/>
+</shapes:Circle>

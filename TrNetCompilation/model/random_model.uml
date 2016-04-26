@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<minuml1:ActivityGraph xmi:version="20110701" xmlns:xmi="http://www.omg.org/spec/XMI/20110701" xmlns:minuml1="minuml1" xmi:id="_7iwLELs5EeKTkIOwiuarQg" name="graph">
+  <top xmi:type="minuml1:CompositeState" xmi:id="_7iwLEbs5EeKTkIOwiuarQg" name="random5">
+    <subvertex xmi:type="minuml1:Pseudostate" xmi:id="_7iwLErs5EeKTkIOwiuarQg" name="random4" outgoing="_7iwLHrs5EeKTkIOwiuarQg" incoming="_7iwLHrs5EeKTkIOwiuarQg" kind="fork"/>
+    <subvertex xmi:type="minuml1:Pseudostate" xmi:id="_7iwLE7s5EeKTkIOwiuarQg" name="random3" incoming="_7iwLFrs5EeKTkIOwiuarQg" kind="join"/>
+    <subvertex xmi:type="minuml1:Pseudostate" xmi:id="_7iwLFLs5EeKTkIOwiuarQg" name="random2" outgoing="_7iwLGbs5EeKTkIOwiuarQg _7iwLGrs5EeKTkIOwiuarQg" kind="join"/>
+    <subvertex xmi:type="minuml1:Pseudostate" xmi:id="_7iwLFbs5EeKTkIOwiuarQg" name="random1" outgoing="_7iwLFrs5EeKTkIOwiuarQg _7iwLG7s5EeKTkIOwiuarQg" incoming="_7iwLGbs5EeKTkIOwiuarQg _7iwLGrs5EeKTkIOwiuarQg _7iwLG7s5EeKTkIOwiuarQg" kind="fork"/>
+  </top>
+  <transitions xmi:id="_7iwLFrs5EeKTkIOwiuarQg" source="_7iwLFbs5EeKTkIOwiuarQg" target="_7iwLE7s5EeKTkIOwiuarQg">
+    <guard xmi:id="_7iwLF7s5EeKTkIOwiuarQg">
+      <expression xmi:id="_7iwLGLs5EeKTkIOwiuarQg" body="random5"/>
+    </guard>
+  </transitions>
+  <transitions xmi:id="_7iwLGbs5EeKTkIOwiuarQg" source="_7iwLFLs5EeKTkIOwiuarQg" target="_7iwLFbs5EeKTkIOwiuarQg"/>
+  <transitions xmi:id="_7iwLGrs5EeKTkIOwiuarQg" source="_7iwLFLs5EeKTkIOwiuarQg" target="_7iwLFbs5EeKTkIOwiuarQg"/>
+  <transitions xmi:id="_7iwLG7s5EeKTkIOwiuarQg" source="_7iwLFbs5EeKTkIOwiuarQg" target="_7iwLFbs5EeKTkIOwiuarQg">
+    <guard xmi:id="_7iwLHLs5EeKTkIOwiuarQg">
+      <expression xmi:id="_7iwLHbs5EeKTkIOwiuarQg" body="random2"/>
+    </guard>
+  </transitions>
+  <transitions xmi:id="_7iwLHrs5EeKTkIOwiuarQg" source="_7iwLErs5EeKTkIOwiuarQg" target="_7iwLErs5EeKTkIOwiuarQg">
+    <guard xmi:id="_7iwLH7s5EeKTkIOwiuarQg">
+      <expression xmi:id="_7iwLILs5EeKTkIOwiuarQg" body="random1"/>
+    </guard>
+  </transitions>
+  <partition xmi:id="_7iwLIbs5EeKTkIOwiuarQg" name="random1" contents="_7iwLErs5EeKTkIOwiuarQg _7iwLE7s5EeKTkIOwiuarQg _7iwLFLs5EeKTkIOwiuarQg _7iwLFbs5EeKTkIOwiuarQg"/>
+</minuml1:ActivityGraph>

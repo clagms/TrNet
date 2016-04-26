@@ -1,0 +1,13 @@
+import "../Utils.eol";
+
+("Setting all minCost to -1...").println();
+	
+for (split in Decomposition!Split.all) { 
+	split.minCost = -1.0d;
+}
+
+for (op in Decomposition!DecomposeOp.all) { 
+	op.min = null;
+}
+
+("Setting all minCost to -1... DONE").println();

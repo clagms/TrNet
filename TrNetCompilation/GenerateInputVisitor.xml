@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="CompileTrNet" default="main" basedir=".">
+
+	<target name="main">
+
+		<epsilon.emf.loadModel name="InputMetamodel" 
+			aliases="Metamodel" 
+			modelfile="model/Classes.ecore" 
+			metamodeluri="http://www.eclipse.org/emf/2002/Ecore" 
+			read="true" 
+			store="false" />
+		
+		<!-- Generate Input Visitor Code -->
+		<epsilon.egl src="Ecore2InputVisitor.egl">
+			<model ref="InputMetamodel" />
+		</epsilon.egl>
+
+	</target>
+
+</project>

@@ -1,0 +1,147 @@
+import "../Utils.eol";
+import "../TrNetManipulationUtils.eol";
+
+var traceEdge = "trace";
+
+"Completing Apply Patterns...".println();
+
+var trnetmodel = TrNetModel!TrNetModel.all.first;
+
+// pick a pattern that is not atomic and is connected to the output operator
+var applyPatternsToBeProjected = 
+	getAllOutputPatternsSet()
+		.reject(atomicPattern|isAtomic(atomicPattern))
+		.reject(pattern|isProjected(pattern));
+
+if (applyPatternsToBeProjected.isEmpty()){
+	"All apply patterns Projected...".println();
+} else {
+	("Apply patterns to be Projected: " + 
+			applyPatternsToBeProjected.size()).println();
+	
+	var applyPatternToBeProjected = applyPatternsToBeProjected.first;
+	
+	("Apply pattern to be Projected: " + 
+				applyPatternToBeProjected.id).println();
+				
+	// Iterate all atomic patterns
+	// there will be 1 per each node and 1 per each edge.
+	// we reject those nodes that are already projected.
+	for (node in applyPatternToBeProjected.nodes.
+				  reject(n|isNodeProjected(applyPatternToBeProjected, n))) {
+		
+		
+		// check if there is already an atomic pattern 
+		// for this node connected to the output operator
+		var candidateAtomicPatterns = 
+				getCandidateAtomicPatternDecomposeFromNode(applyPatternToBeProjected,node);
+		
+		("Candidate atomic patterns for " + node.name + ": " +  
+				candidateAtomicPatterns.collect(pat|pat.id).concat(",")).println();
+		
+		if (not candidateAtomicPatterns.isEmpty()){
+			
+			var candidateAtomicPattern = candidateAtomicPatterns.first;
+			
+			("Connecting pattern " + applyPatternToBeProjected.id + 
+				" to existing pattern " + candidateAtomicPattern.id).println();
+			
+			// create an operator to send these results to that pattern
+			// create the necessary keeps between the nodes
+			
+			var combinator = 
+				createConnectionPatternPattern(applyPatternToBeProjected, 
+										candidateAtomicPattern, trnetmodel);
+			
+			connectByKeepRestriction(node, candidateAtomicPattern.nodes.first, trnetmodel);
+			
+		} else {
+			// create a new atomic pattern with this node only
+			// create an operator to send these results to that pattern.
+			
+			("Connecting pattern " + applyPatternToBeProjected.id + 
+				" to a new pattern with node " + node.name).println();
+			
+			
+			var atomicPattern = createPattern(trnetmodel);
+			var atomicNode = copyNode(node);
+			atomicPattern.nodes.add(atomicNode);
+			
+			var combinator = 
+				createConnectionPatternPattern(applyPatternToBeProjected, 
+										atomicPattern, trnetmodel);
+			
+			connectByKeepRestriction(node, atomicNode, trnetmodel);
+			
+			// and connect the new pattern to the external operator.
+			if (getAllExternalOutputOperators().size()>1){
+				throw "Unsuported.";
+			}
+			var outputOperator = getAllExternalOutputOperators().first; // we assume there is only one.
+			addAsAnyOperand(outputOperator, atomicPattern, trnetmodel);
+			
+		}
+	}
+	
+	// now do the same thing for edges
+	for (edge in applyPatternToBeProjected.edges
+				 .reject(e|isEdgeProjected(applyPatternToBeProjected, e))) {
+		// check if there is already an atomic pattern 
+		// for this edge connected to the output operator
+		var candidateAtomicPatterns = 
+				getCandidateAtomicPatternDecomposeFromEdge(applyPatternToBeProjected, edge);
+		
+		("Candidate atomic patterns for " + edge.name + ": " +  
+				candidateAtomicPatterns.collect(pat|pat.id).concat(",")).println();
+		
+		if (not candidateAtomicPatterns.isEmpty()){
+			// create an operator to send these results to that pattern
+			// create the necessary keeps between the nodes
+			
+			var candidateAtomicPattern = candidateAtomicPatterns.first;
+			
+			("Connecting pattern " + applyPatternToBeProjected.id + 
+				" to existing pattern " + candidateAtomicPattern.id).println();
+			
+			// create an operator to send these results to that pattern
+			// create the necessary keeps between the nodes
+			
+			var combinator = 
+				createConnectionPatternPattern(applyPatternToBeProjected, 
+										candidateAtomicPattern, trnetmodel);
+			
+			connectByKeepRestriction(edge.source, candidateAtomicPattern.edges.first.source, trnetmodel);
+			connectByKeepRestriction(edge.target, candidateAtomicPattern.edges.first.target, trnetmodel);
+			
+		} else {
+			// create a new atomic pattern with this edge only
+			// create an operator to send these results to that pattern.
+			
+			("Connecting pattern " + applyPatternToBeProjected.id + 
+				" to a new pattern with edge " + edge.name).println();
+			
+			var atomicPattern = createAtomicPatternFromEdge(trnetmodel, edge);
+			
+			var combinator = 
+				createConnectionPatternPattern(applyPatternToBeProjected, 
+										atomicPattern, trnetmodel);
+			
+			connectByKeepRestriction(edge.source, atomicPattern.edges.first.source, trnetmodel);
+			connectByKeepRestriction(edge.target, atomicPattern.edges.first.target, trnetmodel);
+			
+			// and connect the new pattern to the external operator.
+			if (getAllExternalOutputOperators().size()>1){
+				throw "Unsuported.";
+			}
+			var outputOperator = getAllExternalOutputOperators().first; // we assume there is only one.
+			addAsAnyOperand(outputOperator, atomicPattern, trnetmodel);
+			
+		}
+	}
+
+}
+
+"Completing Apply Patterns... DONE".println();
+
+
+

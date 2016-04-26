@@ -1,0 +1,6 @@
+import "nat.adt"
+
+Adt CClass
+	Sorts CClass;
+	Generators
+		CClassNodeConstructor: nat -> CClass;

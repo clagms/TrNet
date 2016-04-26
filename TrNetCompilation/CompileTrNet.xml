@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="CompileTrNet" default="main" basedir=".">
+
+	<target name="main">
+
+		<!-- 
+		We don't need this because our metamodels are in the registry as plugins.
+		<epsilon.emf.register file="TrNetVisual.ecore" />
+		<epsilon.emf.register file="TrNet.ecore" />
+		-->
+
+		<!-- Loads the models. The name of the models are important because they are used throughout the transformations -->
+		<!-- 
+		<epsilon.emf.loadModel name="VisualModel" aliases="TrNetModel,CoreModel" modelfile="model/Class2Relational.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+		-->
+		<!-- -->
+		<epsilon.emf.loadModel name="VisualModel" 
+			aliases="TrNetModel,CoreModel" 
+			modelfile="model/Class2Relational.trnetvisual" 
+			metamodeluri="http://trnetvisual/1.0" 
+			read="true" store="true" />
+		
+		<!-- 
+		<epsilon.emf.loadModel name="VisualModel" aliases="TrNetModel,CoreModel" modelfile="model/ActivityMigration.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+		-->
+
+		<!-- -->
+		<epsilon.emf.loadModel 
+			name="CatalogModel" 
+			modelfile="model/CatalogModel.catalog" 
+			metamodeluri="http://catalog/1.0" 
+			read="true" store="false" />
+
+		<!-- Generate IDs on the Visual Model 
+		<epsilon.eol src="analysis/GenerateIds.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>-->
+		
+		
+		<!-- Generate Expected Cardinalities on the Visual Model -->
+		<epsilon.eol src="analysis/GenerateExpectedSizes.eol">
+			<model ref="VisualModel" />
+			<model ref="CatalogModel" />
+		</epsilon.eol>
+
+		<!-- Generate Operand Indexes on the Visual Model -->
+		<epsilon.eol src="analysis/GenerateOperandIndexes.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+
+		<!-- Validations on the Visual Model -->
+		<epsilon.evl src="validation/TrNetVisualValidation.evl">
+			<model ref="VisualModel" />
+		</epsilon.evl>
+
+		<!-- Generate the execution plan on the Visual Model -->
+		<epsilon.eol src="analysis/InferExecutionPlan.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+		
+		<!-- Clear Generated Code
+		<delete quiet="true" includeEmptyDirs="true">
+			<fileset dir="./src-gen/" />
+		</delete> -->
+		
+		<!-- Generate Tranformation Code -->
+		<epsilon.egl src="TrNet2Java.egl">
+			<model ref="VisualModel" />
+		</epsilon.egl>
+		
+		<!-- Clear the execution plan on the Visual Model -->
+		<epsilon.eol src="analysis/ClearExecutionPlan.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+		
+		<!-- Generate Expected Cardinalities on the Visual Model -->
+		<epsilon.eol src="analysis/ComputeTransformationCost.eol">
+			<model ref="VisualModel" />
+			<model ref="CatalogModel" />
+		</epsilon.eol>
+		
+
+	</target>
+
+</project>

@@ -1,0 +1,15 @@
+
+"Inferring Execution Plan".println();
+
+var mapOperator2SuccessorOperators = new Map;
+
+clearPreviouslyDerivedPlan();
+
+"Previously derived plan cleared.".println();
+
+operation clearPreviouslyDerivedPlan() {
+	for (derivedNext in VisualModel!NextDerived.all) {
+		//("Deleting " + derivedNext).println();
+		delete derivedNext;
+	}
+}

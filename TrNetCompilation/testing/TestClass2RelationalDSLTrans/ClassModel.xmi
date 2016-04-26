@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="ASCII"?>
+<classes:CModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:classes="http://classes/1.0">
+  <contents xsi:type="classes:CClass" name="Class1"/>
+  <contents xsi:type="classes:CClass" name="Class2" abstract="true" extends="//@contents.7">
+    <attributes name="Attribute9" type="//@contents.7"/>
+    <attributes name="Attribute10" type="//@contents.4"/>
+  </contents>
+  <contents xsi:type="classes:CClass" name="Class3">
+    <attributes name="Attribute1" type="//@contents.10" isMany="true"/>
+  </contents>
+  <contents xsi:type="classes:CClass" name="Class4" abstract="true"/>
+  <contents xsi:type="classes:CClass" name="Class5"/>
+  <contents xsi:type="classes:CClass" name="Class6">
+    <attributes name="Attribute7" type="//@contents.2" isMany="true"/>
+  </contents>
+  <contents xsi:type="classes:CClass" name="Class7">
+    <attributes name="Attribute2" type="//@contents.11"/>
+    <attributes name="Attribute8" type="//@contents.3" isMany="true"/>
+  </contents>
+  <contents xsi:type="classes:CClass" name="Class8" abstract="true" extends="//@contents.3">
+    <attributes name="Attribute3" type="//@contents.2" isMany="true"/>
+    <attributes name="Attribute4" type="//@contents.8"/>
+  </contents>
+  <contents xsi:type="classes:CClass" name="Class9" abstract="true" extends="//@contents.5">
+    <attributes name="Attribute6" type="//@contents.0"/>
+  </contents>
+  <contents xsi:type="classes:CClass" name="Class10" abstract="true">
+    <attributes name="Attribute5" type="//@contents.1" isMany="true"/>
+  </contents>
+  <contents xsi:type="classes:Datatype" name="Integer"/>
+  <contents xsi:type="classes:Datatype" name="String"/>
+</classes:CModel>

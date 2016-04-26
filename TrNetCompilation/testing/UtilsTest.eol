@@ -1,0 +1,42 @@
+
+operation getOperator(id, operators) {
+	var op = operators.selectOne(op | op.id=id);
+	assertNotEquals(null, op);
+	
+	return op;
+}
+
+operation getPattern(id, patterns) {
+	var pat = patterns.selectOne(pat | pat.id=id);
+	assertNotEquals(null, pat);
+	
+	return pat;
+}
+
+operation getEdge( name , edges) {
+	var edge = edges.selectOne(e | e.name=name);
+	assertNotEquals(null, edge);
+	
+	return edge;
+}
+
+operation getNode( id , nodes) {
+	var node = nodes.selectOne(n | n.id=id);
+	assertNotEquals(null, node);
+	
+	return node;
+}
+
+operation getIdElement(id , set) {
+	var element = set.selectOne(e | e.id=id);
+	assertNotEquals(null, element);
+	
+	return element;
+}
+
+operation getNamedElement(name , set) {
+	var element = set.selectOne(e | e.name=name);
+	assertNotEquals(null, element);
+	
+	return element;
+}

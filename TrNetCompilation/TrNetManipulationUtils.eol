@@ -1,0 +1,479 @@
+import "Utils.eol";
+
+operation removePattern(pattern) {
+
+	if (patternHasOutputs(pattern)) {
+		throw "Incorrect usage of removePattern";
+	}
+
+	for (operator in getOperatorPredecessors(pattern)) {
+		removeResultsToPattern(operator, pattern);
+		removeKeepRestrictionsToPattern(pattern);
+		removeJoinConditionsFromPattern(pattern);
+		if (operatorHasNoResults(operator)) {
+			removeOperator(operator);
+		}
+	}
+	delete pattern;
+}
+
+operation removeKeepRestrictionsToPattern(pattern) {
+	delete getAllKeepRestrictionsToPattern(pattern);
+}
+
+operation removeJoinConditionsFromPattern(pattern) {
+	delete getAllJoinConditionsFromPattern(pattern);
+}
+
+operation getAllKeepRestrictionsToPattern(pattern) {
+	var result = new Bag;
+	for (node in pattern.nodes) {
+		result.addAll(node.keepIn);
+	}
+	return result;
+}
+
+operation getAllJoinConditionsFromPattern(pattern) {
+	var result = new Bag;
+	for (node in pattern.nodes) {
+		result.addAll(node.differentIn);
+		result.addAll(node.differentOut);
+		result.addAll(node.sameIn);
+		result.addAll(node.sameOut);
+	}
+	return result;
+}
+
+operation operatorHasNoResults(operator) {
+	if (operator.results == null) {
+		return true;
+	}
+	
+	if (operator.results.isEmpty()) {
+		return true;
+	}
+	
+	return false;
+}
+
+
+operation removeResultsToPattern(operator, pattern) {
+	delete operator.results.select(res | res.pattern == pattern);
+}
+
+operation removeOperandsFromPattern(operator, pattern) {
+	delete operator.operands.select(op | op.pattern == pattern);
+}
+
+operation removeOperator(operator) {
+	if (not operatorHasNoResults(operator)) {
+		throw "Incorrect usage of removeOperator";
+	}
+	
+	for (pattern in getPatternPredecessors(operator)) {
+		removeOperandsFromPattern(operator, pattern);
+		if (not patternHasOutputs(pattern)) {
+			removePattern(pattern);
+		}
+	}
+	
+	delete operator;
+}
+
+operation getOperatorPredecessors(pattern) {
+	return pattern.incomingResults.collect(res | res.operator);
+}
+
+operation getPatternPredecessors(operator) {
+	return operator.operands.collect( op | op.pattern);
+}
+
+
+operation patternHasOutputs(pattern) {
+	if (pattern.outgoingOperands == null) {
+		return false;
+	}
+	
+	if (pattern.outgoingOperands.isEmpty()) {
+		return false;
+	}
+	
+	return true;
+}
+
+operation copyAllOperands(targetOperator, sourceOperator, trnetmodel) {
+	for (operand in sourceOperator.operands) {
+		var newOperand = copyOperand(operand, trnetmodel);
+		newOperand.pattern = operand.pattern;
+		newOperand.operator = targetOperator;
+	}
+}
+
+operation addAsAnyOperand(operator, matchPattern, trnetmodel){
+	var newOperand = new TrNetModel!AnyOperand;
+	trnetmodel.operands.add(newOperand);
+	operator.operands.add(newOperand);
+	
+	newOperand.pattern = matchPattern;
+}
+
+operation addAsAnyResult(operator, resultPattern, trnetmodel){
+	var newResult = new TrNetModel!AnyResult;
+	trnetmodel.results.add(newResult);
+	operator.results.add(newResult);
+	
+	newResult.pattern = resultPattern;
+}
+
+
+operation patternIsEqual(pattern2, pattern1) {
+	if (hasOnlyOneNode(pattern1)) {
+		if (hasOnlyOneEdge(pattern2)) {
+			return false;
+		} else if (hasOnlyOneNode(pattern2)) {
+			return nodeIsEqual(pattern2.nodes.first, pattern1.nodes.first);
+		} else {
+			throw "Unexpected Pattern: " + pattern2;
+		}
+	} else if (hasOnlyOneEdge(pattern1)) {
+		if (hasOnlyOneEdge(pattern2)) {
+			return edgeIsEqual(pattern1.edges.first, pattern2.edges.first);
+		} else if (hasOnlyOneNode(pattern2)) {
+			return false;
+		} else {
+			throw "Unexpected Pattern: " + pattern2;
+		}
+	} else {
+		throw "Unexpected Pattern: " + pattern1;
+	}
+}
+
+
+
+operation createStandardConnectionOperatorPattern(operator, pattern, trnetmodel) {
+	("Creating connection between " + operator + " and " + pattern).println();
+	addAsAnyResult(operator, pattern, trnetmodel);
+}
+
+operation createCombinator(trnetmodel) {
+	var res = new TrNetModel!Combinator;
+	res.id = "";
+	trnetmodel.operators.add(res);
+	return res;
+}
+
+operation createPattern(trnetmodel) {
+	var res = new TrNetModel!Pattern;
+	res.id="";
+	trnetmodel.patterns.add(res);
+	return res;
+}
+
+operation createConnectionPatternPattern(sourcePattern, targetPattern, trnetmodel) {
+	var combinator = createCombinator(trnetmodel);
+	
+	addAsAnyOperand(combinator, sourcePattern, trnetmodel);
+	addAsAnyResult(combinator, targetPattern, trnetmodel);
+	
+	return combinator;
+}
+
+operation createTrivialConnectionPatternPattern(sourcePattern, targetPattern, trnetmodel) {
+	// the purpose here is to create a connection between two patterns that we assume to be the same.
+	// a combinator is created that connects the source to the target pattern
+	// and then the necessary keep restrictions are created. No new elements are created.
+	if (not patternIsEqual(sourcePattern, targetPattern)) {
+		throw "Unexpected usage of createTrivialConnectionPatternPattern";
+	}
+	
+	var combinator = createConnectionPatternPattern(sourcePattern, targetPattern, trnetmodel);
+	
+	if (hasOnlyOneNode(sourcePattern)) {
+		connectByKeepRestriction(sourcePattern.nodes.first, targetPattern.nodes.first, trnetmodel);
+	} else if (hasOnlyOneEdge(sourcePattern)) {
+		connectByKeepRestriction(sourcePattern.edges.first.source, targetPattern.edges.first.source, trnetmodel);
+		connectByKeepRestriction(sourcePattern.edges.first.target, targetPattern.edges.first.target, trnetmodel);
+	} else {
+		throw "Unexpected usage of createTrivialConnectionPatternPattern ";
+	}
+	
+}
+
+// We have to assume that the two patterns are atomic. Or else we would be computing a graph isomorphism.
+operation getCorrespondingNode(sourceNode, sourcePattern, targetPattern) {
+	if (not patternIsEqual(sourcePattern, targetPattern)) {
+		throw "Impossible!";
+	}
+	
+	if (hasOnlyOneNode(sourcePattern)) {
+		return targetPattern.nodes.first;
+	} else if (hasOnlyOneEdge(sourcePattern)) {
+		if (sourcePattern.edges.first.source = sourceNode) {
+			return targetPattern.edges.first.source;
+		} else {
+			return targetPattern.edges.first.target;
+		}
+	} else {
+		throw "Unexpected";
+	}
+	
+}
+
+
+
+operation isATraceEdge(e) {
+	return e.name == getTracePrefix();
+}
+
+operation isANewNode(n) {
+	if (n.keepIn = null) {
+		return true;
+	}
+	if (n.keepIn.isEmpty()) {
+		return true;
+	}
+	return false;
+}
+
+operation connectBySameRestriction(sourceNode, targetNode, trnetmodel) {
+	var restriction = new TrNetModel!Same;
+	
+	trnetmodel.restrictions.add(restriction);
+	
+	restriction.source = sourceNode;
+	restriction.target = targetNode;
+	
+	return restriction;
+}
+
+operation connectByKeepRestriction(sourceNode, targetNode, trnetmodel) {
+	var restriction = new TrNetModel!Keep;
+	
+	trnetmodel.restrictions.add(restriction);
+	
+	restriction.source = sourceNode;
+	restriction.target = targetNode;
+	
+	return restriction;
+}
+
+operation printPattern(pattern) {
+	pattern.println();
+	for (node in pattern.nodes) {
+		("node: " + node).println();
+	}
+	for (edge in pattern.edges) {
+		("edge: " + edge + " source: " + edge.source + " target: " + edge.target).println();
+	}
+}
+
+operation copyEdge(edge, mapOldNodes2NewOnes) {
+	var newEdge = new TrNetModel!EdgePattern;
+	
+	newEdge.name = edge.name;
+	
+	newEdge.source = mapOldNodes2NewOnes.get(edge.source);
+	newEdge.target = mapOldNodes2NewOnes.get(edge.target);
+	
+	return newEdge;	
+}
+
+operation copyOperand(operand, trnetmodel) {
+	if (operand.isKindOf(TrNetModel!AnyOperand)) {
+	
+		var newOperand = new TrNetModel!AnyOperand;
+		
+		trnetmodel.operands.add(newOperand);
+		
+		return newOperand;
+		
+	} else {
+		throw "Unexpected operand type found: " + operand;
+	}
+}
+
+operation copyAttributePattern(attributePattern) {
+	var result = new TrNetModel!AttributePattern;
+	result.name = attributePattern.name;
+	return result;
+}
+
+operation copyNode(node) {
+	if (node.isKindOf(TrNetModel!MandatoryNode)) {
+	
+		var newNode = new TrNetModel!MandatoryNode;
+		newNode.id = "";
+		newNode.name = node.name;
+		
+		return newNode;
+		
+	} else {
+		("node: " + node).println();
+		throw ("Unexpected node type found: ");
+	}
+}
+
+operation getOppositeNode(startNode, edge) {
+	if (isIncommingEdge(edge, startNode)) {
+		return edge.source;
+	} else {
+		return edge.target;
+	}
+}
+
+operation getConnectedEdge(node, pattern) {
+	return pattern.edges.selectOne(edge | isConnectedToNode(edge, node));
+}
+
+operation isConnectedToNode(edge, node) {
+	return isIncommingEdge(edge, node) or isOutgoingEdge(edge, node);
+}
+
+operation isAtomicPattern(matchPattern) {
+	return hasOnlyOneNode(matchPattern) or hasOnlyOneEdge(matchPattern);
+}
+
+operation hasOnlyOneNode(matchPattern) {
+	return matchPattern.nodes.size=1 and matchPattern.edges.size=0;
+}
+
+operation hasOnlyOneEdge(matchPattern) {
+	return matchPattern.nodes.size = 2 and matchPattern.edges.size=1; 
+}
+
+operation findNodeWithDegree1(pattern) {
+	return pattern.nodes.selectOne(node | (hasOneIncommingEdge(node, pattern) and hasNoOutgoingEdges(node, pattern)) or (hasOneOutgoingEdge(node, pattern) and hasNoIncommingEdges(node, pattern)));
+}
+
+operation hasOneIncommingEdge(node, pattern) {
+	return pattern.edges.select(edge| isIncommingEdge(edge, node)).size = 1;
+}
+
+operation hasNoOutgoingEdges(node, pattern) {
+	return pattern.edges.select(edge| isOutgoingEdge(edge, node)).size = 0;
+}
+
+operation hasNoIncommingEdges(node, pattern) {
+	return pattern.edges.select(edge| isIncommingEdge(edge, node)).size = 0;
+}
+
+operation hasOneOutgoingEdge(node, pattern) {
+	return pattern.edges.select(edge| isOutgoingEdge(edge, node)).size = 1;
+}
+
+operation isOutgoingEdge(edge, node) {
+	return edge.source = node;
+}
+
+operation isIncommingEdge(edge, node) {
+	return edge.target = node;
+}
+
+
+operation setParameterInExternalCalculationCall(calculation, parameter, index) {
+	var result = new TrNetModel!ExternalCalculationCallParameter;
+	result.index = index;
+	result.parameter = parameter;
+	calculation.parameters.add(result);
+	return result;
+}
+
+operation setParameterInExternalAttributeCalculationCall(attributeCalculation, matchAttributeParameter, index) {
+	var result = new TrNetModel!ExternalAttributeCalculationCallParameter;
+	result.index = index;
+	result.parameter = matchAttributeParameter;
+	attributeCalculation.parameters.add(result);
+	return result;
+}
+
+operation setParameterInExternalConditionCall(externalApplicationCondition, matchAttributeParameter, index) {
+	var result = new TrNetModel!ExternalConditionCallParameter;
+	result.index = index;
+	result.parameter = matchAttributeParameter;
+	externalApplicationCondition.parameters.add(result);
+	return result;
+}
+
+operation createExternalAttributeCalculationCall(id, qualifiedName, trnetmodel) {
+	var result = new TrNetModel!ExternalAttributeCalculationCall;
+	result.id = id;
+	result.qualifiedName = qualifiedName;
+	trnetmodel.restrictions.add(result);
+	return result;
+}
+
+operation createExternalCalculationCall(id, qualifiedName, trnetmodel) {
+	var result = new TrNetModel!ExternalCalculationCall;
+	result.id = id;
+	result.qualifiedName = qualifiedName;
+	trnetmodel.calculations.add(result);
+	return result;
+}
+
+operation createExternalConditionCall(id, qualifiedName) {
+	var result = new TrNetModel!ExternalConditionCall;
+	result.id = id;
+	result.qualifiedName = qualifiedName;
+	return result;
+}
+
+operation createAttributePattern(name, parentNode) {
+	var result = new TrNetModel!AttributePattern;
+	result.name = name;
+	parentNode.attributes.add(result);
+	return result;
+}
+
+operation createAtomicPatternFromEdge(trnetmodel, edge){
+	var atomicPattern = createPattern(trnetmodel);
+	var atomicNodeSource = copyNode(edge.source);
+	var atomicNodeTarget = copyNode(edge.target);
+	
+	atomicPattern.nodes.add(atomicNodeSource);
+	atomicPattern.nodes.add(atomicNodeTarget);
+	
+	connectByEdgePattern(atomicNodeSource, atomicNodeTarget, edge.name, atomicPattern);
+	
+	return atomicPattern;
+}
+
+operation connectByEdgePattern(sourceNode, targetNode, name, pattern) {
+	var  result = new TrNetModel!EdgePattern;
+	result.name = name;
+	result.source = sourceNode;
+	result.target = targetNode;
+	pattern.edges.add(result);
+}
+
+operation createNodePattern(name, pattern) {
+	var result = new TrNetModel!MandatoryNode;
+	result.name = name;
+	result.id = "";
+	pattern.nodes.add(result);
+	return result;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

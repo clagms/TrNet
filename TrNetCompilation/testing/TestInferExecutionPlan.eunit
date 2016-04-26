@@ -1,0 +1,7 @@
+$with Map {"VisualModel" = "VisualModel1", "ExpectedVisualModel" = "ExpectedVisualModel1"}
+$with Map {"VisualModel" = "VisualModel3", "ExpectedVisualModel" = "ExpectedVisualModel3"}
+@test
+operation testInferExecutionPlan() {
+	runTarget("RunInferExecutionPlan");
+	assertEqualModels("VisualModel", "ExpectedVisualModel");
+}

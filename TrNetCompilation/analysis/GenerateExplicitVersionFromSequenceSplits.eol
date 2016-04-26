@@ -1,0 +1,59 @@
+import "./DecompositionOperations.eol";
+
+var trace = true;
+
+var sequenceString = "TrNetOp33:TrNetPat25:opunionTrNetPat18_TrNetPat26_TrNetPat24_0:TrNetPat26:TrNetOp6:TrNetPat25:opunionTrNetPat18_TrNetPat24_TrNetPat26_TrNetPat2_0:TrNetPat24:opunionTrNetPat18_TrNetPat26_TrNetPat2_0:TrNetPat2:TrNetOp39:TrNetPat27:opunionTrNetPat25_TrNetPat24_TrNetPat18_0:TrNetPat25:TrNetOp19:TrNetPat27:opunionTrNetPat25_TrNetPat18_TrNetPat24_TrNetPat2_0:TrNetPat25:opunionTrNetPat18_TrNetPat24_TrNetPat2_0:TrNetPat2";
+var sequenceToFollow = sequenceString.split(":");
+
+var trnetmodel = TrNetModel!TrNetModel.all.first;
+
+var rootDecompositionProcess = Decomposition!Decomposition.all.first;
+
+recGenerateDecFromSplits(rootDecompositionProcess.op, trnetmodel, sequenceToFollow, "");
+
+operation recGenerateDecFromSplits(operatorToBeDecomposed, trnetmodel, sequenceToFollow, callIdent){
+	(callIdent + ">recGenerateDecFromSplits(" + operatorToBeDecomposed.id + ")").println();
+	
+	assert(operatorToBeDecomposed.id == sequenceToFollow.first, "Wrong operator.");
+	
+	sequenceToFollow.removeAt(0); // pop
+	
+	var operator = trnetmodel.operators.selectOne(op| op.id == operatorToBeDecomposed.id);
+	
+	assert(operator.isDefined(), "Operator "+operatorToBeDecomposed.id+" not found in the transformation.");
+	assert(operator.operands.size() > 2, "Unexpected binary operator to be decomposed: " + operator.id);
+	
+	var selectedOperandToBeUsedToSplit = operatorToBeDecomposed.splits.selectOne(operand | operand.id == sequenceToFollow.first);
+	
+	assert(selectedOperandToBeUsedToSplit.isDefined(), "Operand "+sequenceToFollow.first+" not found in the decomposition.");
+	
+	sequenceToFollow.removeAt(0); // pop
+	
+	printTrace(callIdent, "Operand selected: " + selectedOperandToBeUsedToSplit.id);
+	printTrace(callIdent, "With cost: " + selectedOperandToBeUsedToSplit.maxCost);
+	
+	var splitOperand = operator.operands.collect(operand| operand.pattern)
+						.select(pattern|pattern.id == selectedOperandToBeUsedToSplit.id).first;
+	
+	assert(splitOperand.isDefined(), "Operand "+selectedOperandToBeUsedToSplit.id+" not found in the transformation.");
+	
+	decomposeOperatorBySplitID(operator, splitOperand.id, trnetmodel, callIdent);
+	
+	if (selectedOperandToBeUsedToSplit.op.isDefined()){
+		// Continue recursively:
+		recGenerateDecFromSplits(selectedOperandToBeUsedToSplit.op, trnetmodel, sequenceToFollow, callIdent + " ");
+	} else {
+		// base case reached.
+		printTrace(callIdent, "Base case reached.");
+	}
+	
+	(callIdent + "<recGenerateDecFromSplits(" + operatorToBeDecomposed.id + ")").println();
+}
+
+
+
+operation printTrace(callIdent, msg){
+	if (trace){
+		(callIdent + msg).println();
+	}
+}

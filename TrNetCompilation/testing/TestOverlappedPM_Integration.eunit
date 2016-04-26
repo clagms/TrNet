@@ -1,0 +1,335 @@
+import "UtilsTest.eol";
+import "../analysis/OverlappedPMLib.eol";
+
+
+
+$with Map {"VisualModel" = "Sample2"}
+@test
+operation testEqualPatterns() {
+	
+	var pattern1 = getPattern("P1", VisualModel!Pattern.all);
+	var pattern2 = getPattern("P2", VisualModel!Pattern.all);
+	
+	assertFalse(pattern1.nodes.size <> pattern2.nodes.size);
+	
+	assertFalse(pattern1.edges.size <> pattern2.edges.size);
+	
+	assertFalse(pattern1.incomingResults.size <> pattern2.incomingResults.size);
+	
+	var commonSuccessorOperators = getCommonOperators(getOperatorSucessorsFromPattern(pattern1), getOperatorSucessorsFromPattern(pattern2));
+	assertFalse(commonSuccessorOperators.exists(operator | operator.isKindOf(VisualModel!Combinator)));
+
+	//this performs a subgraph isomorphism... for a node to be equal to another they must have the same name, the same in and out edges and the same keepIns (from the same patterns).
+	var bijectiveMappingsBetweenNodes = nodeSetsAreExactlyTheSame(pattern1, pattern2);
+	
+	assertFalse(bijectiveMappingsBetweenNodes == null);
+	
+	var equalPatternsCache = new Map;
+	var mappingsBetweenPatterns = equalPatterns(pattern1, pattern2, equalPatternsCache);
+	
+	assertTrue(mappingsBetweenPatterns <> null);
+	
+	
+	
+	//assertEqualModels("VisualModel", "ExpectedVisualModel");
+}
+
+$with Map {"VisualModel" = "Sample2", "ExpectedVisualModel" = "Sample2Expected"}
+@test
+operation experiences() {
+	
+	
+	var pattern1 = getPattern("P1", VisualModel!Pattern.all);
+	var pattern2 = getPattern("P2", VisualModel!Pattern.all);
+	
+	assertTrue(pattern1 <> 0);
+	
+	var equalPatternsCache = new Map;
+	var mappingsBetweenPatterns = equalPatterns(pattern1, pattern2, equalPatternsCache);
+	
+	assertTrue(mappingsBetweenPatterns <> 0);
+	
+	//assertEqualModels("VisualModel", "ExpectedVisualModel");
+}
+
+
+$with Map {"VisualModel" = "Sample2", "ExpectedVisualModel" = "Sample2Expected"}
+@test
+operation test_JoinPatterns_1() {
+	
+	var pattern1 = getPattern("P1", VisualModel!Pattern.all);
+	var pattern2 = getPattern("P2", VisualModel!Pattern.all);
+	
+	var initialPatterns = VisualModel!Pattern.all.size;
+	
+	var equalPatternsCache = new Map;
+	var mappingsBetweenPatterns = equalPatterns(pattern1, pattern2, equalPatternsCache);
+	
+	assertTrue(mappingsBetweenPatterns <> null);
+	
+	assertTrue(4 == mappingsBetweenPatterns.size);
+	
+	var mapBetweenNodesPattern1ToNodesPattern2 = mappingsBetweenPatterns.at(0);
+	var mapBetweenNodesPattern2ToNodesPattern1 = mappingsBetweenPatterns.at(1);
+	var mapBetweenOperatorsPattern1ToOperatorsPattern2 = mappingsBetweenPatterns.at(2);
+	var mapBetweenOperatorsPattern2ToOperatorsPattern1 = mappingsBetweenPatterns.at(3);
+	
+	joinPatterns(pattern1, pattern2, mapBetweenNodesPattern1ToNodesPattern2, mapBetweenNodesPattern2ToNodesPattern1, mapBetweenOperatorsPattern1ToOperatorsPattern2, mapBetweenOperatorsPattern2ToOperatorsPattern1);
+	
+	var patterns = VisualModel!Pattern.all.size;
+	
+	assertTrue(initialPatterns - 1 == patterns);
+	
+	VisualModel.store("TrNetCompilation/testing/TestOverlappedPM/Sample2_test_JoinPatterns_1.trnetvisual");
+	
+	assertEqualModels("VisualModel", "ExpectedVisualModel");
+}
+
+$with Map {"VisualModel" = "Sample2", "ExpectedVisualModel" = "Sample2Expected3"}
+@test
+operation test_JoinPatterns_2() {
+	
+	var pattern1 = getPattern("P2", VisualModel!Pattern.all);
+	var pattern2 = getPattern("P1", VisualModel!Pattern.all);
+	
+	var initialPatterns = VisualModel!Pattern.all.size;
+	
+	var equalPatternsCache = new Map;
+	
+	var mappingsBetweenPatterns = equalPatterns(pattern1, pattern2, equalPatternsCache);
+	
+	assertTrue(mappingsBetweenPatterns <> null);
+	
+	assertTrue(4 == mappingsBetweenPatterns.size);
+	
+	var mapBetweenNodesPattern1ToNodesPattern2 = mappingsBetweenPatterns.at(0);
+	var mapBetweenNodesPattern2ToNodesPattern1 = mappingsBetweenPatterns.at(1);
+	var mapBetweenOperatorsPattern1ToOperatorsPattern2 = mappingsBetweenPatterns.at(2);
+	var mapBetweenOperatorsPattern2ToOperatorsPattern1 = mappingsBetweenPatterns.at(3);
+	
+	joinPatterns(pattern1, pattern2, mapBetweenNodesPattern1ToNodesPattern2, mapBetweenNodesPattern2ToNodesPattern1, mapBetweenOperatorsPattern1ToOperatorsPattern2, mapBetweenOperatorsPattern2ToOperatorsPattern1);
+	
+	var patterns = VisualModel!Pattern.all.size;
+	
+	assertTrue(initialPatterns - 1 == patterns);
+	
+	VisualModel.store("TrNetCompilation/testing/TestOverlappedPM/Sample2_test_JoinPatterns_2.trnetvisual");
+	
+	assertEqualModels("VisualModel", "ExpectedVisualModel");
+}
+
+
+
+$with Map {"VisualModel" = "Sample2", "ExpectedVisualModel" = "Sample2Expected2"}
+@test
+operation test_applyOverlappedPM_1() {
+	
+	var op1 = getOperator("Op1", VisualModel!Operator.all);
+	
+	var initialPatterns = VisualModel!Pattern.all.size;
+	
+	var equalPatternsCache = new Map;
+	var equalOperatorsCache = new Map;
+	
+	applyOverlappedPM(op1, equalPatternsCache, equalOperatorsCache);
+	
+	var patterns = VisualModel!Pattern.all.size;
+	
+	assertTrue(initialPatterns - 1 == patterns);
+	
+	VisualModel.store("TrNetCompilation/testing/TestOverlappedPM/Sample2_test_applyOverlappedPM_1.trnetvisual");
+	
+	assertEqualModels("VisualModel", "ExpectedVisualModel");
+}
+
+$with Map {"VisualModel" = "Sample3", "ExpectedVisualModel" = "Sample3Expected1"}
+@test
+operation test_applyOverlappedPM_2() {
+	
+	var op1 = getOperator("Op1", VisualModel!Operator.all);
+	
+	var initialPatterns = VisualModel!Pattern.all.size;
+	
+	var equalPatternsCache = new Map;
+	var equalOperatorsCache = new Map;
+	
+	applyOverlappedPM(op1, equalPatternsCache, equalOperatorsCache);
+	
+	var patterns = VisualModel!Pattern.all.size;
+	
+	assertTrue(initialPatterns - 1 == patterns);
+	
+	VisualModel.store("TrNetCompilation/testing/TestOverlappedPM/Sample3_test_applyOverlappedPM_2.trnetvisual");
+	
+	assertEqualModels("VisualModel", "ExpectedVisualModel");
+}
+
+
+$with Map {"VisualModel" = "Sample4", "ExpectedVisualModel" = "Sample4Expected1"}
+@test
+operation test_joinOperators_1() {
+	
+	var pat1 = getPattern("P1", VisualModel!Pattern.all);
+	
+	var initialOperatorsCount = VisualModel!Operator.all.size;
+	
+	var op3 = getOperator("Op3", VisualModel!Operator.all);
+	var op3_2 = getOperator("Op3_2", VisualModel!Operator.all);
+	
+	var equalOperatorsCache = new Map;
+	assertTrue(equalOperators(op3, op3_2, equalOperatorsCache));
+	
+	var successorOperators = getOperatorSucessorsFromPattern(pat1);
+	
+	op3 = getOperator("Op3", successorOperators);
+	op3_2 = getOperator("Op3_2", successorOperators);
+	
+	var equalOperatorsCache = new Map;
+	assertTrue(equalOperators(op3, op3_2, equalOperatorsCache));
+	var equalOperatorsCache = new Map;
+	assertTrue(equalOperators(op3_2, op3, equalOperatorsCache));
+	
+	var initialOperatorsCount = VisualModel!Operator.all.size;
+	
+	assertTrue(initialOperatorsCount == 4);
+	
+	joinOperators(op3, op3_2);
+	
+	var currentOperatorsCount = VisualModel!Operator.all.size;
+	
+	assertTrue(currentOperatorsCount == 3);
+	
+	VisualModel.store("TrNetCompilation/testing/TestOverlappedPM/Sample4_test_joinOperators_1.trnetvisual");
+	
+	assertEqualModels("VisualModel", "ExpectedVisualModel");
+}
+
+$with Map {"VisualModel" = "Sample4", "ExpectedVisualModel" = "Sample4Expected2"}
+@test
+operation test_joinOperators_2() {
+	
+	var pat1 = getPattern("P1", VisualModel!Pattern.all);
+	
+	var initialOperatorsCount = VisualModel!Operator.all.size;
+	
+	var op3 = getOperator("Op3_2", VisualModel!Operator.all);
+	var op3_2 = getOperator("Op3", VisualModel!Operator.all);
+	
+	var equalOperatorsCache = new Map;
+	assertTrue(equalOperators(op3, op3_2, equalOperatorsCache));
+	
+	var successorOperators = getOperatorSucessorsFromPattern(pat1);
+	
+	op3 = getOperator("Op3_2", successorOperators);
+	op3_2 = getOperator("Op3", successorOperators);
+	
+	var equalOperatorsCache = new Map;
+	assertTrue(equalOperators(op3, op3_2, equalOperatorsCache));
+	var equalOperatorsCache = new Map;
+	assertTrue(equalOperators(op3_2, op3, equalOperatorsCache));
+	
+	var initialOperatorsCount = VisualModel!Operator.all.size;
+	
+	assertTrue(initialOperatorsCount == 4);
+	
+	joinOperators(op3, op3_2);
+	
+	var currentOperatorsCount = VisualModel!Operator.all.size;
+	
+	assertTrue(currentOperatorsCount == 3);
+	
+	VisualModel.store("TrNetCompilation/testing/TestOverlappedPM/Sample4_test_joinOperators_2.trnetvisual");
+	
+	assertEqualModels("VisualModel", "ExpectedVisualModel");
+}
+
+
+
+$with Map {"VisualModel" = "Sample4", "ExpectedVisualModel" = "Sample4Expected1"}
+@test
+operation test_applyOverlappedPM_3() {
+	
+	var pat1 = getPattern("P1", VisualModel!Pattern.all);
+	
+	var initialOperatorsCount = VisualModel!Operator.all.size;
+	
+	var equalPatternsCache = new Map;
+	var equalOperatorsCache = new Map;
+	
+	applyOverlappedPM(pat1, equalPatternsCache, equalOperatorsCache);
+	
+	var currentOperatorsCount = VisualModel!Operator.all.size;
+	
+	assertTrue(initialOperatorsCount - 1 == currentOperatorsCount);
+	
+	VisualModel.store("TrNetCompilation/testing/TestOverlappedPM/Sample4_test_applyOverlappedPM_3.trnetvisual");
+	
+	assertEqualModels("VisualModel", "ExpectedVisualModel");
+}
+
+$with Map {"VisualModel" = "Sample5", "ExpectedVisualModel" = "Sample5Expected1"}
+@test
+operation test_applyOverlappedPM_3() {
+	
+	var op3 = getOperator("Op3", VisualModel!Operator.all);
+	
+	var initialPatterns = VisualModel!Pattern.all.size;
+	
+	var equalPatternsCache = new Map;
+	var equalOperatorsCache = new Map;
+	
+	applyOverlappedPM(op3, equalPatternsCache, equalOperatorsCache);
+	
+	var patterns = VisualModel!Pattern.all.size;
+	
+	assertTrue(initialPatterns == patterns);
+	
+	VisualModel.store("TrNetCompilation/testing/TestOverlappedPM/Sample5_test_applyOverlappedPM_3.trnetvisual");
+	
+	assertEqualModels("VisualModel", "ExpectedVisualModel");
+}
+
+$with Map {"VisualModel" = "Sample5", "ExpectedVisualModel" = "Sample5Expected1"}
+@test
+operation test_applyOverlappedPM_4() {
+	
+	var op1 = getOperator("Op1", VisualModel!Operator.all);
+	
+	var initialPatterns = VisualModel!Pattern.all.size;
+	
+	var equalPatternsCache = new Map;
+	var equalOperatorsCache = new Map;
+	
+	applyOverlappedPM(op1,equalPatternsCache, equalOperatorsCache);
+	
+	var patterns = VisualModel!Pattern.all.size;
+	
+	assertTrue(initialPatterns == patterns);
+	
+	VisualModel.store("TrNetCompilation/testing/TestOverlappedPM/Sample5_test_applyOverlappedPM_4.trnetvisual");
+	
+	assertEqualModels("VisualModel", "ExpectedVisualModel");
+}
+
+$with Map {"VisualModel" = "Sample6", "ExpectedVisualModel" = "Sample6Expected1"}
+@test
+operation test_applyOverlappedPM_5() {
+	
+	var op1 = getOperator("inputModel", VisualModel!Operator.all);
+	
+	var initialPatterns = VisualModel!Pattern.all.size;
+	
+	var equalPatternsCache = new Map;
+	var equalOperatorsCache = new Map;
+	
+	applyOverlappedPM(op1, equalPatternsCache, equalOperatorsCache);
+	
+	var patterns = VisualModel!Pattern.all.size;
+	
+	assertTrue(initialPatterns - 1 == patterns);
+	
+	VisualModel.store("TrNetCompilation/testing/TestOverlappedPM/Sample6_test_applyOverlappedPM_5.trnetvisual");
+	
+	assertEqualModels("VisualModel", "ExpectedVisualModel");
+}
+

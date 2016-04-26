@@ -1,0 +1,693 @@
+[%
+import "UtilsGen.eol";
+%]
+package [%=getOutputVisitorPackage()%];
+
+import [%=getRootEcorePackageJava()%].*;
+import [%=getGenericPackage()%].*;
+
+[% // Helps to prevent ambiguities
+for (eclass in OutputMetamodel!EClass.all) {
+	generateExplicitImport(eclass);
+}
+%]
+
+import java.io.IOException;
+import java.util.Collections;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import java.util.Map;
+import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.HashSet;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
+
+public class [%=getClassNameOutputVisitor()%]
+implements [%=getGenericPatternInterfaceListener()%]
+{
+	
+	[%generateHashMapFields();%]
+	
+	[%generateConstructor();%]
+	
+	[%generateStoreXMIMethod();%]
+		
+	[%generateNotifyMethod();%]
+	
+	[%generateGetModelMethod();%]
+	
+	[%generateMethodBuildRootEClass();%]
+	
+	[%generateMethodsCreateAssoc();%]
+	
+	[%generateMethodsCreateNonContainmentAssoc();%]
+	
+}
+
+[%
+
+operation generateStoreXMIMethod() {
+	%]
+	public void store([%=getJavaNameFeature(getRootEClass().name)%] element, String path) {
+		Resource.Factory.Registry reg = Resource.Factory.Registry.INSTANCE;
+		Map<String, Object> m = reg.getExtensionToFactoryMap();
+		m.put("xmi", new XMIResourceFactoryImpl());
+
+		ResourceSet resSet = new ResourceSetImpl();
+		Resource resource = resSet.createResource(URI.createURI(path));
+
+		resource.getContents().add(element);
+
+		try {
+			resource.save(Collections.EMPTY_MAP);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	[%
+}
+
+operation generateMethodsCreateAssoc() {
+	var totalRefs = getAllClassReferences().select(ref | ref.containment).size();
+	var count = 0;
+	for (reference in getAllClassReferences().select(ref | ref.containment)) {
+		("ContainAssoc (" + count + "/" +  totalRefs + ")").println();
+		generateMethodCreateAssoc(reference);
+		count = count + 1;
+	}
+}
+
+operation generateMethodsCreateNonContainmentAssoc() {
+	var totalRefs = getAllClassReferences().select(ref | not ref.containment).size();
+	var count = 0;
+	
+	for (reference in getAllClassReferences().select(ref | not ref.containment)) {
+		("ContainAssoc (" + count + "/" +  totalRefs + ")").println();
+		generateMethodCreateNonContainmentAssoc(reference);
+		count = count + 1;
+	}
+}
+
+operation generateMethodCreateAssoc(reference){
+	%]
+	void [%=getMethodCreateAssoc(reference)%]([%=getEClassJavaName(reference.eContainingClass)%] modelElement, ModelNode node) {
+		LinkedList<ModelPattern> patternAssocs = [%=getHashMapFieldEClass(reference.eContainingClass, reference, reference.eType)%].get(node);
+		if (patternAssocs == null) {
+			return;
+		}
+		for (ModelPattern patternAssoc : patternAssocs) {
+			ModelNode targetNode = patternAssoc.edges.get(0).target;
+			[%
+			generateSubTypeDetermination("targetNode", reference.eType, reference);
+			%]
+		}
+	}
+	[%
+}
+
+operation generateMethodCreateNonContainmentAssoc(reference){
+	%]
+	void [%=getMethodCreateNonContainmentAssoc(reference)%]([%=getEClassJavaName(reference.eContainingClass)%] modelElement, ModelNode node) {
+		LinkedList<ModelPattern> patternAssocs = [%=getHashMapFieldEClass(reference.eContainingClass, reference, reference.eType)%].get(node);
+		if (patternAssocs == null) {
+			return;
+		}
+		for (ModelPattern patternAssoc : patternAssocs) {
+			ModelNode targetNode = patternAssoc.edges.get(0).target;
+			[%
+			generateSubTypeDeterminationNonContainment("targetNode", reference.eType, reference);
+			%]
+		}
+	}
+	[%
+}
+
+operation generateSubTypeDeterminationNonContainment(nodeVar, eclass, reference) {
+	%]
+	
+	if ([%=nodeVar%].types.contains("[%=getJavaNameFeature(eclass.name)%]")) {
+		[%
+		if (hasDirectSubTypes(eclass)) {
+			for (subType in getAllDirectSubTypes(eclass)) {
+				%]
+				[%
+				generateSubTypeDeterminationNonContainment("targetNode", subType, reference);
+				%]
+				else	
+				[%
+			}
+			%] {
+				[%
+				if (eclass.abstract) {
+				%] throw new RuntimeException("Attempt to create an abstract class."); [%
+				} else {
+					generateCreateAssocFinal(eclass, nodeVar, reference);
+				}
+				%]
+			}
+			[%
+		} else {
+			generateCreateAssocFinalNonContainment(eclass, nodeVar, reference);
+		}
+		%]
+	}
+	[%
+}
+
+operation generateSubTypeDetermination(nodeVar, eclass, reference) {
+	%]
+	
+	if ([%=nodeVar%].types.contains("[%=getJavaNameFeature(eclass.name)%]")) {
+		[%
+		if (hasDirectSubTypes(eclass)) {
+			for (subType in getAllDirectSubTypes(eclass)) {
+				%]
+				[%
+				generateSubTypeDetermination("targetNode", subType, reference);
+				%]
+				else	
+				[%
+			}
+			%] {
+				[%
+				if (eclass.abstract) {
+				%] throw new RuntimeException("Attempt to create an abstract class."); [%
+				} else {
+					generateCreateAssocFinal(eclass, nodeVar, reference);
+				}
+				%]
+			}
+			[%
+		} else {
+			generateCreateAssocFinal(eclass, nodeVar, reference);
+		}
+		%]
+	}
+	[%
+}
+
+
+operation generateCreateAssocFinalNonContainment(eclass, nodeVar, reference) {
+	%]
+	if ([%=getHashSetFieldEClass(eclass)%].contains([%=nodeVar%])) { 
+		
+		[%=getJavaNameFeature(eclass.name)%] targetElement = [%=getFieldHashMap2EClass(eclass)%].get([%=nodeVar%]);
+		
+		if (targetElement == null) {
+			targetElement = [%=getFactory(eclass)%].eINSTANCE.[%=getFactoryCreateMethod(eclass)%]();
+			[% generateAttributesSetStatements(nodeVar, "targetElement", eclass); %]
+			[%=getFieldHashMap2EClass(eclass)%].put([%=nodeVar%], targetElement);
+		}
+		
+		[% generateAssocAssignment(reference, "modelElement", "targetElement"); %]
+	}
+	[%
+}
+
+operation generateCreateAssocFinal(eclass, nodeVar, reference) {
+	%]
+	if ([%=getHashSetFieldEClass(eclass)%].contains([%=nodeVar%])) { 
+		
+		[%=getJavaNameFeature(eclass.name)%] targetElement = [%=getFieldHashMap2EClass(eclass)%].get([%=nodeVar%]);
+		
+		if (targetElement == null) {
+			targetElement = [%=getFactory(eclass)%].eINSTANCE.[%=getFactoryCreateMethod(eclass)%]();
+			[% generateAttributesSetStatements(nodeVar, "targetElement", eclass); %]
+			[%=getFieldHashMap2EClass(eclass)%].put([%=nodeVar%], targetElement);
+		}
+		[%
+		generateNonContainmentReferencesSetStatements(nodeVar, "targetElement", eclass);
+		%]
+		[%
+		for (targetNodeReferences in getContainmentReferencesIncludingInherited(eclass)) {
+			%]
+			[%=getMethodCreateAssoc(targetNodeReferences)%](targetElement, [%=nodeVar%]);
+			[%
+		}
+		%]
+		
+		[% generateAssocAssignment(reference, "modelElement", "targetElement"); %]
+	}
+	[%
+}
+operation hasDirectSubTypes(eclass) {
+	return not getAllDirectSubTypes(eclass).isEmpty();
+}
+
+operation getAllDirectSubTypes(eclass) {
+	return OutputMetamodel!EClass.all.select(class | isDirectSubTypeOf(class, eclass));
+}
+
+operation isDirectSubTypeOf(class, eclass) {
+	return class.eSuperTypes.includes(eclass);
+}
+
+
+operation generateAssocAssignment(reference, sourceElementVar, targetElementVar){
+	if (isSet(reference)) {
+		%]
+		[%=sourceElementVar%].[%=getGetterMethod(reference)%]().add([%=targetElementVar%]);
+		[%
+	} else {
+		%]
+		[%=sourceElementVar%].[%=getSetterMethod(reference)%]([%=targetElementVar%]);
+		break;
+		[%
+	}
+}
+
+operation generateMethodBuildRootEClass(){
+	%]
+	[%=getJavaNameFeature(getRootEClass().name)%] [%=getMethodBuildSubTree(getRootEClass())%]() {
+		for (ModelNode node : [%=getHashSetFieldEClass(getRootEClass())%]) {
+			[%=getJavaNameFeature(getRootEClass().name)%] result =  [%=getFieldHashMap2EClass(getRootEClass())%].get(node);
+			
+			if (result == null) {
+				result = [%=getFactory(getRootEClass())%].eINSTANCE.[%=getFactoryCreateMethod(getRootEClass())%]();
+				[%=getFieldHashMap2EClass(getRootEClass())%].put(node, result); // coloca ja o elemento no mapa por causa das futuras referencias com target neste elemento.
+				[%
+					generateAttributesSetStatements("node", "result", getRootEClass());
+					// add non-containment references here.
+					generateNonContainmentReferencesSetStatements("node", "result", getRootEClass());
+				%]
+				[%
+				for (reference in getContainmentReferencesIncludingInherited(getRootEClass())) {
+					%]
+					[%=getMethodCreateAssoc(reference)%](result, node);
+					[%
+				}
+				%]
+			}
+			
+			
+			return result;
+		}
+		
+		return null;
+	}
+	[%
+}
+
+operation generateNonContainmentReferencesSetStatements(nodeVar, resultVar, eclass) {
+	for (reference in getNonContainmentReferencesEClassIncludingInherited(eclass)) {
+		generateSetNonContainmentReference(nodeVar, resultVar, reference);
+	}
+}
+
+operation generateAttributesSetStatements(nodeVar, resultVar, eclass) {
+	//("getAllAttributesIncludingInherited(" + eclass +"): " + getAllAttributesIncludingInherited(eclass)).println();
+	for (attribute in getAllAttributesIncludingInherited(eclass)) {
+		generateSetAttribute(nodeVar, resultVar, attribute);
+	}
+}
+
+operation getNonContainmentReferencesEClassIncludingInherited(eclass) {
+	var result = new Set;
+	for (superType in eclass.eSuperTypes) {
+		result.addAll(getNonContainmentReferencesEClassIncludingInherited(superType));
+	}
+	result.addAll(getNonContainmentReferencesEClass(eclass));
+	return result;
+}
+
+operation getContainmentReferencesIncludingInherited(eclass) {
+	var result = new Set;
+	for (superType in eclass.eSuperTypes) {
+		result.addAll(getContainmentReferencesIncludingInherited(superType));
+	}
+	result.addAll(getContainmentReferences(eclass));
+	return result;
+}
+
+
+operation getMethodCreateAssoc(reference) {
+	return "createAssoc" + getJavaNameFeature(reference.eContainingClass.name) + getJavaNameFeature(reference.name);
+}
+
+operation getMethodCreateNonContainmentAssoc(reference) {
+	return "createNonContainmentAssoc" + getJavaNameFeature(reference.eContainingClass.name) + getJavaNameFeature(reference.name);
+}
+
+operation isSet(reference){
+	return (reference.many);
+}
+
+operation getContainmentReferences(eclass) {
+	return eclass.eStructuralFeatures.select(ref: OutputMetamodel!EReference | ref.containment);
+}
+
+operation getNonContainmentReferencesEClass(eclass) {
+	return eclass.eStructuralFeatures.select(ref: OutputMetamodel!EReference | not ref.containment);
+}
+
+operation generateSetAttribute(nodeVar, resultVar, attribute){
+	//("attribute: " + attribute).println();
+	if (attribute.eType.name = "EBoolean") {
+		%]
+		[%=resultVar%].[%=getSetterMethod(attribute)%](Boolean.parseBoolean([%=nodeVar%].attributes.get("[%=attribute.name%]")));
+		[%
+	} else if (attribute.eType.name = "EString"){ // For now we only consider string and boolean types. Latter we can extend this.
+		if (isManyAttribute(attribute)) {
+			%]
+			[%=resultVar%].[%=getGetterMethod(attribute)%]().add(([%=nodeVar%].attributes.get("[%=attribute.name%]")));
+			[%
+		} else {
+			%]
+			[%=resultVar%].[%=getSetterMethod(attribute)%]([%=nodeVar%].attributes.get("[%=attribute.name%]"));
+			[%
+		}
+	} else if (attribute.eType.isKindOf(OutputMetamodel!EEnum)) {
+		/* Do nothing for enums, for now...
+		%]
+		[%=resultVar%].[%=getSetterMethod(attribute)%]([%=nodeVar%].attributes.get("[%=attribute.name%]"));
+		[%
+		*/
+	} else if (attribute.eType.isKindOf(OutputMetamodel!EDataType)) {
+		if (attribute.eType.name == "String") {
+			if (isManyAttribute(attribute)) {
+				%]
+				[%=resultVar%].[%=getGetterMethod(attribute)%]().add(([%=nodeVar%].attributes.get("[%=attribute.name%]")));
+				[%
+			} else {
+				%]
+				[%=resultVar%].[%=getSetterMethod(attribute)%]([%=nodeVar%].attributes.get("[%=attribute.name%]"));
+				[%
+			}
+		} else if (attribute.eType.name == "Boolean") {
+			%]
+			[%=resultVar%].[%=getSetterMethod(attribute)%](Boolean.parseBoolean([%=nodeVar%].attributes.get("[%=attribute.name%]")));
+			[%
+		} else {
+			throw "Unexpected attribute type in " + attribute + " with type " + attribute.eType;
+		}
+	} else {
+		throw "Unexpected attribute type in " + attribute + " with type " + attribute.eType;
+	}
+}
+
+operation isManyAttribute(attribute) {
+	if (attribute.upperBound==1) {
+		return false;
+	} else if (attribute.upperBound==-1){
+		return true;
+	} else {
+		throw "Unexpected attribute multiplicity in " + attribute;
+	}
+}
+
+operation generateSetNonContainmentReference(nodeVar, resultVar, reference) {
+	%]
+	[%=getMethodCreateNonContainmentAssoc(reference)%]([%=resultVar%], [%=nodeVar%]);
+	[%
+}
+
+operation getGetterMethod(element) {
+	return "get" + getJavaNameFeature(element.name);
+}
+
+operation getSetterMethod(element){
+	return "set"+getJavaNameFeature(element.name);
+}
+
+operation getAllAttributes(eclass) {
+	return eclass.eStructuralFeatures.select(attr: OutputMetamodel!EAttribute | true); 
+}
+
+operation getAllAttributesIncludingInherited(eclass) {
+	var result = new Set;
+	for (superType in eclass.eSuperTypes) {
+		result.addAll(getAllAttributesIncludingInherited(superType));
+	}
+	result.addAll(getAllAttributes(eclass));
+	return result;
+}
+
+operation getFactory(eclass) {
+	return getJavaNameFeature(getRootEcorePackageJava()) + "Factory";
+}
+
+operation getFactoryCreateMethod(eclass) {
+	return "create" + getJavaNameFeature(eclass.name);
+}
+
+operation getAllNonAbstractClasses() {
+	return OutputMetamodel!EClass.all.reject(eclass | eclass.abstract);
+}
+
+operation generateGetModelMethod() {
+	%]
+	public [%=getJavaNameFeature(getRootEClass().name)%] buildModel() {
+		return [%=getMethodBuildSubTree(getRootEClass())%]();
+	}
+	[%
+}
+
+operation getMethodBuildSubTree(eclass){
+	return "build" + getJavaNameFeature(eclass.name);
+}
+
+
+operation getJavaNameFeature(name) {
+	return name.firstToUpperCase();
+}
+
+operation generateNotifyMethod() {
+	%]
+	public void notify([%=getGenericPatternClass()%] element){
+		if (element.nodes.size() == 1 && element.edges.size() == 0) {
+			[%
+			var totalSize = OutputMetamodel!EClass.all.size();
+			var count = 0;
+			for (eclass in OutputMetamodel!EClass.all) {
+				("CapCondEClass (" + count + "/" +  totalSize + ")").println();
+				count = count + 1;
+				generateCaptureConditionEClass(eclass);
+			}
+			%]
+		} else if (element.nodes.size() == 2 && element.edges.size()==1) {
+			[%
+			var totalSize = getAllClassReferences().size();
+			var count = 0;
+			
+			for (eref in getAllClassReferences()) {
+				("CapCondERef (" + count + "/" +  totalSize + ")").println();
+				count = count + 1;
+				generateCaptureConditionEReference(eref.eContainingClass, eref, eref.eType);
+			}
+			%]
+		} else {
+			throw new RuntimeException("Unexpected pattern found.");
+		}
+	}
+	[%
+} 
+
+operation generateCaptureConditionEClass(eclass){
+	%]
+	{
+		ModelNode node = element.nodes.get(0);
+		if (
+		[%
+		for (subType in getAllSubTypes(eclass)) {
+		%]
+		node.types.contains("[%=subType.name%]") ||
+		[%
+		}
+		%]
+		false ) {
+			[%
+			for (superType in getAllSuperTypes(eclass)) {
+			%]
+				node.types.add("[%=superType.name%]");
+				[%generateAddFieldEclass(superType, "node");%]
+			[%
+			}
+			%]
+		}
+	}
+	[%
+}
+
+operation generateAddFieldEclass(eclass, nodeVar){
+	%]
+	[%=getHashSetFieldEClass(eclass)%].add([%=nodeVar%]);
+	[%
+}
+
+operation generateCaptureConditionEReference(sourceClass, reference, targetClass){
+	%]
+	{
+		ModelEdge edge = element.edges.get(0);
+		if (
+			([%
+			for (subType in getAllSubTypes(sourceClass)) {
+			%]
+			edge.source.types.contains("[%=subType.name%]") ||
+			[%
+			}
+			%] false)
+			&& edge.name.equals("[%=reference.name%]") &&
+			( false [%
+			for (subType in getAllSubTypes(targetClass)) {
+			%]
+			|| edge.target.types.contains("[%=subType.name%]")
+			[%
+			}
+			%])
+		    ) {
+			[%generateAddFieldEReference(sourceClass, reference, targetClass, "edge.source", "element");%]
+		}
+	}
+	[%
+}
+
+operation getAllSubTypes(eclass) {
+	return OutputMetamodel!EClass.all.select(class | isSubTypeOf(class, eclass));
+}
+
+operation isSubTypeOf(sclass, eclass) {
+	if (eclass==sclass) {
+		return true; // WE consider that an element is a subtype of itself.
+	} else if (sclass.eSuperTypes.includes(eclass)) {
+		//("sclass direct: " + sclass).println();
+		//("eclass direct: " + eclass).println();
+		return true;
+	} else {
+		//("sclass transitive: " + sclass).println();
+		//("eclass transitive: " + eclass).println();
+		return sclass.eSuperTypes.exists(ssclass | isSubTypeOf(ssclass, eclass));
+	}
+}
+
+operation generateAddFieldEReference(sourceClass, reference, targetClass, sourceVar, patternVar){
+	%]
+	if (![%=getHashMapFieldEClass(sourceClass, reference, targetClass)%].containsKey([%=sourceVar%])) {
+		[%=getHashMapFieldEClass(sourceClass, reference, targetClass)%].put([%=sourceVar%], new LinkedList<[%=getGenericPatternClass()%]>());
+	}
+	[%=getHashMapFieldEClass(sourceClass, reference, targetClass)%].get([%=sourceVar%]).add([%=patternVar%]);
+	[%
+}
+
+
+operation generateConstructor() {
+	%]
+	public [%=getClassNameOutputVisitor()%]() {
+		[%generateHashMapFieldsInitializers();%]
+	}
+	[%
+}
+
+operation generateHashMapModel2EClassInitializer(eclass){
+	%]
+	[%=getFieldHashMap2EClass(eclass)%] = new HashMap<ModelNode, [%=getJavaNameFeature(eclass.name)%]>(10);
+	[%
+}
+
+operation generateHashMapFieldsInitializers(){
+	for (eclass in OutputMetamodel!EClass.all) {
+		generateHashsetFieldEClassInitializer(eclass);
+		generateHashMapModel2EClassInitializer(eclass);
+	}
+	
+	for (eref in getAllClassReferences()) {
+		generateHashmapFieldEReferenceInitializer(eref.eContainingClass, eref, eref.eType);
+	}
+}
+
+operation generateHashMapFields() {
+	for (eclass in OutputMetamodel!EClass.all) {
+		generateHashsetFieldEClass(eclass);
+		generateHashMapModelNode2EClass(eclass);
+	}
+	
+	for (eref in getAllClassReferences()) {
+		generateHashmapFieldEReference(eref.eContainingClass, eref, eref.eType);
+	}
+}
+
+operation getAllClassReferences() {
+	return OutputMetamodel!EReference.all.select(ref | ref.eContainingClass<>null and ref.eContainingClass.isDefined() and ref.eType <> null and ref.eType.isDefined()); // this garantuess that anotations will not affect the visitor.
+}
+
+operation generateHashsetFieldEClass(eclass) {
+	%]
+	HashSet<[%=getGenericNodeClass()%]> [%=getHashSetFieldEClass(eclass)%];
+	[%
+}
+
+operation generateHashMapModelNode2EClass(eclass) {
+	%]
+	HashMap<ModelNode, [%=getJavaNameFeature(eclass.name)%]> [%=getFieldHashMap2EClass(eclass)%];
+	[%
+}
+
+operation getFieldHashMap2EClass(eclass) {
+	return "modelNode2" + getJavaNameFeature(eclass.name);
+}
+
+operation generateHashsetFieldEClassInitializer(eclass){
+	%]
+	[%=getHashSetFieldEClass(eclass)%] = new HashSet<[%=getGenericNodeClass()%]>(10);
+	[%
+}
+
+operation getHashSetFieldEClass(eclass){
+	return getEClassJavaName(eclass)+"Set";
+}
+
+operation generateHashmapFieldEReference(sourceClass, reference, targetClass){
+	%]
+	HashMap<[%=getGenericNodeClass()%], LinkedList<[%=getGenericPatternClass()%]>> [%=getHashMapFieldEClass(sourceClass, reference, targetClass)%];
+	[%
+}
+
+operation generateHashmapFieldEReferenceInitializer(sourceClass, reference, targetClass){
+	%]
+	[%=getHashMapFieldEClass(sourceClass, reference, targetClass)%] = new HashMap<[%=getGenericNodeClass()%], LinkedList<[%=getGenericPatternClass()%]>>(10);
+	[%
+}
+
+
+operation getHashMapFieldEClass(sourceClass, reference, targetClass){
+	
+	return getEClassJavaName(sourceClass) + getEReferenceJavaName(reference) + getEClassJavaName(targetClass) + "Map";
+}
+
+
+operation generateExplicitImport(eclass){
+%]
+import [%=getRootEcorePackageJava()%].[%=getEClassJavaName(eclass)%];
+[%
+}
+
+operation contains(class, eclass){
+	return getContainedClasses(class).exists(c: OutputMetamodel!EClass | c = eclass);
+}
+
+operation getContainedClasses(eclass){
+	return getContainmentReferences(eclass).collect(ref: OutputMetamodel!EReference | ref.eType);
+}
+
+
+operation getEClassJavaName(eclass){
+	return eclass.name.firstToUpperCase();
+}
+
+operation getEReferenceJavaName(ereference){
+	return ereference.name.firstToUpperCase();
+}
+
+operation getOutputVisitorPackage(){
+	return getRootEcorePackageJava() + "_visitor";
+}
+
+operation getClassNameOutputVisitor() {
+	return getRootEcorePackage().name.toLowerCase().firstToUpperCase() + "OutputVisitor";
+}
+
+operation getJavaClassNameOutputVisitor() {
+	return getClassNameOutputVisitor() + ".java";
+}
+%]

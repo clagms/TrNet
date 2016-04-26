@@ -1,0 +1,704 @@
+import "../Utils.eol";
+import "../TrNetManipulationUtils.eol";
+
+var trace = false;
+
+if(trace){
+	"Decomposing model...".println();
+}
+
+var trnetmodel = TrNetModel!TrNetModel.all.first;
+
+if(trace){
+	("Implicit operators: " + 
+			findAllImplicitOperators(trnetmodel).collect(op | op.id)).println();
+}
+
+var transformationNativeFile = getTransformationNativeFile(transformationFile);
+
+var rootFolder = transformationNativeFile.getParent() + "/" + transformationNativeFile.getName().replace(".trnetvisual", "");
+
+if(trace){
+	("rootFolder: " + rootFolder).println();
+}
+
+var callIdent = " ";
+
+var operator = findUndecomposedImplicitOperator(trnetmodel, rootFolder);
+
+if (operator <> null){
+	
+	if(trace){
+		("Decomposing operator " + 
+			operator.id + " ...").println();
+	}
+	
+	decomposeOperator(operator, trnetmodel, rootFolder, callIdent);
+	
+	if(trace){
+		("Decomposing operator " + 
+			operator.id + " ... DONE").println();
+	}
+	
+} else {
+	
+	if(trace){
+		("Operator " + 
+			operator.id + " already decomposed.").println();
+	}
+	
+}
+
+
+if(trace){
+	"Decomposing model... DONE".println();
+}
+
+operation decomposeOperator(operator, trnetmodel, rootFolder, callIdent){
+	
+	if(true){
+		(callIdent + ">decomposeOperator(" + operator.id + ")").println();
+	}
+	
+	if (not isDecomposableOperator(operator)){
+		
+		if(true){
+			(callIdent + "<decomposeOperator(" + operator.id + ")").println();
+		}
+		
+		return;
+	}
+	
+	var decompositionFolder = rootFolder + "/" + operator.id;
+	
+	if(trace){
+		("Folder: " + decompositionFolder).println();
+	}
+	
+	// we use the ids to avoid changing the collection in which we are iterating
+	var candidatesForSplit = operator.operands.collect(operands| operands.pattern.id);
+	var splitID = candidatesForSplit.first;
+	
+	// we iterate the splits to that each alternative can be explored.
+	var splitID = candidatesForSplit.first;
+	for (splitID in candidatesForSplit) { 
+		
+		transaction TrNetModel{
+			
+			decomposeOperatorBySplit(operator, splitID, trnetmodel, decompositionFolder, callIdent);
+			
+			var modelName = "";
+			if (findAllImplicitOperators(trnetmodel).isEmpty()){
+				modelName = splitID + "_explicit";
+			} else {
+				modelName = splitID + "_implicit";		
+			}
+			var location = decompositionFolder + "/" + modelName + ".trnetvisual";
+			
+			TrNetModel.store(location);
+			if(true){
+				("Model stored in " 
+					+ location).println();
+			}
+			
+			abort;
+		}
+		
+	}
+	
+	if(true){
+		(callIdent + "<decomposeOperator(" + operator.id + ")").println();
+	}
+	
+}
+
+operation decomposeOperatorBySplit(operator, splitID, trnetmodel, decompositionFolder, callIdent){
+	
+	if(true){
+		(callIdent + ">decomposeOperatorBySplit(" + operator.id + "," + splitID + ")").println();
+	}
+	
+	// create the union pattern of the operands that are not the split operand
+	var splitPattern = operator.operands.collect(operand| operand.pattern)
+						.select(pattern|pattern.id == splitID).first;
+	var otherOperands = operator.operands.collect(operand| operand.pattern)
+						.select(pattern|pattern.id <> splitID);
+	
+	var node2CloneMap = new Map;
+	var attribute2CloneMap = new Map;
+	
+	// create an empty union pattern
+	var unionPattern = createPattern(trnetmodel);
+	unionPattern.id = generateFreshId(
+							"union"+otherOperands.collect(pat|pat.id).concat("_") + "_", 
+							TrNetModel!Pattern.all.collect(pat | pat.id));
+	
+	if(trace){
+		("Union pattern  " + unionPattern.id + " created.").println();
+	}
+	
+	// create a new operator between the operands that formed the union pattern and 
+	// the union pattern itself. The keep and the same restrictions will be added later.
+	var newOperator = createCombinator(trnetmodel);
+	newOperator.id = "op"+unionPattern.id;
+	for (pattern in otherOperands) { 
+		addAsAnyOperand(newOperator, pattern, trnetmodel);
+	}
+	addAsAnyResult(newOperator, unionPattern, trnetmodel);
+	
+	if(trace){
+		("New operator  " + newOperator.id + " created.").println();
+	}
+	
+	// those operands are no longer operands of the operator operator.
+	for (pattern in otherOperands) { 
+		removeOperandsFromPattern(operator, pattern);
+	}
+	
+	if (operator.operands.size()<>1){
+		throw "Operator should have only one operand by now.";
+	}
+	
+	if(trace){
+		("Operands moved to the new operator.").println();
+	}
+	
+	// the operator has only two operands now: the split and the union pattern.
+	addAsAnyOperand(operator, unionPattern, trnetmodel);
+	
+	if(trace){
+		("Old operator got new operands.").println();
+	}
+	
+	
+	// copy all the nodes and edges of the operands into the union patterns
+	// copy also the attributes
+	for (pattern in otherOperands) { 
+		for (node in pattern.nodes){
+			var clone = copyNode(node);
+			
+			if (unionPattern.nodes.exists(n | n.id == node.id)){
+				clone.id = generateFreshId(node.id + "_", unionPattern.nodes.collect(n | n.id));
+			} else {
+				clone.id = node.id;
+			}
+			
+			unionPattern.nodes.add(clone);
+			node2CloneMap.put(node, clone);
+			
+			// create a keep restriction between each node and its copy.		
+			connectByKeepRestriction(node, clone, trnetmodel);
+			
+			// copy attributes
+			for (attribute in node.attributes) { 
+				var attrClone = copyAttributePattern(attribute);
+				clone.attributes.add(attrClone);
+				attribute2CloneMap.put(attribute, attrClone);
+			}
+		}
+		for (edge in pattern.edges) { 
+			var edgeClone = copyEdge(edge, node2CloneMap);
+			unionPattern.edges.add(edgeClone);
+		}
+	}
+	
+	if(trace){
+		("Nodes added to the union pattern.").println();
+	}
+	
+	// move the parameters of the attribute calculations that 
+	// depend on nodes or attributes of the OtherOperands.
+	// we only care about the calculation that affect some of the operator operator
+	// results.
+	for (attrCalculation in 
+			TrNetModel!ExternalAttributeCalculationCall.all
+				.select(attrCalc|operator.results
+				  .collect(res|res.pattern.nodes.collect(node| node.attributes))
+				  .flatten().includes(attrCalc.result))) { 
+		for (param in attrCalculation.parameters) { 
+			var nodeOrAttribute = param.parameter;
+			if (node2CloneMap.containsKey(nodeOrAttribute)){
+				// set the parameter to point to the clone of the node.
+				param.parameter = node2CloneMap.get(nodeOrAttribute);
+			} else if (attribute2CloneMap.containsKey(nodeOrAttribute)){
+				// set the parameter to point to the clone of the attribute.
+				param.parameter = attribute2CloneMap.get(nodeOrAttribute);
+			}
+		}
+	}
+	
+	if(trace){
+		("Attribute calculations moved to the new nodes.").println();
+	}
+	
+	// do the same thing for the conditions that belong to the operator.
+	for (cond in operator.conditions){
+		for (param in cond.parameters) { 
+			var nodeOrAttribute = param.parameter;
+			if (node2CloneMap.containsKey(nodeOrAttribute)){
+				// set the parameter to point to the clone of the node.
+				param.parameter = node2CloneMap.get(nodeOrAttribute);
+			} else if (attribute2CloneMap.containsKey(nodeOrAttribute)){
+				// set the parameter to point to the clone of the attribute.
+				param.parameter = attribute2CloneMap.get(nodeOrAttribute);
+			}
+		}
+	}
+	
+	if(trace){
+		("Conditions moved to the new nodes.").println();
+	}
+	
+	// copy also the same restrictions, even those that link to nodes in the split pattern.
+	var sameCounter = 0;
+	for (same in Same.all) { 
+		
+		// if the source of the same fall into one of the nodes 
+		//  belonging to the union pattern, 
+		//  create a clone of the same and connect its source to the clone node and
+		//  target to its original target.
+		//  then check if the target of the same fall into one of the nodes belonging to
+		//  the union pattern. If so, move the same clone target to the clone node.
+		// otherwise, repeat the same thing but for the target node of the same.
+		
+		
+		if (node2CloneMap.containsKey(same.source)){
+			if (node2CloneMap.containsKey(same.target)){
+				connectBySameRestriction(
+					node2CloneMap.get(same.source), 
+					node2CloneMap.get(same.target), 
+					trnetmodel);
+				
+				if(trace){
+					("Same created: " 
+					+ node2CloneMap.get(same.source).pattern.id
+					+"_"+node2CloneMap.get(same.source).id + " -> "
+					+ node2CloneMap.get(same.target).pattern.id
+					+"_"+node2CloneMap.get(same.target).id ).println();
+				}
+			} else {
+				connectBySameRestriction(
+					node2CloneMap.get(same.source), 
+					same.target, 
+					trnetmodel);
+				if(trace){
+					("Same created: " 
+					+ node2CloneMap.get(same.source).pattern.id
+					+"_"+node2CloneMap.get(same.source).id + " -> "
+					+ same.target.pattern.id
+					+"_"+same.target.id ).println();
+				}
+				
+			}
+			sameCounter = sameCounter+1;
+		} else if (node2CloneMap.containsKey(same.target)){
+			if (node2CloneMap.containsKey(same.source)){
+				throw "This never occurs.";
+			} else {
+				connectBySameRestriction(
+					same.source, 
+					node2CloneMap.get(same.target), 
+					trnetmodel);
+				if(trace){
+					("Same created: " 
+					+ same.source.pattern.id
+					+"_"+same.source.id + " -> "
+					+ node2CloneMap.get(same.target).pattern.id
+					+"_"+node2CloneMap.get(same.target).id ).println();
+				}
+				sameCounter = sameCounter+1;
+			}
+		}
+	}
+	
+	if(trace){
+		("Same restrictions copied to the new nodes: " 
+		+ sameCounter).println();
+	}
+	
+	// any keep restrictions whose source is in some node of the otheroperands,
+	//  must be change to the new node in the union pattern.
+	var operatorsResultNodes = operator.results
+									.collect(res|res.pattern
+											.collect(pat | pat.nodes))
+									.flatten();
+	for (keep in Keep.all.select(keep|node2CloneMap.containsKey(keep.source))) { 
+		// make sure that this keep is pointing to a node that belongs to some 
+		// result of operator operator.
+		if (operatorsResultNodes.includes(keep.target)){
+			keep.source = node2CloneMap.get(keep.source);
+		}
+	}
+	
+	if(trace){
+		("Keep restrictions moved to the new nodes.").println();
+	}
+	
+	
+	// look at the same restrictions between the nodes of the 
+	// unionPattern,  merge those nodes  
+	// and then delete the same restriction
+	
+	
+	while(not Same.all
+				.select(same|unionPattern.nodes.includes(same.source) and
+							unionPattern.nodes.includes(same.target))
+				.isEmpty()){
+		
+		// pick one
+		var sameBetweenNodesToBeMerged = Same.all
+				.selectOne(same|unionPattern.nodes.includes(same.source) and
+							unionPattern.nodes.includes(same.target));
+		
+		if(trace){
+			("Same restrictions between nodes to be merged left: " 
+			+ Same.all
+				.selectOne(same|unionPattern.nodes.includes(same.source) and
+							unionPattern.nodes.includes(same.target)).size()).println();
+		}
+		
+		// get the corresponding nodes in the operands:
+		// we need to later correct the dictionary to the merged node.
+		var origNodeSources = node2CloneMap.keySet
+									.select(key | 
+										node2CloneMap.get(key)==sameBetweenNodesToBeMerged.source);
+		var origNodeTargets = node2CloneMap.keySet
+									.select(key | 
+										node2CloneMap.get(key)==sameBetweenNodesToBeMerged.target);
+		
+		if (origNodeSources.size() <> 1 or origNodeTargets.size()<> 1){
+			throw "Unexpected";
+		}
+		
+		var origNodeSource = origNodeSources.first;
+		var origNodeTarget = origNodeTargets.first;
+		
+		//merge the nodes
+		var mergedNode = mergeNodes(sameBetweenNodesToBeMerged.source,
+									sameBetweenNodesToBeMerged.target);
+		
+		// correct the nodes map.
+		node2CloneMap.put(origNodeSource, mergedNode);
+		node2CloneMap.put(origNodeTarget, mergedNode);
+		
+		// remove the restriction
+		delete sameBetweenNodesToBeMerged;
+		
+	}
+	
+	if(trace){
+		("All nodes merged.").println();
+	}
+	
+	
+	// remove the redundant keep restrictions
+	//  those that point to the same element and whose sources are two nodes
+	//  connected by a same restriction
+	var unionPatternNodes = unionPattern.nodes;
+	var keepsMarkedForDeletion = new Sequence;
+	var sameRestrictionsBetweenOtherOperandsNodes = 
+			Same.all.select(same| node2CloneMap.containsKey(same.source)
+									and node2CloneMap.containsKey(same.target));
+	
+	var sameRestrictionsBetweenOperandsIds = 
+				sameRestrictionsBetweenOtherOperandsNodes.collect(s | 
+						"(" + s.source.pattern.id + "_" + s.source.id + "," 
+						+ s.target.pattern.id + "_" + s.target.id + ")");
+	
+	if(trace){
+		("Sames between operands: " + 
+				sameRestrictionsBetweenOperandsIds).println();
+	}
+	
+	
+	
+	for (keep in Keep.all
+				.select(keep|unionPattern.nodes.includes(keep.target)
+							and node2CloneMap.containsKey(keep.source))) { 
+		var redundantKeeps = 
+				Keep.all
+				.select(keep2|keep2.target == keep.target
+								and keep2.source <> keep.source
+								and node2CloneMap.containsKey(keep2.source)
+								and sameRestrictionsBetweenOtherOperandsNodes
+									.exists(same| (same.source == keep.source 
+													and same.target == keep2.source)
+												 or (same.source == keep2.source 
+													and same.target == keep.source) )
+								);
+		
+		var redundantKeepsIds = 
+				redundantKeeps.collect(k | 
+						"(" + k.source.pattern.id + "_" + k.source.id + "," 
+						+ k.target.pattern.id + "_" + k.target.id + ")");
+			
+			if(trace){
+				( "Redundant Keeps with keep " + 
+						"(" + keep.source.pattern.id + "_" + keep.source.id + "," 
+								+ keep.target.pattern.id + "_" + keep.target.id + ")"
+					 + ": " + redundantKeepsIds).println();
+			}
+						
+			
+		
+		for (redundantKeep in redundantKeeps) { 
+			if (not keepsMarkedForDeletion.includes(redundantKeep)){
+				keepsMarkedForDeletion.add(keep);
+			}
+		}
+	}
+	
+	if(trace){
+		("Redundant keeps found: " 
+			+ keepsMarkedForDeletion.size()).println();
+	}
+	
+	for (keep in keepsMarkedForDeletion) { 
+		delete keep;
+	}
+	
+	if(trace){
+		("Redundant keeps deleted.").println();
+	}
+	
+	// ensure that no ambiguous keep restrictions were introduced.
+	//  I have a validation for this already, so assert that.
+	for (keep in Keep.all) { 
+		var ambiguousKeeps =
+			Keep.all.select(keep2|keep.target == keep2.target
+									and keep.source <> keep2.source
+									and Operator
+										.all
+										.exists(op|
+											op.operands
+												.collect(o|o.pattern)
+												.includes(keep.source.pattern)
+											and 
+											op.operands
+												.collect(o|o.pattern)
+												.includes(keep2.source.pattern))
+									);
+		if (not ambiguousKeeps.isEmpty()){
+			var ambiguousKeepsIds = 
+				ambiguousKeeps.collect(k | 
+						"(" + k.source.pattern.id + "_" + k.source.id + "," 
+						+ k.target.pattern.id + "_" + k.target.id + ")");
+			throw "Ambiguous Keeps with keep " + 
+				"(" + keep.source.pattern.id + "_" + keep.source.id + "," 
+						+ keep.target.pattern.id + "_" + keep.target.id + ")"
+			 + " found: " + ambiguousKeepsIds;
+		}
+	}
+	
+	if(trace){
+		("No ambiguous keeps found.").println();
+	}
+	
+	
+	
+	// ensure that no keeps remain between the otheroperands and the results.
+	if (not 
+		Keep.all
+		.select(keep|node2CloneMap.containsKey(keep.source)
+				and operatorsResultNodes.includes(keep.target)).isEmpty()){
+		throw "Unexpected keeps found.";
+	}
+	
+	if(trace){
+		("No useless keeps found.").println();
+	}
+	
+	
+	// remove the useless same restrictions
+	//  those that are between patterns that are not operands of the same operator.
+	var sameMarkedForDeletion = Same.all
+			.reject(same | // now we reject those that affect an operator.
+				Operator.all.exists(op | sameAffectsOperator(same, op)));
+	
+	if(trace){
+		("Useless sames found: " + sameMarkedForDeletion.size()).println();
+	}
+	
+	for (same in sameMarkedForDeletion) { 
+		delete same;
+	}
+	
+	if(trace){
+		("Useless sames deleted. ").println();
+	}
+	
+	
+	// remove the useless calculations and conditions
+	//  those that do not affect the outcome of any operator.
+	// I should introduce a validation for this.
+	// These should not even occur. If they occur, it is a bug in the algorithm
+	if (not 
+		ExternalAttributeCalculationCall.all
+		.select(calc| 
+		  calc.parameters.collect(param | param.parameter)
+		  .exists(attrPattern | not calc.result.ownerNode.pattern.incomingResults
+								  .collect(res| 
+								  	res.operator.operands.collect(operand | 
+								  		operand.pattern.nodes.collect(node | node.attributes)))
+								  .flatten().includes(attrPattern))).isEmpty()){
+		throw "Attribute calculations that do not affect anything found.";							  
+	}
+	
+	if(trace){
+		("No useless calculations found.").println();
+	}
+	
+	if (not 
+		ExternalConditionCall.all
+		.select(cond| cond.parameters.collect(param | param.parameter)
+			.exists(attrPattern | not (Operator.all.selectOne(op|op.conditions.includes(cond))
+									.operands.collect(operand | 
+								  		operand.pattern.nodes.collect(node | node.attributes)))
+								  		.flatten().includes(attrPattern)) ).isEmpty()){
+		throw "Conditions that do not affect anything found.";								  		
+	}
+	
+	if(trace){
+		("No useless conditions founds.").println();
+	}
+	
+	// and proceed recursively to decompose the remaining implicit operator.
+	// decomposeOperator(newOperator, trnetmodel, decompositionFolder + "/" + splitID, callIdent + " ");
+	
+	
+	
+	if(true){
+		(callIdent + "<decomposeOperatorBySplit(" + operator.id + "," + splitID + ")").println();
+	}
+}
+
+
+operation mergeNodes(node1,node2){
+	
+	// the two nodes must have the same name and "live" in the same pattern.
+	if (node1.name <> node2.name){
+		throw "Nodes must have same name.";
+	}
+	if (node1.pattern <> node2.pattern){
+		throw "Nodes must live in the same pattern.";
+	}
+	
+	// merge the nodes attributes.
+	// This involves checking if the attributes of node2 is already present in node1.
+	// if it is, then we must go through all parameter refs to point to the attribute in
+	//  node2 and set them to point to the same attribute in node1.
+	// if it is not, then we can simply remove the attribute from node2 and add it 
+	//  to node 1. The parameter references that point to that attribute do not need to be changed.
+	while(not node2.attributes.isEmpty()){
+		var attr2 = node2.attributes.first;
+		if (node1.attributes.exists(attr1|attr1.name == attr2.name)){
+			for (param in ExternalCalculationCallParameter.all
+						.select(param|param.parameter==attr2)) { 
+				param.parameter = attr1;
+			}
+			for (param in ExternalAttributeCalculationCallParameter.all
+						.select(param|param.parameter==attr2)) { 
+				param.parameter = attr1;
+			}
+			for (param in ExternalConditionCallParameter.all
+						.select(param|param.parameter==attr2)) { 
+				param.parameter = attr1;
+			}
+			for (param in ExternalActionCallParameter.all
+						.select(param|param.parameter==attr2)) { 
+				param.parameter = attr1;
+			}
+			// and remove the attr2 from node2.
+			node2.attributes.remove(attr2);
+			delete attr2;
+		} else {
+			node2.attributes.remove(attr2);
+			node1.attributes.add(attr2);
+		}
+	}
+	
+	// update the edges that end/start in node2 to end/start in node1
+	for (edge in EdgePattern.all.select(edge| edge.target==node2)) { 
+		edge.target = node1;
+	}
+	for (edge in EdgePattern.all.select(edge| edge.source==node2)) { 
+		edge.source = node1;
+	}
+	
+	// update the keep references that are pointing to node2, to point to node1 instead.
+	for (keep in Keep.all.select(keep| keep.target==node2)) { 
+		keep.target = node1;
+	}
+	
+	// update the keep references that start at node2 to start at node1 instead
+	for (keep in Keep.all.select(keep| keep.source==node2)) { 
+		keep.source = node1;
+	}
+	
+	// do the same for the same references.
+	for (same in Same.all.select(same| same.target==node2)) { 
+		same.target = node1;
+	}
+	for (same in Same.all.select(same| same.source==node2)) { 
+		same.source = node1;
+	}
+	
+	
+	// delete node2.
+	delete node2;
+	
+	return node1;
+}
+
+operation generateFreshId(prefix, ids){
+	var idSufix = 0;
+	// avoid clashes of ids
+	while (ids.exists(id | id == (prefix + idSufix))){
+		idSufix = idSufix + 1;
+	}
+	return (prefix + idSufix);
+}
+
+operation getTransformationNativeFile(transformationFile){
+	var file = new Native("java.io.File")(transformationFile);
+	return file;
+}
+
+operation hasAlreadyBeenDecomposed(operator_id, rootFolder){
+	return hasFolderWithName(operator_id, rootFolder);
+}
+
+operation hasFolderWithName(operator_id, rootFolder){
+	var file = new Native("java.io.File")(rootFolder + "/"  + operator_id);
+	return 	file.exists();
+}
+
+
+operation findUndecomposedImplicitOperator(trnetmodel, rootFolder){
+	var unDecomposedOperator = null;
+
+	for (operator in findAllImplicitOperators(trnetmodel)) { 
+		if (not hasAlreadyBeenDecomposed(operator.id, rootFolder)){
+			unDecomposedOperator = operator;
+			break;
+		}
+	}
+	
+	return unDecomposedOperator;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

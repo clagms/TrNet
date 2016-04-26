@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<notation:Diagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:trnetvisual="http://trnetvisual/1.0" xmi:id="_pH83wOR6EeKobKEi7I9cnA" type="Trnetvisual" measurementUnit="Pixel">
+  <styles xmi:type="notation:DiagramStyle" xmi:id="_pH83weR6EeKobKEi7I9cnA"/>
+  <element xmi:type="trnetvisual:TrNetModel" href="SampleAnalysable1.trnetvisual#/"/>
+</notation:Diagram>

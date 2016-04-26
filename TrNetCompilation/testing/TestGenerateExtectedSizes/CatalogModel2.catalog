@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="ASCII"?>
+<catalog:CatalogModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:catalog="http://catalog/1.0">
+  <types name="CModel" outgoingReferences="//@references.0 //@references.1 //@references.11" aggregatedNumberOfInstances="1">
+    <samples numberOfInstances="1"/>
+  </types>
+  <types name="Classifier" incomingReferences="//@references.0 //@references.4 //@references.7" super="//@types.2" aggregatedNumberOfInstances="100">
+    <attributes name="name" aggregatedNumberOfDistinctValues="100">
+      <samples numberOfDistinctValues="100"/>
+    </attributes>
+    <samples numberOfInstances="100"/>
+  </types>
+  <types name="NamedElement" aggregatedNumberOfInstances="200">
+    <attributes name="name" aggregatedNumberOfDistinctValues="100">
+      <samples numberOfDistinctValues="100"/>
+    </attributes>
+    <samples numberOfInstances="200"/>
+  </types>
+  <types name="CClass" outgoingReferences="//@references.2 //@references.3 //@references.10" incomingReferences="//@references.2 //@references.5 //@references.8 //@references.10 //@references.1" super="//@types.1" aggregatedNumberOfInstances="51">
+    <attributes name="abstract" aggregatedNumberOfDistinctValues="2">
+      <samples numberOfDistinctValues="2"/>
+    </attributes>
+    <attributes name="name" aggregatedNumberOfDistinctValues="51">
+      <samples numberOfDistinctValues="51"/>
+    </attributes>
+    <samples numberOfInstances="51"/>
+  </types>
+  <types name="Attribute" outgoingReferences="//@references.4 //@references.5 //@references.6" incomingReferences="//@references.3" super="//@types.2 //@types.5" aggregatedNumberOfInstances="100">
+    <attributes name="isMany" aggregatedNumberOfDistinctValues="2">
+      <samples numberOfDistinctValues="2"/>
+    </attributes>
+    <attributes name="name" aggregatedNumberOfDistinctValues="100">
+      <samples numberOfDistinctValues="100"/>
+    </attributes>
+    <samples numberOfInstances="100"/>
+  </types>
+  <types name="TypedElement" outgoingReferences="//@references.7 //@references.8 //@references.9" aggregatedNumberOfInstances="100">
+    <samples numberOfInstances="100"/>
+  </types>
+  <types name="Datatype" incomingReferences="//@references.6 //@references.9 //@references.11" super="//@types.1" aggregatedNumberOfInstances="49">
+    <attributes name="name" aggregatedNumberOfDistinctValues="49">
+      <samples numberOfDistinctValues="49"/>
+    </attributes>
+    <samples numberOfInstances="49"/>
+  </types>
+  <references name="contents" source="//@types.0" target="//@types.1" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="100" aggregatedNumberOfInstances="100">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="100" numberOfInstances="100"/>
+  </references>
+  <references name="contents" source="//@types.0" target="//@types.3" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="51" aggregatedNumberOfInstances="51">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="51" numberOfInstances="51"/>
+  </references>
+  <references name="extends" source="//@types.3" target="//@types.3">
+    <samples/>
+  </references>
+  <references name="attributes" source="//@types.3" target="//@types.4" aggregatedNumberOfDistinctSourceInstances="47" aggregatedNumberOfDistinctTargetInstances="100" aggregatedNumberOfInstances="100">
+    <samples numberOfDistinctSourceInstances="47" numberOfDistinctTargetInstances="100" numberOfInstances="100"/>
+  </references>
+  <references name="type" source="//@types.4" target="//@types.1" aggregatedNumberOfDistinctSourceInstances="100" aggregatedNumberOfDistinctTargetInstances="69" aggregatedNumberOfInstances="100">
+    <samples numberOfDistinctSourceInstances="100" numberOfDistinctTargetInstances="69" numberOfInstances="100"/>
+  </references>
+  <references name="type" source="//@types.4" target="//@types.3" aggregatedNumberOfDistinctSourceInstances="54" aggregatedNumberOfDistinctTargetInstances="35" aggregatedNumberOfInstances="54">
+    <samples numberOfDistinctSourceInstances="54" numberOfDistinctTargetInstances="35" numberOfInstances="54"/>
+  </references>
+  <references name="type" source="//@types.4" target="//@types.6" aggregatedNumberOfDistinctSourceInstances="46" aggregatedNumberOfDistinctTargetInstances="34" aggregatedNumberOfInstances="46">
+    <samples numberOfDistinctSourceInstances="46" numberOfDistinctTargetInstances="34" numberOfInstances="46"/>
+  </references>
+  <references name="type" source="//@types.5" target="//@types.1" aggregatedNumberOfDistinctSourceInstances="100" aggregatedNumberOfDistinctTargetInstances="69" aggregatedNumberOfInstances="100">
+    <samples numberOfDistinctSourceInstances="100" numberOfDistinctTargetInstances="69" numberOfInstances="100"/>
+  </references>
+  <references name="type" source="//@types.5" target="//@types.3" aggregatedNumberOfDistinctSourceInstances="54" aggregatedNumberOfDistinctTargetInstances="35" aggregatedNumberOfInstances="54">
+    <samples numberOfDistinctSourceInstances="54" numberOfDistinctTargetInstances="35" numberOfInstances="54"/>
+  </references>
+  <references name="type" source="//@types.5" target="//@types.6" aggregatedNumberOfDistinctSourceInstances="46" aggregatedNumberOfDistinctTargetInstances="34" aggregatedNumberOfInstances="46">
+    <samples numberOfDistinctSourceInstances="46" numberOfDistinctTargetInstances="34" numberOfInstances="46"/>
+  </references>
+  <references name="super" source="//@types.3" target="//@types.3">
+    <samples/>
+  </references>
+  <references name="contents" source="//@types.0" target="//@types.6" aggregatedNumberOfDistinctSourceInstances="1" aggregatedNumberOfDistinctTargetInstances="49" aggregatedNumberOfInstances="49">
+    <samples numberOfDistinctSourceInstances="1" numberOfDistinctTargetInstances="49" numberOfInstances="49"/>
+  </references>
+</catalog:CatalogModel>

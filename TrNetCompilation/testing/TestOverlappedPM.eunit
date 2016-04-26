@@ -1,0 +1,949 @@
+import "UtilsTest.eol";
+import "../analysis/OverlappedPMLib.eol";
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_edgesAreEqual() {
+	var pat1 = getPattern("P1", VisualModel!Pattern.all);
+	var pat2 = getPattern("P2", VisualModel!Pattern.all);
+	
+	var edge1 = getEdge("e1", pat1.edges);
+	var edge2 = getEdge("e1", pat2.edges);
+	
+	assertTrue(edgesAreEqual(edge1, edge2));
+	assertTrue(edgesAreEqual(edge2, edge1));
+	
+	var edge11 = getEdge("e2", pat1.edges);
+	var edge22 = getEdge("e2", pat2.edges);
+	
+	assertFalse(edgesAreEqual(edge11, edge22));
+	assertFalse(edgesAreEqual(edge22, edge11));
+	
+	
+}
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_getCandidateEdges() {
+	var pat1 = getPattern("P1", VisualModel!Pattern.all);
+	var pat2 = getPattern("P2", VisualModel!Pattern.all);
+	var pat3 = getPattern("P3", VisualModel!Pattern.all);
+	
+	
+	var edge1 = getEdge("e1", pat1.edges);
+	var edge2 = getEdge("e2", pat1.edges);
+	
+	
+	var c1 = getCandidateEdges(edge1, pat1.edges);
+	
+	assertTrue(c1 <> null);
+	
+	assertEquals(1, c1.size);
+	assertEquals(edge1, c1.first);
+	
+	var c0 = getCandidateEdges(edge2, pat3.edges);
+	
+	assertTrue(c0 <> null);
+	assertTrue(c0.isEmpty());
+	
+	var c2 = getCandidateEdges(edge1, pat3.edges);
+	
+	assertEquals(2, c2.size);
+	
+}
+
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_edgesSetAreEqual() {
+
+	var pat1 = getPattern("P1", VisualModel!Pattern.all);
+	var pat2 = getPattern("P2", VisualModel!Pattern.all);
+	var pat3 = getPattern("P3", VisualModel!Pattern.all);
+	var pat4 = getPattern("P4", VisualModel!Pattern.all);
+	var pat5 = getPattern("P5", VisualModel!Pattern.all);
+	
+	
+	assertTrue(edgesSetAreEqual(pat1.edges, pat1.edges));
+	assertTrue(edgesSetAreEqual(pat2.edges, pat2.edges));
+	assertTrue(edgesSetAreEqual(pat3.edges, pat3.edges));
+	assertTrue(edgesSetAreEqual(pat4.edges, pat4.edges));
+	assertTrue(edgesSetAreEqual(pat5.edges, pat5.edges));
+	
+	
+	assertFalse(edgesSetAreEqual(pat1.edges, pat2.edges));
+	assertFalse(edgesSetAreEqual(pat2.edges, pat1.edges));
+	assertFalse(edgesSetAreEqual(pat1.edges, pat3.edges));
+	
+	assertFalse(edgesSetAreEqual(pat4.edges, pat5.edges));
+	assertFalse(edgesSetAreEqual(pat5.edges, pat4.edges));
+	
+}
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_equalNodes() {
+
+	var pat1 = getPattern("P1", VisualModel!Pattern.all);
+	var pat2 = getPattern("P2", VisualModel!Pattern.all);
+	var pat3 = getPattern("P3", VisualModel!Pattern.all);
+	var pat4 = getPattern("P4", VisualModel!Pattern.all);
+	var pat5 = getPattern("P5", VisualModel!Pattern.all);
+	var pat6 = getPattern("P6", VisualModel!Pattern.all);
+	
+	var p1n1 = getNode( "N1", pat1.nodes);
+	var p2n1 = getNode( "N1", pat2.nodes);
+	var p3n1 = getNode( "N1", pat3.nodes);
+	var p3n2 = getNode( "N2", pat3.nodes);
+	var p4n1 = getNode( "N1", pat4.nodes);
+	var p4n1_2 = getNode( "N1_2", pat4.nodes);
+	var p4n2 = getNode( "N2", pat4.nodes);
+	var p6n2 = getNode( "N2", pat6.nodes);
+	
+	
+	assertTrue(equalNodes(p1n1, p1n1));
+	assertTrue(equalNodes(p2n1, p2n1));
+	assertTrue(equalNodes(p3n1, p3n1));
+	assertTrue(equalNodes(p3n2, p3n2));
+	assertTrue(equalNodes(p4n1, p4n1));
+	assertTrue(equalNodes(p4n2, p4n2));
+	assertTrue(equalNodes(p6n2, p6n2));
+	
+	assertFalse(equalNodes(p1n1, p2n1));
+	assertFalse(equalNodes(p1n1, p3n1));
+	assertFalse(equalNodes(p1n1, p3n2));
+	assertFalse(equalNodes(p1n1, p4n1));
+	assertTrue(equalNodes(p1n1, p4n1_2));
+	
+	assertTrue(equalNodes(p2n1, p4n1));
+	assertFalse(equalNodes(p2n1, p4n1_2));
+	
+	assertFalse(equalNodes(p3n1, p4n1));
+	
+	assertTrue(equalNodes(p3n2, p4n2));
+	assertFalse(equalNodes(p3n2, p6n2));
+	
+}
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_getCandidateNodes() {
+
+	var pat1 = getPattern("P1", VisualModel!Pattern.all);
+	var pat2 = getPattern("P2", VisualModel!Pattern.all);
+	var pat3 = getPattern("P3", VisualModel!Pattern.all);
+	var pat4 = getPattern("P4", VisualModel!Pattern.all);
+	var pat5 = getPattern("P5", VisualModel!Pattern.all);
+	var pat6 = getPattern("P6", VisualModel!Pattern.all);
+	
+	var p1n1 = getNode( "N1", pat1.nodes);
+	var p2n1 = getNode( "N1", pat2.nodes);
+	var p3n1 = getNode( "N1", pat3.nodes);
+	var p3n2 = getNode( "N2", pat3.nodes);
+	var p4n1 = getNode( "N1", pat4.nodes);
+	var p4n1_2 = getNode( "N1_2", pat4.nodes);
+	var p4n2 = getNode( "N2", pat4.nodes);
+	var p6n2 = getNode( "N2", pat6.nodes);
+	var p5n1 = getNode( "N1", pat5.nodes);
+	
+	
+	assertEquals(0, getCandidateNodes(p5n1, pat4.nodes).size);
+	assertEquals(0, getCandidateNodes(p4n1, pat5.nodes).size);
+	assertEquals(1, getCandidateNodes(p4n2, pat3.nodes).size);
+	
+	assertEquals(2, getCandidateNodes(p3n1, pat3.nodes).size);
+	
+	
+	assertEquals(0, getCandidateNodes(p1n1, pat2.nodes).size);
+	
+	assertEquals(1, getCandidateNodes(p3n1, pat6.nodes).size);
+	
+	
+}
+
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_nodeSetsAreExactlyTheSame() {
+
+	var pat1 = getPattern("P1", VisualModel!Pattern.all);
+	var pat1d = getPattern("P1d", VisualModel!Pattern.all);
+	
+	var pat2 = getPattern("P2", VisualModel!Pattern.all);
+	var pat2d = getPattern("P2d", VisualModel!Pattern.all);
+	
+	var pat3 = getPattern("P3", VisualModel!Pattern.all);
+	var pat3d = getPattern("P3d", VisualModel!Pattern.all);
+	
+	var pat4 = getPattern("P4", VisualModel!Pattern.all);
+	var pat4d = getPattern("P4d", VisualModel!Pattern.all);
+	
+	var pat5 = getPattern("P5", VisualModel!Pattern.all);
+	var pat5d = getPattern("P5d", VisualModel!Pattern.all);
+	
+	var pat6 = getPattern("P6", VisualModel!Pattern.all);
+	var pat6d = getPattern("P6d", VisualModel!Pattern.all);
+	
+	
+	assertTrue(nodeSetsAreExactlyTheSame(pat1, pat1) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat1, pat1).size == pat1.nodes.size);
+	assertTrue(nodeSetsAreExactlyTheSame(pat2, pat2) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat2, pat2).first.size == pat2.nodes.size);
+	assertTrue(nodeSetsAreExactlyTheSame(pat3, pat3) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat3, pat3).first.size == pat3.nodes.size);
+	assertTrue(nodeSetsAreExactlyTheSame(pat4, pat4) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat4, pat4).first.size == pat4.nodes.size);
+	assertTrue(nodeSetsAreExactlyTheSame(pat5, pat5) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat5, pat5).first.size == pat5.nodes.size);
+	assertTrue(nodeSetsAreExactlyTheSame(pat6, pat6) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat6, pat6).first.size == pat6.nodes.size);
+	
+	assertTrue(nodeSetsAreExactlyTheSame(pat1, pat2) == null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat2, pat1) == null);
+	
+	assertTrue(nodeSetsAreExactlyTheSame(pat1, pat3) == null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat3, pat1) == null);
+	
+	
+	assertTrue(nodeSetsAreExactlyTheSame(pat3, pat6) == null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat6, pat3) == null);
+	
+	
+	assertTrue(nodeSetsAreExactlyTheSame(pat4, pat5) == null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat5, pat4) == null);
+	
+	assertTrue(nodeSetsAreExactlyTheSame(pat1, pat1d) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat1, pat1d).last.size == pat1d.nodes.size);
+	assertTrue(nodeSetsAreExactlyTheSame(pat2, pat2d) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat2, pat2d).last.size == pat2d.nodes.size);
+	assertTrue(nodeSetsAreExactlyTheSame(pat3, pat3d) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat3, pat3d).last.size == pat3d.nodes.size);
+	assertTrue(nodeSetsAreExactlyTheSame(pat4, pat4d) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat4, pat4d).last.size == pat4d.nodes.size);
+	assertTrue(nodeSetsAreExactlyTheSame(pat5, pat5d) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat5, pat5d).last.size == pat5d.nodes.size);
+	assertTrue(nodeSetsAreExactlyTheSame(pat6, pat6d) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat6, pat6d).last.size == pat6d.nodes.size);
+	
+	assertTrue(nodeSetsAreExactlyTheSame(pat1d, pat1) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat1d, pat1).first.size == pat1.nodes.size);
+	assertTrue(nodeSetsAreExactlyTheSame(pat2d, pat2) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat2d, pat2).first.size == pat2.nodes.size);
+	assertTrue(nodeSetsAreExactlyTheSame(pat3d, pat3) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat3d, pat3).first.size == pat3.nodes.size);
+	assertTrue(nodeSetsAreExactlyTheSame(pat4d, pat4) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat4d, pat4).first.size == pat4.nodes.size);
+	assertTrue(nodeSetsAreExactlyTheSame(pat5d, pat5) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat5d, pat5).first.size == pat5.nodes.size);
+	assertTrue(nodeSetsAreExactlyTheSame(pat6d, pat6) <> null);
+	assertTrue(nodeSetsAreExactlyTheSame(pat6d, pat6).first.size == pat6.nodes.size);
+}
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_getCandidateOperators() {
+	var op1 = getOperator("Op1", VisualModel!Operator.all);
+	var op2 = getOperator("Op2", VisualModel!Operator.all);
+	var op3 = getOperator("Op3", VisualModel!Operator.all);
+	var op4 = getOperator("Op4", VisualModel!Operator.all);
+	var op5 = getOperator("Op5", VisualModel!Operator.all);
+	
+	assertTrue(getCandidateOperators(op1, Sequence{op1, op1, op1, op1}).size==1);
+	assertTrue(getCandidateOperators(op1, Sequence{op1, op1, op1, op1}).first == op1);
+	
+	assertTrue(getCandidateOperators(op1, Sequence{op2, op2, op2, op2}).size==0);
+	
+	assertTrue(getCandidateOperators(op1, Sequence{op1, op2, op3, op4, op5}).size==1);
+	assertTrue(getCandidateOperators(op2, Sequence{op1, op2, op3, op4, op5}).size==1);
+	assertTrue(getCandidateOperators(op3, Sequence{op1, op2, op3, op4, op5}).size==1);
+	assertTrue(getCandidateOperators(op4, Sequence{op1, op2, op3, op4, op5}).size==1);
+	assertTrue(getCandidateOperators(op5, Sequence{op1, op2, op3, op4, op5}).size==1);
+}
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_operatorSetsAreExactlyTheSame() {
+	var op1 = getOperator("Op1", VisualModel!Operator.all);
+	var op2 = getOperator("Op2", VisualModel!Operator.all);
+	var op3 = getOperator("Op3", VisualModel!Operator.all);
+	var op4 = getOperator("Op4", VisualModel!Operator.all);
+	var op5 = getOperator("Op5", VisualModel!Operator.all);
+	
+	assertTrue(operatorSetsAreExactlyTheSame(Sequence{op1, op1, op1, op1}, Sequence{op1, op1, op1, op1}).first.size==1);
+	
+	assertTrue(operatorSetsAreExactlyTheSame(Sequence{op1, op2, op3, op4}, Sequence{op4, op3, op2, op1}).first.size==4);
+	
+	assertTrue(operatorSetsAreExactlyTheSame(Sequence{op1, op2, op3, op4}, Sequence{op4, op3, op3, op1}) == null);
+	assertTrue(operatorSetsAreExactlyTheSame(Sequence{op4, op3, op3, op1}, Sequence{op1, op2, op3, op4}) == null);
+	
+	assertTrue(operatorSetsAreExactlyTheSame(Sequence{op1, op3, op3, op4}, Sequence{op4, op3, op3, op1}) <> null);
+	assertTrue(operatorSetsAreExactlyTheSame(Sequence{op4, op3, op3, op1}, Sequence{op1, op3, op3, op4}) <> null);
+	assertTrue(operatorSetsAreExactlyTheSame(Sequence{op1, op3, op3, op4}, Sequence{op4, op3, op3, op1}).first.size==3);
+	
+	assertTrue(operatorSetsAreExactlyTheSame(Sequence{op1, op3, op4}, Sequence{op4, op2, op3, op1}) == null);
+	assertTrue(operatorSetsAreExactlyTheSame(Sequence{op4, op2, op3, op1}, Sequence{op1, op3, op4}) == null);
+	
+}
+
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_equalPatterns_1() {
+	var pat1 = getPattern("P1", VisualModel!Pattern.all);
+	var pat1d = getPattern("P1d", VisualModel!Pattern.all);
+	
+	var pat2 = getPattern("P2", VisualModel!Pattern.all);
+	var pat2d = getPattern("P2d", VisualModel!Pattern.all);
+	
+	var pat3 = getPattern("P3", VisualModel!Pattern.all);
+	var pat3d = getPattern("P3d", VisualModel!Pattern.all);
+	
+	var pat4 = getPattern("P4", VisualModel!Pattern.all);
+	var pat4d = getPattern("P4d", VisualModel!Pattern.all);
+	
+	var pat5 = getPattern("P5", VisualModel!Pattern.all);
+	var pat5d = getPattern("P5d", VisualModel!Pattern.all);
+	
+	var pat6 = getPattern("P6", VisualModel!Pattern.all);
+	var pat6d = getPattern("P6d", VisualModel!Pattern.all);
+	
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat1, pat1, equalPatternsCache) <> null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat1, pat1, equalPatternsCache).first.size == pat1.nodes.size);
+	
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat2d, pat2d, equalPatternsCache) <> null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat2d, pat2d, equalPatternsCache).first.size == pat2d.nodes.size);
+	
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat2, pat2, equalPatternsCache) <> null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat2, pat2, equalPatternsCache).first.size == pat1.nodes.size);
+	
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat3, pat3, equalPatternsCache) <> null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat3, pat3, equalPatternsCache).first.size == pat3.nodes.size);
+	
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat4, pat4, equalPatternsCache) <> null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat4, pat4, equalPatternsCache).first.size == pat4.nodes.size);
+	
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat5, pat5, equalPatternsCache) <> null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat5, pat5, equalPatternsCache).first.size == pat5.nodes.size);
+	
+	
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat1, pat1d, equalPatternsCache) == null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat1d, pat1, equalPatternsCache) == null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat3, pat3d, equalPatternsCache) == null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat3d, pat3, equalPatternsCache) == null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat3, pat6d, equalPatternsCache) == null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat6d, pat3, equalPatternsCache) == null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat3, pat6, equalPatternsCache) == null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat6, pat3, equalPatternsCache) == null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat4, pat5, equalPatternsCache) == null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat5, pat4, equalPatternsCache) == null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat4, pat5d, equalPatternsCache) == null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat5d, pat4, equalPatternsCache) == null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat6, pat6d, equalPatternsCache) == null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat6d, pat6, equalPatternsCache) == null);
+	
+	
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat2, pat2d, equalPatternsCache) <> null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat2, pat2d, equalPatternsCache).first.size == pat2.nodes.size);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat2d, pat2, equalPatternsCache) <> null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat2d, pat2, equalPatternsCache).first.size == pat2d.nodes.size);
+	
+	assertTrue(equalPatterns(pat4, pat4d, equalPatternsCache) <> null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat4, pat4d, equalPatternsCache).first.size == pat4.nodes.size);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat4d, pat4, equalPatternsCache) <> null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat4d, pat4, equalPatternsCache).first.size == pat4d.nodes.size);
+	
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat5, pat5d, equalPatternsCache) <> null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat5, pat5d, equalPatternsCache).first.size == pat5.nodes.size);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat5d, pat5, equalPatternsCache) <> null);
+	var equalPatternsCache = new Map;
+	assertTrue(equalPatterns(pat5d, pat5, equalPatternsCache).first.size == pat5d.nodes.size);
+	
+	
+}
+
+$with Map {"VisualModel" = "Sample2"}
+@test
+operation test_equalPatterns_2() {
+	var pat1 = getPattern("P1", VisualModel!Pattern.all);
+	
+	var pat2 = getPattern("P2", VisualModel!Pattern.all);
+	
+	var equalPatternCache = new Map;
+	assertTrue(equalPatterns(pat1, pat1, equalPatternCache) <> null);
+	var equalPatternCache = new Map;
+	assertTrue(equalPatterns(pat1, pat1, equalPatternCache).first.size == pat1.nodes.size);
+	
+	var equalPatternCache = new Map;
+	assertTrue(equalPatterns(pat2, pat2, equalPatternCache) <> null);
+	var equalPatternCache = new Map;
+	assertTrue(equalPatterns(pat2, pat2, equalPatternCache).first.size == pat2.nodes.size);
+	
+	
+	var equalPatternCache = new Map;
+	assertTrue(equalPatterns(pat1, pat2, equalPatternCache) <> null);
+	var equalPatternCache = new Map;
+	assertTrue(equalPatterns(pat1, pat2, equalPatternCache).first.size == pat1.nodes.size);
+	var equalPatternCache = new Map;
+	assertTrue(equalPatterns(pat2, pat1, equalPatternCache) <> null);
+	var equalPatternCache = new Map;
+	assertTrue(equalPatterns(pat2, pat1, equalPatternCache).first.size == pat2.nodes.size);
+	
+	
+}
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_getCandidateParameters() {
+	var pat1 = getPattern("P1", VisualModel!Pattern.all);
+	var pat2 = getPattern("P2", VisualModel!Pattern.all);
+	var pat3 = getPattern("P3", VisualModel!Pattern.all);
+	var pat4 = getPattern("P4", VisualModel!Pattern.all);
+	var pat5 = getPattern("P5", VisualModel!Pattern.all);
+	var pat6 = getPattern("P6", VisualModel!Pattern.all);
+	
+	var p1n1 = getNode( "N1", pat1.nodes);
+	var p2n1 = getNode( "N1", pat2.nodes);
+	var p3n1 = getNode( "N1", pat3.nodes);
+	var p3n2 = getNode( "N2", pat3.nodes);
+	var p3n2a1 = getNamedElement( "name", p3n2.attributes);
+	var p4n1 = getNode( "N1", pat4.nodes);
+	var p4n1_2 = getNode( "N1_2", pat4.nodes);
+	var p4n2 = getNode( "N2", pat4.nodes);
+	var p6n2 = getNode( "N2", pat6.nodes);
+	var p5n1 = getNode( "N1", pat5.nodes);
+	
+	
+	assertTrue(getCandidateParameters(p1n1, Sequence{p1n1, p2n1, p2n1}).size == 1);
+	
+	assertTrue(getCandidateParameters(p3n2a1, Sequence{p1n1, p2n1, p2n1}).isEmpty());
+	
+	assertTrue(getCandidateParameters(p3n2a1, Sequence{p1n1, p2n1, p2n1, p3n2a1}).size == 1);
+	
+	assertTrue(getCandidateParameters(p4n1, Sequence{p1n1, p2n1, p2n1}).isEmpty());
+	
+	
+}
+
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_parameterSetsAreExactlyTheSame() {
+	var pat1 = getPattern("P1", VisualModel!Pattern.all);
+	var pat2 = getPattern("P2", VisualModel!Pattern.all);
+	var pat3 = getPattern("P3", VisualModel!Pattern.all);
+	var pat4 = getPattern("P4", VisualModel!Pattern.all);
+	var pat5 = getPattern("P5", VisualModel!Pattern.all);
+	var pat6 = getPattern("P6", VisualModel!Pattern.all);
+	
+	var p1n1 = getNode( "N1", pat1.nodes);
+	var p2n1 = getNode( "N1", pat2.nodes);
+	var p3n1 = getNode( "N1", pat3.nodes);
+	var p3n2 = getNode( "N2", pat3.nodes);
+	var p3n2a1 = getNamedElement( "name", p3n2.attributes);
+	var p4n1 = getNode( "N1", pat4.nodes);
+	var p4n1_2 = getNode( "N1_2", pat4.nodes);
+	var p4n2 = getNode( "N2", pat4.nodes);
+	var p6n2 = getNode( "N2", pat6.nodes);
+	var p5n1 = getNode( "N1", pat5.nodes);
+	
+	
+	assertTrue(parameterSetsAreExactlyTheSame(Sequence{p1n1, p2n1, p2n1}, Sequence{p1n1, p2n1, p2n1}));
+	assertTrue(parameterSetsAreExactlyTheSame(Sequence{}, Sequence{}));
+	
+	assertTrue(parameterSetsAreExactlyTheSame(Sequence{p3n2a1, p2n1, p2n1}, Sequence{p3n2a1, p2n1, p2n1}));
+	
+	assertFalse(parameterSetsAreExactlyTheSame(Sequence{ p2n1, p2n1}, Sequence{p3n2a1, p2n1, p2n1}));
+	assertFalse(parameterSetsAreExactlyTheSame(Sequence{p3n2a1, p2n1, p2n1}, Sequence{p3n2a1, p2n1}));
+	
+	
+}
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_getCandidateParameterRefsSameIndex() {
+	var op1 = getOperator("Op1", VisualModel!Operator.all);
+	var op2 = getOperator("Op2", VisualModel!Operator.all);
+	var op3 = getOperator("Op3", VisualModel!Operator.all);
+	var op4 = getOperator("Op4", VisualModel!Operator.all);
+	var op5 = getOperator("Op5", VisualModel!Operator.all);
+	
+	var op1c1 = getIdElement("cond1", op1.conditions);
+	var op1c2 = getIdElement("cond2", op1.conditions);
+	
+	var op2c3 = getIdElement("cond3", op2.conditions);
+	var op2c4 = getIdElement("cond4", op2.conditions);
+	
+	var op3c5 = getIdElement("cond5", op3.conditions);
+	var op3c6 = getIdElement("cond6", op3.conditions);
+	
+	
+	assertTrue(getCandidateParameterRefsSameIndex(op1c1.parameters.first, op3c5.parameters).isEmpty());
+	assertTrue(getCandidateParameterRefsSameIndex(op1c1.parameters.first, op3c6.parameters).size == 1);
+	
+}
+
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_parameterSetsHaveTheSameIndex() {
+	var op1 = getOperator("Op1", VisualModel!Operator.all);
+	var op2 = getOperator("Op2", VisualModel!Operator.all);
+	var op3 = getOperator("Op3", VisualModel!Operator.all);
+	var op4 = getOperator("Op4", VisualModel!Operator.all);
+	var op5 = getOperator("Op5", VisualModel!Operator.all);
+	
+	var op1c1 = getIdElement("cond1", op1.conditions);
+	var op1c2 = getIdElement("cond2", op1.conditions);
+	
+	var op2c3 = getIdElement("cond3", op2.conditions);
+	var op2c4 = getIdElement("cond4", op2.conditions);
+	var op2c7 = getIdElement("cond7", op2.conditions);
+	
+	var op3c5 = getIdElement("cond5", op3.conditions);
+	var op3c6 = getIdElement("cond6", op3.conditions);
+	
+	
+	assertFalse(parameterSetsHaveTheSameIndex(op1c1.parameters, op3c5.parameters));
+	
+	assertFalse(parameterSetsHaveTheSameIndex(op1c1.parameters, op1c2.parameters));
+	
+	assertTrue(parameterSetsHaveTheSameIndex(op1c2.parameters, op2c4.parameters));
+	
+	assertTrue(parameterSetsHaveTheSameIndex(op2c3.parameters, op2c3.parameters));
+	
+	assertTrue(parameterSetsHaveTheSameIndex(op3c5.parameters, op3c5.parameters));
+	assertTrue(parameterSetsHaveTheSameIndex(op3c6.parameters, op3c6.parameters));
+	
+	
+	assertFalse(parameterSetsHaveTheSameIndex(op3c5.parameters, op3c6.parameters));
+	assertFalse(parameterSetsHaveTheSameIndex(op3c6.parameters, op3c5.parameters));
+	
+	assertFalse(parameterSetsHaveTheSameIndex(op1c1.parameters, op2c3.parameters));
+	assertFalse(parameterSetsHaveTheSameIndex(op2c3.parameters, op1c1.parameters));
+	
+	assertFalse(parameterSetsHaveTheSameIndex(op2c7.parameters, op3c5.parameters));
+	assertFalse(parameterSetsHaveTheSameIndex(op3c5.parameters, op2c7.parameters));
+	
+	
+}
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_getCandidatePatterns() {
+	var pat1 = getPattern("P1", VisualModel!Pattern.all);
+	var pat1d = getPattern("P1d", VisualModel!Pattern.all);
+	
+	var pat2 = getPattern("P2", VisualModel!Pattern.all);
+	var pat2d = getPattern("P2d", VisualModel!Pattern.all);
+	
+	var pat3 = getPattern("P3", VisualModel!Pattern.all);
+	var pat3d = getPattern("P3d", VisualModel!Pattern.all);
+	
+	var pat4 = getPattern("P4", VisualModel!Pattern.all);
+	var pat4d = getPattern("P4d", VisualModel!Pattern.all);
+	
+	var pat5 = getPattern("P5", VisualModel!Pattern.all);
+	var pat5d = getPattern("P5d", VisualModel!Pattern.all);
+	
+	var pat6 = getPattern("P6", VisualModel!Pattern.all);
+	var pat6d = getPattern("P6d", VisualModel!Pattern.all);
+	
+	
+	assertTrue(getCandidatePatterns(pat1, Sequence{pat1, pat1d, pat2}).size==1);
+	assertTrue(getCandidatePatterns(pat1, Sequence{pat1, pat1d, pat2}).first==pat1);
+	
+	assertTrue(getCandidatePatterns(pat1, Sequence{ pat1d, pat2}).size==0);
+}
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_patternSetsAreExaclyTheSame() {
+	var pat1 = getPattern("P1", VisualModel!Pattern.all);
+	var pat1d = getPattern("P1d", VisualModel!Pattern.all);
+	
+	var pat2 = getPattern("P2", VisualModel!Pattern.all);
+	var pat2d = getPattern("P2d", VisualModel!Pattern.all);
+	
+	var pat3 = getPattern("P3", VisualModel!Pattern.all);
+	var pat3d = getPattern("P3d", VisualModel!Pattern.all);
+	
+	var pat4 = getPattern("P4", VisualModel!Pattern.all);
+	var pat4d = getPattern("P4d", VisualModel!Pattern.all);
+	
+	var pat5 = getPattern("P5", VisualModel!Pattern.all);
+	var pat5d = getPattern("P5d", VisualModel!Pattern.all);
+	
+	var pat6 = getPattern("P6", VisualModel!Pattern.all);
+	var pat6d = getPattern("P6d", VisualModel!Pattern.all);
+	
+	
+	assertTrue(patternSetsAreExaclyTheSame(Sequence{pat1, pat1d, pat2}, Sequence{pat1, pat1d, pat2}));
+	assertTrue(patternSetsAreExaclyTheSame(Sequence{pat1, pat1d, pat2}, Sequence{pat1, pat1d, pat2}));
+	
+	assertTrue(patternSetsAreExaclyTheSame(Sequence{pat6, pat5, pat4, pat3, pat2, pat1}, Sequence{pat1, pat2, pat3, pat4, pat5, pat6}));
+	assertTrue(patternSetsAreExaclyTheSame(Sequence{pat1, pat2, pat3, pat4, pat5, pat6}, Sequence{pat6, pat5, pat4, pat3, pat2, pat1}));
+	
+	assertFalse(patternSetsAreExaclyTheSame(Sequence{pat6d, pat5d, pat4d, pat3d, pat2d, pat1d}, Sequence{pat1, pat2, pat3, pat4, pat5, pat6}));
+	assertFalse(patternSetsAreExaclyTheSame(Sequence{pat6d, pat5d, pat4d, pat3d, pat2d, pat1d}, Sequence{pat6, pat5, pat4, pat3, pat2, pat1}));
+
+}
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_equalConditions() {
+	var op1 = getOperator("Op1", VisualModel!Operator.all);
+	var op2 = getOperator("Op2", VisualModel!Operator.all);
+	var op3 = getOperator("Op3", VisualModel!Operator.all);
+	var op4 = getOperator("Op4", VisualModel!Operator.all);
+	var op5 = getOperator("Op5", VisualModel!Operator.all);
+	
+	var op1c1 = getIdElement("cond1", op1.conditions);
+	var op1c2 = getIdElement("cond2", op1.conditions);
+	
+	var op2c3 = getIdElement("cond3", op2.conditions);
+	var op2c4 = getIdElement("cond4", op2.conditions);
+	var op2c7 = getIdElement("cond7", op2.conditions);
+	
+	var op3c5 = getIdElement("cond5", op3.conditions);
+	var op3c6 = getIdElement("cond6", op3.conditions);
+	
+	
+	assertTrue(equalConditions(op1c1, op1c1));
+	assertTrue(equalConditions(op1c2, op1c2));
+	assertTrue(equalConditions(op2c3, op2c3));
+	assertTrue(equalConditions(op2c4, op2c4));
+	assertTrue(equalConditions(op3c5, op3c5));
+	assertTrue(equalConditions(op3c6, op3c6));
+	assertTrue(equalConditions(op2c7, op2c7));
+	
+	
+	
+	assertFalse(equalConditions(op1c1, op3c5));
+	assertFalse(equalConditions(op3c5, op1c1));
+	
+	assertTrue(equalConditions(op1c1, op3c6));
+	assertTrue(equalConditions(op3c6, op1c1));
+	
+	
+	assertFalse(equalConditions(op1c1, op1c2));
+	
+	assertFalse(equalConditions(op1c2, op2c4));
+	assertFalse(equalConditions(op2c4, op1c2));
+	
+	assertFalse(equalConditions(op3c5, op3c6));
+	assertFalse(equalConditions(op3c6, op3c5));
+	
+	assertFalse(equalConditions(op1c1, op2c3));
+	assertFalse(equalConditions(op2c3, op1c1));
+	
+	assertFalse(equalConditions(op2c7, op3c5));
+	assertFalse(equalConditions(op3c5, op2c7));
+	
+	
+}
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_equalActions() {
+	var op1 = getOperator("Op1", VisualModel!Operator.all);
+	var op2 = getOperator("Op2", VisualModel!Operator.all);
+	var op3 = getOperator("Op3", VisualModel!Operator.all);
+	var op4 = getOperator("Op4", VisualModel!Operator.all);
+	var op5 = getOperator("Op5", VisualModel!Operator.all);
+	
+	var op1c1 = getIdElement("act1", op1.actions);
+	var op1c2 = getIdElement("act2", op1.actions);
+	
+	var op2c3 = getIdElement("act3", op2.actions);
+	var op2c4 = getIdElement("act4", op2.actions);
+	var op2c7 = getIdElement("act7", op2.actions);
+	
+	var op3c5 = getIdElement("act5", op3.actions);
+	var op3c6 = getIdElement("act6", op3.actions);
+	
+	
+	assertTrue(equalActions(op1c1, op1c1));
+	assertTrue(equalActions(op1c2, op1c2));
+	assertTrue(equalActions(op2c3, op2c3));
+	assertTrue(equalActions(op2c4, op2c4));
+	assertTrue(equalActions(op3c5, op3c5));
+	assertTrue(equalActions(op3c6, op3c6));
+	assertTrue(equalActions(op2c7, op2c7));
+	
+	
+	
+	assertFalse(equalActions(op1c1, op3c5));
+	assertFalse(equalActions(op3c5, op1c1));
+	
+	assertTrue(equalActions(op1c1, op3c6));
+	assertTrue(equalActions(op3c6, op1c1));
+	
+	
+	assertFalse(equalActions(op1c1, op1c2));
+	
+	assertFalse(equalActions(op1c2, op2c4));
+	assertFalse(equalActions(op2c4, op1c2));
+	
+	assertFalse(equalActions(op3c5, op3c6));
+	assertFalse(equalActions(op3c6, op3c5));
+	
+	assertFalse(equalActions(op1c1, op2c3));
+	assertFalse(equalActions(op2c3, op1c1));
+	
+	assertFalse(equalActions(op2c7, op3c5));
+	assertFalse(equalActions(op3c5, op2c7));
+	
+	
+}
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_getCandidateConditions() {
+	var op1 = getOperator("Op1", VisualModel!Operator.all);
+	var op2 = getOperator("Op2", VisualModel!Operator.all);
+	var op3 = getOperator("Op3", VisualModel!Operator.all);
+	var op4 = getOperator("Op4", VisualModel!Operator.all);
+	var op5 = getOperator("Op5", VisualModel!Operator.all);
+	
+	var op1c1 = getIdElement("cond1", op1.conditions);
+	var op1c2 = getIdElement("cond2", op1.conditions);
+	
+	var op2c3 = getIdElement("cond3", op2.conditions);
+	var op2c4 = getIdElement("cond4", op2.conditions);
+	var op2c7 = getIdElement("cond7", op2.conditions);
+	
+	var op3c5 = getIdElement("cond5", op3.conditions);
+	var op3c6 = getIdElement("cond6", op3.conditions);
+	
+	
+	assertTrue(getCandidateConditions(op1c1, Sequence{op1c1}).size==1);
+	assertTrue(getCandidateConditions(op1c2, Sequence{op1c2}).size==1);
+	assertTrue(getCandidateConditions(op2c3, Sequence{op2c3}).size==1);
+	assertTrue(getCandidateConditions(op2c4, Sequence{op2c4}).size==1);
+	assertTrue(getCandidateConditions(op3c5, Sequence{op3c5}).size==1);
+	assertTrue(getCandidateConditions(op3c6, Sequence{op3c6}).size==1);
+	assertTrue(getCandidateConditions(op2c7, Sequence{op2c7}).size==1);
+	
+	assertTrue(getCandidateConditions(op1c1, Sequence{op3c5}).isEmpty());
+	assertTrue(getCandidateConditions(op3c5, Sequence{op1c1}).isEmpty());
+	
+	assertTrue(getCandidateConditions(op1c1, Sequence{op3c5, op3c6}).size==1);
+	assertTrue(getCandidateConditions(op3c6, Sequence{op3c5, op1c1}).size==1);
+	
+	assertTrue(getCandidateConditions(op1c1, Sequence{op3c5, op3c6, op1c1}).size==2);
+	assertTrue(getCandidateConditions(op3c6, Sequence{op3c5, op1c1, op3c6}).size==2);
+	
+}
+
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_getCandidateActions() {
+	var op1 = getOperator("Op1", VisualModel!Operator.all);
+	var op2 = getOperator("Op2", VisualModel!Operator.all);
+	var op3 = getOperator("Op3", VisualModel!Operator.all);
+	var op4 = getOperator("Op4", VisualModel!Operator.all);
+	var op5 = getOperator("Op5", VisualModel!Operator.all);
+	
+	var op1c1 = getIdElement("act1", op1.actions);
+	var op1c2 = getIdElement("act2", op1.actions);
+	
+	var op2c3 = getIdElement("act3", op2.actions);
+	var op2c4 = getIdElement("act4", op2.actions);
+	var op2c7 = getIdElement("act7", op2.actions);
+	
+	var op3c5 = getIdElement("act5", op3.actions);
+	var op3c6 = getIdElement("act6", op3.actions);
+	
+	
+	assertTrue(getCandidateActions(op1c1, Sequence{op1c1}).size==1);
+	assertTrue(getCandidateActions(op1c2, Sequence{op1c2}).size==1);
+	assertTrue(getCandidateActions(op2c3, Sequence{op2c3}).size==1);
+	assertTrue(getCandidateActions(op2c4, Sequence{op2c4}).size==1);
+	assertTrue(getCandidateActions(op3c5, Sequence{op3c5}).size==1);
+	assertTrue(getCandidateActions(op3c6, Sequence{op3c6}).size==1);
+	assertTrue(getCandidateActions(op2c7, Sequence{op2c7}).size==1);
+	
+	assertTrue(getCandidateActions(op1c1, Sequence{op3c5}).isEmpty());
+	assertTrue(getCandidateActions(op3c5, Sequence{op1c1}).isEmpty());
+	
+	assertTrue(getCandidateActions(op1c1, Sequence{op3c5, op3c6}).size==1);
+	assertTrue(getCandidateActions(op3c6, Sequence{op3c5, op1c1}).size==1);
+	
+	assertTrue(getCandidateActions(op1c1, Sequence{op3c5, op3c6, op1c1}).size==2);
+	assertTrue(getCandidateActions(op3c6, Sequence{op3c5, op1c1, op3c6}).size==2);
+	
+}
+
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_conditionSetsAreExaclyTheSame() {
+	var op1 = getOperator("Op1", VisualModel!Operator.all);
+	var op2 = getOperator("Op2", VisualModel!Operator.all);
+	var op2d = getOperator("Op2d", VisualModel!Operator.all);
+	var op3 = getOperator("Op3", VisualModel!Operator.all);
+	var op4 = getOperator("Op4", VisualModel!Operator.all);
+	var op5 = getOperator("Op5", VisualModel!Operator.all);
+	
+	var op1c1 = getIdElement("cond1", op1.conditions);
+	var op1c2 = getIdElement("cond2", op1.conditions);
+	
+	var op2c3 = getIdElement("cond3", op2.conditions);
+	var op2c4 = getIdElement("cond4", op2.conditions);
+	var op2c7 = getIdElement("cond7", op2.conditions);
+	
+	var op2dc3 = getIdElement("cond3", op2d.conditions);
+	var op2dc4 = getIdElement("cond4", op2d.conditions);
+	var op2dc7 = getIdElement("cond7", op2d.conditions);
+	
+	var op3c5 = getIdElement("cond5", op3.conditions);
+	var op3c6 = getIdElement("cond6", op3.conditions);
+	
+	assertTrue(conditionSetsAreExaclyTheSame(Sequence{op2c3, op1c1, op2c4}, Sequence{op2c3, op1c1, op2c4}));
+	
+	assertTrue(conditionSetsAreExaclyTheSame(Sequence{op2c3, op1c1, op2c4}, Sequence{op2c3, op1c1, op2c4}));
+	
+	assertTrue(conditionSetsAreExaclyTheSame(Sequence{op1c1}, Sequence{op3c6}));
+	
+	assertTrue(conditionSetsAreExaclyTheSame(Sequence{op2c3, op1c1, op2c4}, Sequence{op3c6, op2c3, op2c4}));
+	
+	assertTrue(conditionSetsAreExaclyTheSame(Sequence{op1c1, op1c2, op2c3, op2c4, op2c7, op3c5}, Sequence{op3c5, op2c7, op2c4, op2c3, op1c2, op1c1}));
+	assertTrue(conditionSetsAreExaclyTheSame(Sequence{op3c5, op2c7, op2c4, op2c3, op1c2, op1c1}, Sequence{op1c1, op1c2, op2c3, op2c4, op2c7, op3c5}));
+	
+	assertFalse(conditionSetsAreExaclyTheSame(Sequence{op1c1, op2c3, op2c4, op2c7}, Sequence{op3c5, op2c4, op2c3,  op1c1}));
+	
+	assertFalse(conditionSetsAreExaclyTheSame(Sequence{op3c5, op2c7, op2c4, op1c2, op1c1}, Sequence{ op1c2, op2c3, op2c4, op2c7, op3c5}));
+	
+	assertTrue(conditionSetsAreExaclyTheSame(Sequence{op2c3, op2c4, op2c7}, Sequence{op2dc3, op2dc4, op2dc7}));
+	assertTrue(conditionSetsAreExaclyTheSame(Sequence{op2dc3, op2dc4, op2dc7}, Sequence{op2c3, op2c4, op2c7}));
+	
+	
+}
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_actionSetsAreExaclyTheSame() {
+	var op1 = getOperator("Op1", VisualModel!Operator.all);
+	var op2 = getOperator("Op2", VisualModel!Operator.all);
+	var op2d = getOperator("Op2d", VisualModel!Operator.all);
+	var op3 = getOperator("Op3", VisualModel!Operator.all);
+	var op4 = getOperator("Op4", VisualModel!Operator.all);
+	var op5 = getOperator("Op5", VisualModel!Operator.all);
+	
+	var op1c1 = getIdElement("act1", op1.actions);
+	var op1c2 = getIdElement("act2", op1.actions);
+	
+	var op2c3 = getIdElement("act3", op2.actions);
+	var op2c4 = getIdElement("act4", op2.actions);
+	var op2c7 = getIdElement("act7", op2.actions);
+	
+	var op2dc3 = getIdElement("act3", op2d.actions);
+	var op2dc4 = getIdElement("act4", op2d.actions);
+	var op2dc7 = getIdElement("act7", op2d.actions);
+	
+	var op3c5 = getIdElement("act5", op3.actions);
+	var op3c6 = getIdElement("act6", op3.actions);
+	
+	assertTrue(actionSetsAreExaclyTheSame(Sequence{op2c3, op1c1, op2c4}, Sequence{op2c3, op1c1, op2c4}));
+	
+	assertTrue(actionSetsAreExaclyTheSame(Sequence{op2c3, op1c1, op2c4}, Sequence{op2c3, op1c1, op2c4}));
+	
+	assertTrue(actionSetsAreExaclyTheSame(Sequence{op1c1}, Sequence{op3c6}));
+	
+	assertTrue(actionSetsAreExaclyTheSame(Sequence{op2c3, op1c1, op2c4}, Sequence{op3c6, op2c3, op2c4}));
+	
+	assertTrue(actionSetsAreExaclyTheSame(Sequence{op1c1, op1c2, op2c3, op2c4, op2c7, op3c5}, Sequence{op3c5, op2c7, op2c4, op2c3, op1c2, op1c1}));
+	assertTrue(actionSetsAreExaclyTheSame(Sequence{op3c5, op2c7, op2c4, op2c3, op1c2, op1c1}, Sequence{op1c1, op1c2, op2c3, op2c4, op2c7, op3c5}));
+	
+	assertFalse(actionSetsAreExaclyTheSame(Sequence{op1c1, op2c3, op2c4, op2c7}, Sequence{op3c5, op2c4, op2c3,  op1c1}));
+	
+	assertFalse(actionSetsAreExaclyTheSame(Sequence{op3c5, op2c7, op2c4, op1c2, op1c1}, Sequence{ op1c2, op2c3, op2c4, op2c7, op3c5}));
+	
+	assertTrue(actionSetsAreExaclyTheSame(Sequence{op2c3, op2c4, op2c7}, Sequence{op2dc3, op2dc4, op2dc7}));
+	assertTrue(actionSetsAreExaclyTheSame(Sequence{op2dc3, op2dc4, op2dc7}, Sequence{op2c3, op2c4, op2c7}));
+	
+}
+
+$with Map {"VisualModel" = "Sample1"}
+@test
+operation test_equalOperators() {
+	var op1 = getOperator("Op1", VisualModel!Operator.all);
+	var op2 = getOperator("Op2", VisualModel!Operator.all);
+	var op2d = getOperator("Op2d", VisualModel!Operator.all);
+	var op3 = getOperator("Op3", VisualModel!Operator.all);
+	var op4 = getOperator("Op4", VisualModel!Operator.all);
+	var op5 = getOperator("Op5", VisualModel!Operator.all);
+	
+	var equalOperatorsCache = new Map;
+	
+	assertTrue(equalOperators(op1,op1, equalOperatorsCache));
+	
+	equalOperatorsCache = new Map;
+	assertTrue(equalOperators(op2,op2, equalOperatorsCache));
+	equalOperatorsCache = new Map;
+	assertTrue(equalOperators(op2d,op2d, equalOperatorsCache));
+	equalOperatorsCache = new Map;
+	assertTrue(equalOperators(op3,op3, equalOperatorsCache));
+	equalOperatorsCache = new Map;
+	assertTrue(equalOperators(op4,op4, equalOperatorsCache));
+	equalOperatorsCache = new Map;
+	assertTrue(equalOperators(op5,op5, equalOperatorsCache));
+	
+	equalOperatorsCache = new Map;
+	assertFalse(equalOperators(op1,op2, equalOperatorsCache));
+	equalOperatorsCache = new Map;
+	assertFalse(equalOperators(op2,op3, equalOperatorsCache));
+	equalOperatorsCache = new Map;
+	assertFalse(equalOperators(op2d,op1, equalOperatorsCache));
+	equalOperatorsCache = new Map;
+	assertFalse(equalOperators(op2,op3, equalOperatorsCache));
+	
+	equalOperatorsCache = new Map;
+	assertTrue(equalOperators(op4,op5, equalOperatorsCache));
+	equalOperatorsCache = new Map;
+	assertTrue(equalOperators(op5,op4, equalOperatorsCache));
+	
+	equalOperatorsCache = new Map;
+	assertTrue(equalOperators(op2,op2d, equalOperatorsCache));
+	equalOperatorsCache = new Map;
+	assertTrue(equalOperators(op2d,op2, equalOperatorsCache));
+}
+
+
