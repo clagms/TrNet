@@ -1,0 +1,39 @@
+@namespace(uri="http://defaultname/1.0", prefix="defaultname")
+package defaultname;
+
+
+class DataFlow {
+  attr String name;
+  ref Process processSource;
+  ref Process processTarget;
+  ref DataStore dataSource;
+  ref DataStore dataTarget;
+  ref ExternalEntity entitySource;
+  ref ExternalEntity entityTarget;
+}
+
+class Process  {
+	attr String name;
+  ref Process abstractProcess;
+}
+
+class DataStore  {
+	attr String name;
+}
+
+class ExternalEntity  {
+	attr String name;
+}
+
+
+class DFDModel  {
+attr String name;
+  val Process[+] processes;
+  val DataStore[+] datas;
+  val ExternalEntity[+] entities;
+  
+  val DataFlow[*] flows;
+  val DFDModel[*] refinements;
+}
+
+
