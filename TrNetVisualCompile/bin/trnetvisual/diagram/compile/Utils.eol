@@ -1,0 +1,824 @@
+operation getTransformationRootPackage() {
+	var trnetModel = CoreModel!TrNetModel.all.first;
+	return trnetModel.id.toLowerCase();
+}
+
+operation getPackageTransformation() {
+	return getTransformationRootPackage();
+}
+
+operation getPackageGenericPatternListener() {
+	return getGenericPackage();
+}
+
+operation getGenericPackage(){
+	return "generic";
+}
+
+operation getPackagePattern(pattern) {
+	return getTransformationRootPackage();
+}
+
+operation getPackageNodePattern(node){
+	return getTransformationRootPackage();
+}
+
+operation getPackageGenericNode() {
+	return getGenericPackage();
+}
+
+operation getPackageGenericPattern() {
+	return getGenericPackage();
+}
+
+operation getPackageGenericPatternPublisher() {
+	return getGenericPackage();
+}
+
+operation getPackageGenericEdge() {
+	return getGenericPackage();
+}
+
+operation getTransformationClass() {
+	var trnetModel = CoreModel!TrNetModel.all.first;
+	return trnetModel.id.firstToUpperCase() + "Transformation";
+}
+
+operation getTransformationClassFile() {
+	return getTransformationClass() + ".java";
+}
+
+operation getJavaClassName(pattern) {
+	return getClassPattern(pattern) + ".java";
+}
+
+operation getGenericPatternInterfaceListenerFile() {
+	return getGenericPatternInterfaceListener() + ".java";
+}
+
+operation getGenericPatternInterfacePublisherFile() {
+	return getGenericPatternInterfacePublisher() + ".java";
+}
+
+operation getGenericPatternInterfaceListener() {
+	return "ModelPatternListener";
+}
+
+operation getGenericPatternInterfacePublisher() {
+	return "ModelPatternPublisher";
+}
+
+operation getGenericNodeClassFile(){
+	return getGenericNodeClass() + ".java";
+}
+
+operation getGenericPatternClassFile() {
+	return getGenericPatternClass() + ".java";
+}
+
+operation getGenericPatternClass() {
+	return "ModelPattern";
+}
+
+operation getGenericNodeClass() {
+	return "ModelNode";
+}
+
+operation getGenericEdgeClassFile(){
+	return getGenericEdgeClass() + ".java";
+}
+
+operation getGenericEdgeClass() {
+	return "ModelEdge";
+}
+
+operation getClassPattern(pattern) {
+	return pattern.id.firstToUpperCase() + "Instance";
+}
+
+operation getJavaInterfaceNamePatternListener(pattern){
+	return getInterfacePatternListener(pattern) + ".java";
+}
+
+operation getJavaInterfaceNamePatternPublisher(pattern){
+	return getInterfacePatternPublisher(pattern) + ".java";
+}
+
+operation getInterfacePatternListener(pattern){
+	return pattern.id.firstToUpperCase() + "InstanceListener";
+}
+
+operation getInterfacePatternPublisher(pattern){
+	return pattern.id.firstToUpperCase() + "InstancePublisher";
+}
+
+operation getJavaClassFileExternalInputOperator(externalInputOperator){
+	return getJavaClassExternalInputOperator(externalInputOperator) + ".java";
+}
+
+operation getJavaClassNameNode(node){
+	return getClassNodePattern(node) + ".java";
+}
+
+operation getClassNodePattern(node){
+	//return node.name.firstToUpperCase() + "NodeInstance";
+	return "ModelNode";
+}
+
+operation getJavaClassExternalInputOperator(externalInputOperator) {
+	return externalInputOperator.id.firstToUpperCase() + "ExternalInput";
+}
+
+operation getJavaClassFileExternalOutputOperator(externalOutputOperator){
+	return getJavaClassExternalOutputOperator(externalOutputOperator) + ".java";
+}
+
+operation getJavaClassExternalOutputOperator(externalOutputOperator) {
+	return externalOutputOperator.id.firstToUpperCase() + "ExternalOutput";
+}
+
+operation getPackageExternalInputOperator(externalInputOperator){
+	return getTransformationRootPackage();
+}
+
+operation getPackagePatternListener(pattern){
+	return getTransformationRootPackage();
+}
+
+operation getPackagePatternPublisher(pattern){
+	return getTransformationRootPackage();
+}
+
+operation getPackageExternalOutputOperator(externalOutputOperator){
+	return getTransformationRootPackage();
+}
+
+operation getPatternSucessorsFromOperator(operator){
+	return operator.results.collect(element | element.pattern );
+}
+
+operation getOperatorSucessorsFromPattern(pattern) {
+	return pattern.outgoingOperands.collect(element : CoreModel!Operand | element.operator);
+}
+
+operation getPatternPredecessorsFromOperator(operator){
+	return operator.operands.collect(element | element.pattern );
+}
+
+operation getFieldNameNodePattern(node){
+	return node.id.firstToLowerCase();
+}
+
+operation getAllExternalInputOperators() {
+	return CoreModel!External.all.select(external: CoreModel!External | isInputOperator(external));
+}
+
+operation getAllInternalOperators() {
+	return CoreModel!Operator.all.reject(op: CoreModel!Operator | isExternalOperator(op) );
+}
+
+operation getAllInternalOrOutputOperators() {
+	return CoreModel!Operator.all.select(op: CoreModel!Operator | isInternalOperator(op) or isOutputOperator(op) );
+}
+
+operation isExternalOperator(op){
+	return op.isKindOf(CoreModel!External);
+}
+
+operation isInternalOperator(op){
+	return not isExternalOperator(op);
+}
+
+
+operation isInputOperator(external) {
+	return external.operands.isEmpty();
+}
+
+operation isOutputOperator(external) {
+	return external.results.isEmpty();
+}
+
+operation getAllExternalOutputOperators() {
+	return CoreModel!External.all.select(external: External| isOutputOperator(external));
+}
+
+operation isOutputOperator(external) {
+	return external.results.isEmpty();
+}
+
+operation getRestrictions(operator) {
+	var result = new Bag;
+	result.addAll(findOperatorSameRestrictions(operator));
+	result.addAll(findOperatorDifferentRestrictions(operator));
+	result.addAll(findOperatorKeepRestrictions(operator));
+	return result;
+}
+
+operation min(a,b) {
+	if (a>b) {
+		return b;
+	} else {
+		return a;
+	}
+}
+
+operation max(a,b) {
+	if (a>b) {
+		return a;
+	} else {
+		return b;
+	}
+}
+
+operation findOperatorKeepRestrictions(operator) {
+	return CoreModel!Keep.all.select(keepRestriction | hasSourceInSomePatternKeepRestriction(keepRestriction, getIncomingPatternsSet(operator)) and hasTargetInSomePatternKeepRestriction(keepRestriction, getOutgoingPatternsSet(operator)));
+}
+
+operation findOperatorSameRestrictions(operator) {
+  return CoreModel!Same.all.select(sameRestriction | hasSourceInSomePatternSameRestriction(sameRestriction, getIncomingPatternsSet(operator)) and hasTargetInSomePatternSameRestriction(sameRestriction, getIncomingPatternsSet(operator)));
+}
+
+operation findOperatorDifferentRestrictions(operator) {
+  return VisualModel!Different.all.select(differentRestriction | hasSourceInSomePatternDifferentRestriction(differentRestriction, getIncomingPatternsSet(operator)) and hasTargetInSomePatternDifferentRestriction(differentRestriction, getIncomingPatternsSet(operator)));
+}
+
+operation getIncomingPatternsSet(operator){
+	return operator.operands.collect(operand | operand.pattern).asSet();
+}
+
+operation getOutgoingPatternsSet(operator){
+	return operator.results.collect(result | result.pattern).asSet();
+}
+
+operation hasSourceInSomePatternSameRestriction(sameRestriction, setOfPatterns){
+	return setOfPatterns.exists(somePattern | hasSourceInPatternSameRestriction(sameRestriction, somePattern));
+}
+
+operation hasSourceInSomePatternDifferentRestriction(differentRestriction, setOfPatterns){
+	return setOfPatterns.exists(somePattern | hasSourceInPatternDifferentRestriction(differentRestriction, somePattern));
+}
+
+operation hasSourceInSomePatternKeepRestriction(keepRestriction, setOfPatterns){
+	return setOfPatterns.exists(somePattern | hasSourceInPatternKeepRestriction(keepRestriction, somePattern));
+}
+
+operation hasSourceInPatternKeepRestriction(keepRestriction, somePattern){
+	return somePattern.nodes.exists(someNode | keepRestriction.source = someNode);
+}
+
+operation hasTargetInSomePatternSameRestriction(sameRestriction, setOfPatterns){
+	return setOfPatterns.exists(somePattern | hasTargetInPatternSameRestriction(sameRestriction, somePattern));
+}
+
+operation hasTargetInSomePatternDifferentRestriction(differentRestriction, setOfPatterns){
+	return setOfPatterns.exists(somePattern | hasTargetInPatternSameRestriction(differentRestriction, somePattern));
+}
+
+operation hasTargetInSomePatternKeepRestriction(keepRestriction, setOfPatterns){
+	return setOfPatterns.exists(somePattern | hasTargetInPatternKeepRestriction(keepRestriction, somePattern));
+}
+
+operation hasSourceInPatternSameRestriction(sameRestriction, somePattern){
+	return somePattern.nodes.exists(someNode | sameRestriction.source = someNode);
+}
+
+operation hasSourceInPatternDifferentRestriction(differentRestriction, somePattern){
+	return somePattern.nodes.exists(someNode | differentRestriction.source = someNode);
+}
+
+operation hasTargetInPatternSameRestriction(differentRestriction, somePattern){
+	return somePattern.nodes.exists(someNode | differentRestriction.target = someNode);
+}
+
+operation hasTargetInPatternSameRestriction(sameRestriction, somePattern){
+	return somePattern.nodes.exists(someNode | sameRestriction.target = someNode);
+}
+
+operation hasTargetInPatternKeepRestriction(keepRestriction, somePattern){
+	return somePattern.nodes.exists(someNode | keepRestriction.target = someNode);
+}
+
+operation getAllInputPatterns(){
+	return CoreModel!Pattern.all.select(pattern | isInputPattern(pattern));
+}
+
+operation getAllOutputPatterns() {
+	return CoreModel!Pattern.all.select(pattern | isOutputPattern(pattern));
+}
+
+operation isInputPattern(pattern){
+	return isConnectedToSomeInputOperator(pattern);
+}
+
+operation isOutputPattern(pattern){
+	return isConnectedToSomeOutputOperator(pattern);
+}
+
+operation isConnectedToSomeInputOperator(pattern){
+	return pattern.incomingResults.collect(incRes | incRes.operator).exists(op | isInputOperator(op));
+}
+
+operation isConnectedToSomeOutputOperator(pattern){
+	return pattern.outgoingOperands.collect(outOp | outOp.operator).exists(op | isOutputOperator(op));
+}
+
+
+operation getConditionsWithFirstParameterInPattern(conditions, pattern) {
+	return conditions.select(cond | pattern.nodes.collect(n | n.attributes).exists(attrsSet | attrsSet.includes(getFirstParameterCondition(cond))));
+}
+
+operation getFirstParameterCondition(cond) {
+	return cond.parameters.selectOne(param| param.index == 0).parameter;
+}
+
+operation getSourcePattern(joinCondition) {
+	return joinCondition.source.pattern;
+}
+
+operation getTargetPattern(joinCondition) {
+	return joinCondition.target.pattern;
+}
+
+
+operation selectMostRestrictiveJoinCondition(operator) {
+	var maxSelectivityDenominator = 0.0d;
+	var mostRestrictiveSameCondition = null;
+	
+	for (sameCondition in findOperatorSameRestrictions(operator)) {
+		var selDenAux = computeConditionSelectivityDenominator(sameCondition);
+		if (selDenAux > maxSelectivityDenominator) {
+			maxSelectivityDenominator = selDenAux;
+			mostRestrictiveSameCondition = sameCondition;
+		}
+	}
+	
+	assert(mostRestrictiveSameCondition==null implies findOperatorSameRestrictions(operator).isEmpty(), "Error in selectMostRestrictiveJoinCondition.");
+	
+	return mostRestrictiveSameCondition;
+}
+
+operation dependsOnlyOnOnePattern(condition, pattern) {
+	return collectAllConditionParameters(condition.parameters).forAll(param | parameterBelongsToPattern(param, pattern));
+}
+
+operation parameterBelongsToPattern(parameter, pattern) {
+	
+	if (parameter.isKindOf(VisualModel!NodePattern)) {
+		return pattern.nodes.includes(parameter);
+	} else if (parameter.isKindOf(VisualModel!AttributePattern)) {
+		return pattern.nodes.collect(n| n.attributes).exists(attrList | attrList.includes(parameter));
+	} else {
+		assert(false, "Unexpected kind of parameter in parameterBelongsToPattern");
+	}
+}
+
+operation collectAllConditionParameters(parameterRefs) {
+	
+	/*
+	Fetches the set of all parameter (node or attribute) used in the calculation.
+	*/
+	var result = new Bag;
+	
+	for (parameterRef in parameterRefs) {
+		var parameter = parameterRef.parameter;
+		if (parameter.isKindOf(VisualModel!ExternalCalculationCall)) {
+			result.addAll(collectAllConditionParameters(parameter.parameters));
+		} else if (parameter.isKindOf(VisualModel!NodePattern)) {
+			result.add(parameter);
+		} else if (parameter.isKindOf(VisualModel!AttributePattern)) {
+			result.add(parameter);
+		} else {
+			assert(false, "Unexpected kind of parameter in collectAllConditionParameters");
+		}
+	}
+	
+	return result;
+}
+
+operation getOperandFromPattern(operator, pattern) {
+	return operator.operands.selectOne(operand | operand.pattern == pattern);
+}
+
+
+operation computeConditionSelectivityDenominator(sameCondition) {
+	return max(computeConditionSelectivityDenominatorSourcePattern(sameCondition), computeConditionSelectivityDenominatorTargetPattern(sameCondition));
+}
+
+operation computeConditionSelectivityDenominatorSourcePattern(sameCondition) {
+	var nodePattern = sameCondition.source;
+	return nodePattern.expectedNumberOfDistinctValues;
+}
+
+operation computeConditionSelectivityDenominatorTargetPattern(sameCondition) {
+	var nodePattern = sameCondition.target;
+	return nodePattern.expectedNumberOfDistinctValues;
+}
+
+operation generateRandomIndexes(operator: VisualModel!Operator){
+	var index = 1;
+	
+	for (operand in operator.operands){
+		operand.index = index;
+		index = index + 1;
+	}
+}
+
+
+operation VisualModel!Operator hasOnlyOneOperand(){
+	return self.operands.size() == 1;
+}
+
+operation VisualModel!Operator hasTwoOperands(){
+	return self.operands.size() == 2;
+}
+
+operation VisualModel!Operator hasNoOperands(){
+	return self.operands.isEmpty();
+}
+
+operation assert(condition, message) {
+	if (not condition) {
+		throw "Assertion error: " + message;
+	}
+}
+
+
+
+operation getHashMapNodeInPatternField(node,pattern){
+	return node.id.firstToLowerCase() + "In" + pattern.id.firstToUpperCase() + "Hash";
+}
+
+
+operation getAllInputPatternsSet() {
+	var results = new Set;
+	for (externalInputOperator in getAllExternalInputOperators()) {
+		results.addAll(getPatternSucessorsFromOperator(externalInputOperator));
+	}
+	
+	return results;
+}
+
+/*
+	Returns nodes that are to be joined in some natural join operation.
+*/
+operation getJoinableNodes(nodes) {
+	return nodes.select(n | isJoinableNode(n));
+}
+
+operation isJoinableNode(node) {
+	return node.sameOut.exists(sameRelation | IsJoinableNodeInRelation(node, sameRelation))
+			or node.sameIn.exists(sameRelation | IsJoinableNodeInRelation(node, sameRelation));
+}
+
+operation getOperatorContainingSameRelation(operators, sameRestriction) {
+	return operators.select(operator | hasSourceInSomePatternSameRestriction(sameRestriction, getIncomingPatternsSet(operator)) and hasTargetInSomePatternSameRestriction(sameRestriction, getIncomingPatternsSet(operator)));
+}
+
+operation IsJoinableNodeInRelation(node, sameRelation) {
+/*
+An operator is joinable if there is at least one operation in which the pattern's node
+is treated as a secondary operand.
+*/
+	var operatorsContainingSameRelation = getOperatorContainingSameRelation(node.pattern.outgoingOperands.collect(operand | operand.operator), sameRelation);
+	
+	var pattern = node.pattern;
+	
+	for (operator in operatorsContainingSameRelation) {
+		assert(operator.operands.size==2, "incorrect operatorsContainingSameRelation.");
+		var op1 = null;
+		var op2 = null;
+		
+		if (operator.operands.first.pattern == pattern) {
+			op1 = operator.operands.first;
+			op2 = operator.operands.last;
+		} else if (operator.operands.last.pattern == pattern) {
+			op2 = operator.operands.first;
+			op1 = operator.operands.last;
+		}
+		
+		if (op1.index > op2.index) {
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+
+operation getAllOutputPatternsSet() {
+	var results = new Set;
+	for (externalOutputOperator in getAllExternalOutputOperators()) {
+		results.addAll(getPatternPredecessorsFromOperator(externalOutputOperator));
+	}
+	
+	return results;
+}
+
+operation getArrayListPatternField(pattern) {
+	return pattern.id.firstToLowerCase() + "Array";
+}
+
+operation getIntCounterField(pattern,operator){
+	return "newCounter" + pattern.id.firstToUpperCase() + operator.id.firstToUpperCase();
+}
+
+operation getOperandCounterField(operand){
+	return "operand" + operand.pattern.id.firstToUpperCase() + operand.operator.id.firstToUpperCase() + "Counter";
+}
+
+operation getResultsCounterField(result){
+	return "result" + result.operator.id.firstToUpperCase() + result.pattern.id.firstToUpperCase() + "Counter";
+}
+
+operation getHashSetPatternField(pattern){
+	return pattern.id.firstToLowerCase() + "Set";
+}
+
+operation getOperatorMethodName(operator){
+	return "executeOperator" + operator.id.firstToUpperCase();
+}
+
+
+
+operation selectNodeInPattern(node1, node2, pattern) {
+	if (pattern.nodes.includes(node1)) {
+		return node1;
+	} else if (pattern.nodes.includes(node2))  {
+		return node2;
+	} else {
+		throw "Unable to choose!";
+	}
+}
+
+
+
+operation isAnyResult(result){
+	return result.isKindOf(CoreModel!AnyResult);
+}
+
+operation isSomeResult(result){
+	return result.isKindOf(CoreModel!SomeResult);
+}
+
+
+
+operation attributeIsDerived(at) {
+	if (isDerivedByExternalAttributeCall(at)) {
+		return true;
+	}
+	return false;
+}
+
+operation isDerivedByExternalAttributeCall(attribute) {
+	if (attribute.attributeExternalCalculationCall <> null) {
+		return true;
+	}
+	return false;
+}
+
+
+
+operation getAllAttributeParameters(parameterRefs) {
+	/*
+	Fetches the set of all attribute refs used in the calculation so that their existence can be verified prior to the calculation execution.
+	*/
+	var result = new Bag;
+	
+	for (parameterRef in parameterRefs) {
+		if (parameterRef.isKindOf(CoreModel!ExternalAttributeCalculationCallParameter)) {
+			result.addAll(getAttributeParameter(parameterRef.parameter));
+		} else if (parameterRef.isKindOf(CoreModel!ExternalCalculationCallParameter)) {
+			result.addAll(getAttributeParameter(parameterRef.parameter));
+		} else if (parameterRef.isKindOf(CoreModel!ExternalConditionCallParameter)) {
+			result.addAll(getAttributeParameter(parameterRef.parameter));
+		} else {
+			("Error: parameterRef: " + parameterRef).println();
+			throw "Unexpected kind of parameterRef";
+		}
+	}
+	
+	return result;
+}
+
+operation getAttributeParameter(parameter) {
+	var result = new Bag;
+	if (parameter.isKindOf(CoreModel!NodePattern)) {
+		// do nothing
+	} else if (parameter.isKindOf(CoreModel!AttributePattern)) {
+		result.add(parameter);
+	} else if (parameter.isKindOf(CoreModel!ExternalCalculationCall)) {
+		result.addAll(getAllAttributeParameters(parameter.parameters));
+	} else {
+		throw "Not implemented yet";
+	}
+	
+	return result;
+}
+
+
+operation getParameterWithIndex(parameters, index) {
+	return parameters.selectOne(param | param.index == index);
+}
+
+
+
+operation getAllNewNodePatterns(sourcePattern, targetPattern){
+	return targetPattern.nodes.select(node: CoreModel!NodePattern | isNewNodePattern(node, sourcePattern));
+}
+
+operation isNewNodePattern(node, sourcePattern){
+	return not hasAKeepRelationInSourcePattern(node, sourcePattern);
+}
+
+operation hasAKeepRelationInSourcePattern(node, sourcePattern){
+	return sourcePattern.nodes.exists(sourceNode: CoreModel!NodePattern | hasAKeepRelation(sourceNode, node));
+}
+
+operation hasAKeepRelation(sourceNode, targetNode){
+	return sourceNode.keepOut.exists(relation:CoreModel!Keep | relation.target = targetNode);
+}
+
+
+operation getCorrespondingNode(node, pattern) {
+	return node.keepIn.selectOne(rel : CoreModel!Keep | patternContains(pattern, rel.source)).source;
+}
+
+operation patternContains(pattern, node) {
+	return pattern.nodes.includes(node);
+}
+
+operation getAllKeepNodePatterns(sourcePattern, targetPattern){
+	return targetPattern.nodes.select(node: CoreModel!NodePattern | isKeepNodePattern(node, sourcePattern));
+}
+
+operation isKeepNodePattern(node, sourcePattern){
+	return hasAKeepRelationInSourcePattern(node, sourcePattern);
+}
+
+operation isAnyOperand(operand){
+	return operand.isKindOf(CoreModel!AnyOperand);
+}
+
+operation isSomeOperand(operand){
+	return operand.isKindOf(CoreModel!SomeOperand);
+}
+
+operation isAntiOperand(operand){
+	return operand.isKindOf(CoreModel!AntiOperand);
+}
+
+operation isOptionalOperand(operand){
+	return operand.isKindOf(CoreModel!OptionalOperand);
+}
+
+operation isOnlyOneOperand(operand1, operand2){
+	return operand1 <> null and operand2 = null;
+}
+
+operation isDoubleOperand(operand1, operand2){
+	return operand1 <> null and operand2 <> null;
+}
+
+
+
+operation getFirstOperand(operator){
+	if (operator.operands.size() = 1) {
+		return operator.operands.first;
+	} else if (operator.operands.size() = 2) {
+		if (operator.operands.first.index <= operator.operands.last.index) {
+			return operator.operands.first;
+		}else {
+			return operator.operands.last;
+		}
+	} else {
+		throw ("Unexpected number of operands in " + operator);
+	}
+}
+
+operation getSecondOperand(operator){
+	if (operator.operands.size() = 1) {
+		return null;
+	} else if (operator.operands.size() = 2) {
+		if (operator.operands.first.index <= operator.operands.last.index) {
+			return operator.operands.last;
+		}else {
+			return operator.operands.first;
+		}
+	} else {
+		throw ("Unexpected number of operands in " + operator);
+	}
+}
+
+operation hasJoinConditions(operator, operand1, operand2){
+	if (operator.isKindOf(CoreModel!Combinator)) {
+		return getRestrictions(operator).exists(same : CoreModel!Same | isRestrictionWithinPatterns(same, operand1.pattern, operand2.pattern));
+	/*} else if (operator.isKindOf(CoreModel!Union)) {
+		return getRestrictions(operator).exists(same : CoreModel!Same | isRestrictionWithinPatterns(same, operand1.pattern, operand2.pattern));
+	*/} else {
+		throw "Unexpected operator found: " + operator;
+	}
+}
+
+operation selectJoinCondition(operator, operand1, operand2) {
+	var restriction = selectMostRestrictiveJoinCondition(operator);
+	
+	assert(isRestrictionWithinPatterns(restriction, operand1.pattern, operand2.pattern), "Invalid restriction found in selectJoinCondition()");
+	
+	return restriction;
+}
+
+operation getRemainingConditions(operator, operand1, operand2, joinCondition) {
+	if (joinCondition <> null) {
+		return getRestrictions(operator).select(restriction : CoreModel!Restriction | restriction<>joinCondition and isRestrictionWithinPatterns(restriction, operand1.pattern, operand2.pattern));
+	} else {
+		return getRestrictions(operator).select(restriction : CoreModel!Restriction | isRestrictionWithinPatterns(restriction, operand1.pattern, operand2.pattern));
+	}
+}
+
+operation isRestrictionWithinPatterns(restriction, pattern1, pattern2){
+	return (pattern1.nodes.includes(restriction.source) and pattern2.nodes.includes(restriction.target)) or (pattern2.nodes.includes(restriction.source) and pattern1.nodes.includes(restriction.target));
+}
+
+operation getPatternHasChangedFlag(pattern) {
+	return "pattern" + pattern.id.firstToUpperCase() + "HasChanged";
+}
+
+
+
+operation getNextOperators(operatorIterator) {
+	if (operatorIterator.flowOut == null) {
+		return new Bag;
+	}
+	
+	if (operatorIterator.flowOut.isEmpty()) {
+		return new Bag;
+	}
+	
+	if (operatorIterator.flowOut.select(rule | rule.isKindOf(VisualModel!NextDerived)).isEmpty()) {
+		throw "Interruption of execution flow in operator " + operatorIterator;
+	}
+	
+	/* Com ciclos ja pode haver ambiguidades
+	if (operatorIterator.flowOut.select(rule | rule.isKindOf(VisualModel!NextDerived)).size()>1) {
+		throw "Ambiguity in execution flow in operator " + operatorIterator;
+	}
+	*/
+	
+	return operatorIterator.flowOut.select(rule | rule.isKindOf(VisualModel!NextDerived)).collect(rule | rule.target);
+}
+
+operation hasMoreOperatorSucessors(operatorIterator) {
+	var nextOperators = getNextOperators(operatorIterator);
+	
+	return nextOperators <> null and (not nextOperators.isEmpty());
+}
+
+operation getFirstOperatorToBeExecuted() {
+	var possibleResults = new Set;
+	for (operator in VisualModel!Operator.all) {
+		if (operator.flowIn == null) {
+			possibleResults.add(operator);
+		} else if (operator.flowIn.isEmpty()) {
+			possibleResults.add(operator);
+		}
+	}
+	
+	if (possibleResults.isEmpty()) {
+		throw "No execution plan found!";
+	}
+	
+	if (possibleResults.size() > 1) {
+		throw "Ambiguity in execution plan found!";
+	}
+	
+	return possibleResults.first;
+}
+
+
+operation thereIsAPathBetween(startOp, endOp) {
+	("Calculating path between: " + startOp + " and " + endOp).println();
+	var nextOperators = getNextOperators(startOp);
+	if (nextOperators.isEmpty()) {
+		return false;
+	}
+	if (nextOperators.size() <> 1) {
+		throw "Cycle not supported";
+	}
+	var operatorIterator = nextOperators.first;
+	
+	while (operatorIterator <> endOp) {
+		nextOperators = getNextOperators(operatorIterator);
+		if (nextOperators.size() == 0) {
+			return false;
+		}
+		if (nextOperators.size() <> 1) {
+			throw "Cycle not supported";
+		}
+		operatorIterator = nextOperators.first;
+	}
+	
+	// operatorIterator == endOp
+	return true;
+}
+
+

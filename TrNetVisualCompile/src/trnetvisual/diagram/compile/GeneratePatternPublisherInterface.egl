@@ -1,0 +1,11 @@
+[%
+import "Utils.eol";
+
+%]
+package [%=getPackagePatternPublisher(pattern)%];
+
+public interface [%=getInterfacePatternPublisher(pattern)%]{
+	public void registerListener([%=getInterfacePatternListener(pattern)%] listener);
+	
+	public void notifyListeners([%=getClassPattern(pattern)%] element);
+}

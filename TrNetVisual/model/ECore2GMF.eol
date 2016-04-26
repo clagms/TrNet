@@ -1,0 +1,96 @@
+-- This script is executed automatically by Eugenia 
+
+/*
+"Clearing Empty Feature Mappings...".println();
+var feature_mappings = GmfMap!FeatureLabelMapping.all.select(f|f.features.isEmpty());
+
+for (n in feature_mappings){
+  ("Found Mapping: " + n).println();
+  delete n;
+}
+"Clearing Empty Feature Mappings... DONE".println();
+*/
+
+
+"Formatting Attributes Aspect...".println();
+
+var attributeFigures = GmfGraph!Rectangle.all.
+    select(r|r.name = 'AttributePatternFigure');
+
+if (attributeFigures.size > 1) {
+	throw "Warning: More than one attribute figure found!";
+}
+
+var attributeFigure = attributeFigures.first();
+
+-- ... delete its border
+delete attributeFigure.border;
+
+-- ... set its outline to false
+attributeFigure.outline = false;
+
+-- ... and add a preferred size to it
+var preferredSize = new GmfGraph!Dimension;
+preferredSize.dx = 100;
+preferredSize.dy = 16;
+attributeFigure.preferredSize = preferredSize;
+
+"Formatting Attributes Aspect... DONE".println();
+
+
+
+var toolsPalette = GmfTool!Palette.all.first;
+
+var actionToolGroup = new GmfTool!ToolGroup;
+actionToolGroup.title="Actions";
+actionToolGroup.description="Actions";
+actionToolGroup.collapsible=true;
+toolsPalette.tools.add(actionToolGroup);
+
+"Inserting Custom Tool Generate IDs... ".println();
+
+var generateIDsTool = new GmfTool!GenericTool;
+generateIDsTool.title = "Generate IDs";
+generateIDsTool.description = "Generate IDs";
+generateIDsTool.toolClass="trnetvisual.diagram.generateids.GenerateIdsTool";
+
+actionToolGroup.tools.add(generateIDsTool);
+
+"Inserting Custom Tool Generate IDs... DONE".println();
+
+
+"Inserting Custom Tool Generate Operand Indexes... ".println();
+
+var generateOperandsTool = new GmfTool!GenericTool;
+generateOperandsTool.title = "Generate Operand Indexes";
+generateOperandsTool.description = "Generate Operand Indexes";
+generateOperandsTool.toolClass="trnetvisual.diagram.generateoperandsindexes.GenerateOperandIndexesTool";
+
+actionToolGroup.tools.add(generateOperandsTool);
+
+"Inserting Custom Tool Generate Operand Indexes... DONE".println();
+
+
+"Inserting Custom Tool Generate Expected Sizes... ".println();
+
+var generateSizesTool = new GmfTool!GenericTool;
+generateSizesTool.title = "Generate Expected Sizes";
+generateSizesTool.description = "Generate Expected Sizes";
+generateSizesTool.toolClass="trnetvisual.diagram.generatesizes.GenerateExpectedSizesTool";
+
+actionToolGroup.tools.add(generateSizesTool);
+
+"Inserting Custom Tool Generate Expected Sizes... DONE".println();
+
+
+"Inserting Custom Tool Compile... ".println();
+
+var compileTool = new GmfTool!GenericTool;
+compileTool.title = "Compile";
+compileTool.description = "Compile";
+compileTool.toolClass="trnetvisual.diagram.compile.CompileTool";
+
+actionToolGroup.tools.add(compileTool);
+
+"Inserting Custom Tool Compile... DONE".println();
+

@@ -1,0 +1,351 @@
+-*
+This script generates the required ids in the transformation while retaining user filled IDs.
+It will perform a deph first search in the network to fill those IDs instead of iterating through
+all instances of each element's type to generate the ids. It is best in this way because, 
+except for rare exceptions, close ids mean the elements are conected or in the same container.
+It is better for debug. 
+*-
+
+// Global vars.
+var next_operator_id = 1;
+var next_pattern_id = 1;
+
+var visitedNodes = new Set;
+
+
+generateAllIDs();
+
+operation generateAllIDs(){
+
+	clearAllGeneratedIds();
+	
+	"Generating All IDs...".println();
+	
+	var modelElement =  VisualModel!TrNetModel.all.first;
+	
+	generateIDTrNetModel(modelElement);
+	
+	
+	for (externalInputOperator in modelElement.getAllInputOperators()) { 
+		("Generating ID for " + externalInputOperator + "...").println();
+		
+		if (externalInputOperator.needsNewId()){
+			
+			if (not visitedNodes.includes(externalInputOperator)) {
+				visitedNodes.add(externalInputOperator);
+				generateIDOperator(externalInputOperator);
+				
+				("ID for " + externalInputOperator + " Generated!").println();
+				
+				generateIDOperatorSucessors(externalInputOperator);
+			}
+			
+			
+		} else if (not externalInputOperator.hasBeenVisited()) {
+			if (not visitedNodes.includes(externalInputOperator)) {
+				
+				visitedNodes.add(externalInputOperator);
+				
+				generateIDOperatorSucessors(externalInputOperator);
+			
+			}
+		} else {
+			("ID for " + externalInputOperator + " Not Generated!").println();
+		}
+		
+		
+		
+		("Generating ID for " + externalInputOperator + "... DONE").println();
+		
+		
+	}
+	
+	"Generating All IDs... DONE".println();
+}
+
+operation generateIDOperatorSucessors(operator){
+	("Generating ID for " + operator + "'s successors...").println();
+	
+	for (pattern in operator.getPatternSucessors()) {
+		if (pattern.needsNewId()){
+			if (not visitedNodes.includes(pattern)) {
+				visitedNodes.add(pattern);
+				
+				generateIDPattern(pattern);
+				("ID for " + pattern + " Generated!").println();
+				
+				generateIDPatternChildren(pattern);
+				
+				generateIDPatternSucessors(pattern);
+				
+			}
+			
+		} else if (not pattern.hasBeenVisited()){
+			if (not visitedNodes.includes(pattern)) {
+				visitedNodes.add(pattern);
+				
+				generateIDPatternChildren(pattern);
+				
+				generateIDPatternSucessors(pattern);
+			}
+		} else {
+			("ID for " + pattern + " Not Generated!").println();
+		}
+	}
+	
+	("Generating ID for " + operator + "'s successors... DONE").println();
+}
+
+operation generateIDPatternSucessors(pattern){
+	("Generating ID for " + pattern + "'s successors...").println();
+	
+	for (operator in pattern.getOperatorSucessors()) {
+		if (operator.needsNewId()){
+			if (not visitedNodes.includes(operator)) {
+				visitedNodes.add(operator);
+				
+				generateIDOperator(operator);
+				("ID for " + operator + " Generated!").println();
+				
+				generateIDOperatorSucessors(operator);
+			}
+			
+		} else if (not operator.hasBeenVisited()){
+			if (not visitedNodes.includes(operator)) {
+				visitedNodes.add(operator);
+				
+				generateIDOperatorSucessors(operator);
+			
+			}
+		} else {
+			("ID for " + operator + " Not Generated!").println();
+		}
+	}
+	
+	("Generating ID for " + pattern + "'s successors... DONE").println();
+}
+
+
+operation generateIDPatternChildren(pattern){
+	("Generating ID for " + pattern + "'s children...").println();
+	var nodeNamesMap = buildNamesMap(pattern.nodes);
+	
+	for (node in pattern.nodes) {
+		if (node.needsNewId()){
+			generateIDNode(node, nodeNamesMap);
+			("ID for " + node + " Generated!").println();
+		} else {
+			("ID for " + node + " Not Generated!").println();
+		}
+	}
+	
+	("Generating ID for " + pattern + "'s children... DONE").println();
+}
+
+operation buildNamesMap(nodes) {
+	var result = new Map;
+	for (node in nodes) {
+		result.put(node.name, 0);
+	}
+	return result;
+}
+
+operation  Operator hasBeenVisited(){
+	return isGeneratedOperator(self);
+}
+
+operation  Pattern hasBeenVisited(){
+	return isGeneratedPattern(self);
+}
+
+operation  Pattern needsNewId(){
+	return self.id = "";
+}
+
+operation  TrNetModel needsNewId(){
+	return self.id = "";
+}
+
+operation  NodePattern needsNewId(){
+	return self.id = "";
+}
+
+operation  Operator needsNewId(){
+	return self.id = "";
+}
+
+operation generateIDPattern(pattern){
+	pattern.id = "TrNetPat"+next_pattern_id;
+	next_pattern_id = next_pattern_id + 1;
+	
+}
+
+operation generateIDNode(node, nodeNamesMap){
+	if (not nodeNamesMap.containsKey(node.name)) {
+		throw "Wrong usage of function";
+	}
+	var nodeid = nodeNamesMap.get(node.name);
+	node.id = node.name + nodeid;
+	nodeNamesMap.put(node.name, nodeid+1);
+}
+
+operation generateIDOperator(operator){
+	operator.id = ("TrNetOp"+next_operator_id);
+	next_operator_id = next_operator_id + 1;
+}
+
+operation generateIDTrNetModel(element:  TrNetModel){
+
+	if (element.needsNewId()){
+		("ID for " + element + " Generated!").println();
+		element.id = ("TrNetTransformation");
+	}
+	
+}
+
+operation clearAllGeneratedIds(){
+	"Clearing All Generated IDs...".println();
+	
+	clearGeneratedIdsTrNetModel();
+	clearGeneratedIdsPatterns();
+	clearGeneratedIdsOperators();
+	clearGeneratedIdsNode();
+	
+	"Clearing All Generated IDs... DONE".println();
+}
+
+
+operation clearGeneratedIdsNode(){
+	"Clearing ID for Node elements...".println();
+	
+	for (element in  NodePattern.all) { 
+		
+		if (element.id <> null) {
+			if (isGeneratedNode(element)){
+				
+				(element + " Cleared!").println();
+				element.id = "";
+			
+			} else {
+			
+				(element + " Not Cleared!").println();
+				
+			}
+		} else {
+			(element + " Cleared (null)!").println();
+			element.id = "";
+		}
+		
+						
+	}
+	
+	"Clearing ID for Node elements... DONE".println();
+}
+
+
+operation clearGeneratedIdsOperators(){
+	"Clearing ID for Operator elements...".println();
+	
+	for (element in  Operator.all) { 
+		
+		if (element.id <> null) {
+			if (isGeneratedOperator(element)){
+				
+				(element + " Cleared!").println();
+				element.id = "";
+			
+			} else {
+			
+				(element + " Not Cleared!").println();
+				
+			}
+		} else {
+			(element + " Cleared (null)!").println();
+			element.id = "";
+		}
+		
+						
+	}
+	
+	"Clearing ID for Operator elements... DONE".println();
+}
+
+operation clearGeneratedIdsPatterns(){
+	"Clearing ID for Pattern elements...".println();
+	
+	for (element in  Pattern.all) { 
+		
+		if (element.id <> null) {
+			if (isGeneratedPattern(element)){
+				
+				(element + " Cleared!").println();
+				element.id = "";
+			
+			} else {
+			
+				(element + " Not Cleared!").println();
+				
+			}
+		} else {
+			(element + " Cleared (null)!").println();
+			element.id = "";
+		}
+		
+						
+	}
+	
+	"Clearing ID for Pattern elements... DONE".println();
+}
+
+operation clearGeneratedIdsTrNetModel(){
+	
+	var element =  VisualModel!TrNetModel.all.first;
+	("Clearing ID for TrNetModel element... " + element).println();
+	
+	if (element.id = null){
+		
+		element.id = "";
+		"Cleared!".println();
+		
+	} else if (isGeneratedTrNetModel(element)){
+		"Cleared!".println();
+		
+		element.id = "";
+	} else {
+	
+		"Not Cleared!".println();
+		
+	}
+	"Clearing ID for TrNetModel element... DONE".println();
+}
+
+
+operation isGeneratedTrNetModel(element: TrNetModel): Boolean {
+	return element.id.matches("^TrNetTransformation$");
+}
+
+operation isGeneratedPattern(element: Pattern): Boolean {
+	return element.id.matches("^TrNetPat[0-9]+$");
+}
+
+operation isGeneratedOperator(element: Operator): Boolean {
+	return element.id.matches("^TrNetOp[0-9]+$");
+}
+
+operation isGeneratedNode(element: NodePattern): Boolean {
+	return true;
+	//return element.id.matches("^TrNetNode[0-9]+$");
+}
+
+operation Operator getPatternSucessors(){
+	return self.results.collect(element | element.pattern );
+}
+
+operation Pattern getOperatorSucessors(){
+	return self.outgoingOperands.collect(operand | operand.operator );
+}
+
+operation TrNetModel getAllInputOperators(){
+	return self.operators.select(external: External|external.operands.isEmpty());
+}
+

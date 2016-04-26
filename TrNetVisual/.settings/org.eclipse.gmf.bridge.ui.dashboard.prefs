@@ -1,0 +1,7 @@
+eclipse.preferences.version=1
+gmf_dashboard/domainGenerationModel=platform\:/resource/TrNetVisual/model/TrNetVisual.genmodel
+gmf_dashboard/domainModel=platform\:/resource/TrNetVisual/model/TrNetVisual.ecore
+gmf_dashboard/generationModel=platform\:/resource/TrNetVisual/model/TrNetVisual.gmfgen
+gmf_dashboard/graphicalDefinitionModel=platform\:/resource/TrNetVisual/model/TrNetVisual.gmfgraph
+gmf_dashboard/mappingModel=platform\:/resource/TrNetVisual/model/TrNetVisual.gmfmap
+gmf_dashboard/toolingDefinitionModel=platform\:/resource/TrNetVisual/model/TrNetVisual.gmftool

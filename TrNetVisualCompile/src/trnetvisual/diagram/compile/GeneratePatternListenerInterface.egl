@@ -1,0 +1,9 @@
+[%
+import "Utils.eol";
+
+%]
+package [%=getPackagePatternListener(pattern)%];
+
+public interface [%=getInterfacePatternListener(pattern)%]{
+	public void notify([%=getClassPattern(pattern)%] element);
+}

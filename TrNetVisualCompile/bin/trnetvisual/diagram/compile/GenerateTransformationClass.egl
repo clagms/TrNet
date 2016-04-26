@@ -1,0 +1,1722 @@
+[%
+import "Utils.eol";
+import "UtilsGen.eol";
+
+
+// global flags
+var global_flag_validate_approximations = true;
+var optimize_memory = true; // Set to turn on memory savings by removing unused datastructures.
+
+%]
+package [%=getPackageTransformation()%];
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.HashMap;
+import java.util.LinkedList;
+
+import generic.*;
+
+public class [%=getTransformationClass()%]
+implements [% generateImplementsInterfaces(); %]
+{
+	[%
+	
+	generateFieldsForInputOperatorsInstances();
+	
+	generateFieldsForOutputOperatorsInstances();
+	
+	generateFieldsForPatterns();
+	
+	// This is not yet used because we are not yet using countable operands.
+	//generateCountersForCountableOperands();
+	
+	// This is not yet used because we are not yet using countable results.
+	//generateCounterForCountableResults();
+	
+	%]
+	
+	public [%=getTransformationClass()%](){
+		
+		[%
+		generateFieldInitializers();
+		%]
+		
+		[%
+		generateListenersListInitializers();
+		%]
+		
+		[%
+		generateCounterFielInitializers();
+		%]
+		
+		[%
+		generateInputOperatorInstancesInitializers();
+		%]
+		
+		[%
+		generateOutputOperatorInstancesInitializers();
+		%]
+	}
+	
+	[%
+	"generateRunMethod".println();
+	generateRunMethod();
+	%]
+	
+	[%
+	if (global_flag_validate_approximations) {
+		generateGatherRealSizesForPatterns();
+		generateOutputCVSStats();
+	}
+	%]
+	
+	[%
+	"generateNotifyMethodPattern".println();
+	for (inputPattern in getAllInputPatternsSet()){
+		generateNotifyMethodPattern(inputPattern);
+	}
+	%]
+	
+	
+	[% 
+	"generatePublisherMethodsPattern".println();
+	for (outPattern in getAllOutputPatternsSet()){
+		generatePublisherMethodsPattern(outPattern);
+	}
+	%]
+	
+	
+	[% 
+	"generateMethodOperator".println();
+	for (operator in getAllInternalOrOutputOperators()){
+		generateMethodOperator(operator);
+	}
+	%]
+	
+	[% 
+	"generateMethodInternalOperator".println();
+	for (operator in getAllExternalInputOperators()){
+		generateMethodInternalOperator(operator);
+	}
+	%]
+	
+	[%
+	"generateMethodRegisterExternalInputPublisher".println();
+	for (operator in getAllExternalInputOperators()){
+		generateMethodRegisterExternalInputPublisher(operator);
+	}
+	%]
+	
+	[% 
+	"generateMethodRegisterExternalOutputListener".println();
+	for (operator in getAllExternalOutputOperators()){
+		generateMethodRegisterExternalOutputListener(operator);
+	}
+	%]
+}
+
+
+
+
+
+
+[%
+
+operation generateGatherRealSizesForPatterns() {
+	%]
+	public HashMap<String, generic.PatternStats> retrieveExpectedAndRealSizesPatterns() {
+		HashMap<String, generic.PatternStats> result = new HashMap<String, generic.PatternStats>();
+		[%
+		for (pattern in VisualModel!Pattern.all){
+			%]
+			{
+				generic.PatternStats patternStats = new generic.PatternStats();
+				
+				patternStats.expectedSize = [%=pattern.expected_size%];
+				patternStats.realSize = [%=getHashSetPatternField(pattern)%].size();
+				
+				[%
+				// TODO: Other statistics are filled here.
+				%]
+				
+				result.put("[%=pattern.id%]", patternStats);
+			}
+			[%
+		}
+		%]
+		
+		return result;
+	} 
+	[%
+}
+
+operation generateOutputCVSStats() {
+	%]
+	public void generateOutputCSVStats(String directory_path) {
+		HashMap<String, generic.PatternStats> statsMap = retrieveExpectedAndRealSizesPatterns();
+		try{
+		    java.io.FileWriter patternStatsFile = new java.io.FileWriter(directory_path + "/" + "patternSize.csv");
+	 	
+		    patternStatsFile.append("Pattern ID");
+		    patternStatsFile.append(',');
+		    patternStatsFile.append("Expected Size");
+		    patternStatsFile.append(',');
+		    patternStatsFile.append("Real Size");
+		    patternStatsFile.append('\n');
+			
+			[%
+			for (pattern in VisualModel!Pattern.all) {
+				%]
+				{
+					generic.PatternStats patternStats = statsMap.get("[%=pattern.id%]");
+					
+					patternStatsFile.append("[%=pattern.id%]");
+				    patternStatsFile.append(',');
+				    patternStatsFile.append(patternStats.expectedSize + "");
+				    patternStatsFile.append(',');
+				    patternStatsFile.append(patternStats.realSize + "");
+				    patternStatsFile.append('\n');
+					
+				}
+				[%
+			}
+			%]
+			
+		    patternStatsFile.flush();
+		    patternStatsFile.close();
+		}
+		catch(java.io.IOException e){
+		     e.printStackTrace();
+		} 
+		
+	}
+	[%
+}
+
+
+operation generateMethodInternalOperator(operator) {
+	%]
+	boolean [%=getOperatorMethodName(operator)%]() {
+		return true;
+	}
+	[%
+}
+
+operation generateCounterFielInitializers(){
+	// There is no support yet for countable stuff.
+	//generateCounterFieldInitializersCountableOperands();
+	//generateCounterFieldInitializersCountableresults();
+}
+
+operation generateCounterFieldInitializersCountableOperands() {
+	for (operand in CoreModel!SomeOperand.all) {
+		%]
+		[%=getOperandCounterField(operand)%] = 0;
+		[%
+	}
+}
+
+operation generateCounterFieldInitializersCountableresults(){
+	for (result in CoreModel!SomeResult.all) {
+		%]
+		[%=getResultsCounterField(result)%] = 0;
+		[%
+	}
+}
+
+operation generateListenersListInitializers(){
+	for (outPattern in getAllOutputPatternsSet()){
+		generateListenersListInitializer(outPattern);
+	}
+}
+
+operation generateFieldInitializers(){
+	for (pattern in CoreModel!Pattern.all){
+		generateFieldsInitializersForPattern(pattern);
+	}
+}
+
+operation generateInputOperatorInstancesInitializers() {
+	for (operator in getAllExternalInputOperators()){
+		generateInputOperatorInstanceInitializer(operator);
+	}
+}
+
+operation generateInputOperatorInstanceInitializer(operator) {
+	%]
+	[%=getFieldForInputOperator(operator)%] = new [%=getJavaClassExternalInputOperator(operator)%]();
+	[%
+	for (pattern in getPatternSucessorsFromOperator(operator)) {
+		%]
+		[%=getFieldForInputOperator(operator)%].registerListener( ([%=getInterfacePatternListener(pattern)%]) this);
+		[%
+	}
+	%]
+	[%
+}
+
+operation generateOutputOperatorInstancesInitializers() {
+	for (operator in getAllExternalOutputOperators()){
+		generateOutputOperatorInstanceInitializer(operator);
+	}
+}
+
+operation generateOutputOperatorInstanceInitializer(operator) {
+	%]
+	[%=getFieldForOutputOperator(operator)%] = new [%=getJavaClassExternalOutputOperator(operator)%]();
+	[%
+	for (pattern in getPatternPredecessorsFromOperator(operator)) {
+		%]
+		this.registerListener(([%=getInterfacePatternListener(pattern)%]) [%=getFieldForOutputOperator(operator)%]);
+		[%
+	}
+	%]
+	[%
+}
+
+// This is not yet used because we are not using countable operands.
+operation generateCountersForCountableOperands(){
+	for (operand in CoreModel!SomeOperand.all) {
+		%]
+		int [%=getOperandCounterField(operand)%];
+		[%
+	}
+}
+
+// This is not yet used because we are not using countable results.
+operation generateCounterForCountableResults(){
+	for (result in CoreModel!SomeResult.all) {
+		%]
+		int [%=getResultsCounterField(result)%];
+		[%
+	}
+}
+
+operation generateMethodRegisterExternalInputPublisher(operator) {
+%]
+	public void [%=getMethodRegisterExternalInputPublisher(operator)%](ModelPatternPublisher publisher) {
+		publisher.registerListener([%=getFieldForInputOperator(operator)%]);
+	}
+[%
+}
+
+operation generateMethodRegisterExternalOutputListener(operator) {
+	%]
+	public void [%=getMethodRegisterExternalOutputListener(operator)%](ModelPatternListener listener) {
+		[%=getFieldForOutputOperator(operator)%].registerListener(listener);
+	}
+	[%
+}
+
+operation getMethodRegisterExternalInputPublisher(operator){
+	return "register" + operator.id.firstToUpperCase() + "Publisher";
+}
+
+
+operation getMethodRegisterExternalOutputListener(operator){
+	return "register" + operator.id.firstToUpperCase() + "Listener";
+}
+
+
+operation generateMethodOperator(operator) {
+%]
+boolean [%=getOperatorMethodName(operator)%]() {
+	boolean operatorHasExecuted = false;
+	
+	[%
+	/*if (operator.isKindOf(CoreModel!Union)) {
+		generateMethodOperatorUnion(operator);
+	} else*/ if (operator.isKindOf(CoreModel!Combinator)) {
+		generateMethodOperatorCombinator(operator);
+	} else if (operator.isKindOf(CoreModel!External)) {
+		generateMethodOperatorExternal(operator);
+	} else {
+		throw "Unexpected kind of operator: " + operator;
+	}
+	%]
+	
+	return operatorHasExecuted;
+}
+[%
+}
+
+operation generateResultPatternChangedFlag(operator) {
+	
+	// por agora deixa de existir esta flag ja que o contorlo sera feito a partir do metodo run. Nesse caso, e na eventualidade da transformacao ter cilos, e necessario que se utilizem flags globais para o controlo dos operadores que precisam de ser executados.
+	/*
+	for (pattern in getPatternSucessorsFromOperator(operator)) {
+		%]
+		boolean [%=getPatternHasChangedFlag(pattern)%] = false;
+		[%
+	}
+	*/
+	
+}
+
+operation generateMethodOperatorExternal(operator) {
+	for (operand in operator.operands) {
+		generateMethodOperatorExternalOperand(operand);
+	}
+}
+
+operation generateMethodOperatorExternalOperand(operand){
+	%]
+	{
+		int sourcePatternSize = [%=getArrayListPatternField(operand.pattern)%].size();
+		for (int i = 0; i<sourcePatternSize; i++){
+			[%=getClassPattern(operand.pattern)%] sourcePatternInstance = [%=getArrayListPatternField(operand.pattern)%].get(i);
+			[% generateCallToPublishInstance("sourcePatternInstance"); %]
+		}
+		[%generateUpdateReadInstances(operand.operator, operand.pattern);%]
+	}
+	[%
+}
+
+operation generateCallToPublishInstance(sourceInstance) {
+	//for (operand in operator.operands) {
+		//generateCallToPublishInstanceResult(sourceInstance);
+	//}
+	%]
+	notifyListeners([%=sourceInstance%]);
+	[%
+}
+
+/*
+operation generateCallToPublishInstanceResult(sourceInstance) {
+	%]
+	notifyListeners([%=sourceInstance%]);
+	[%
+}
+*/
+
+operation generateMethodOperatorUnion(unionOperator) {
+	
+	var operand1 = getFirstOperand(unionOperator);
+	
+	var operand2 = getSecondOperand(unionOperator);
+	
+	if (isOnlyOneOperand(operand1, operand2)) {
+		if (isAnyOperand(operand1)) {
+			generateMethodOperatorUnionSingleAnyOperand(unionOperator, operand1);
+		} else if (isSomeOperand(operand1)) {
+			throw "Not implemented yet: " + operand1;
+			// There is no support for countables yet.
+			// generateMethodOperatorUnionSingleSomeOperand(unionOperator, operand1);
+		} else {
+			throw "Unexpected operand found: " + operand1;
+		}
+	} else if (isDoubleOperand(operand1, operand2)){
+		if (isAnyOperand(operand1)) {
+			if (isAnyOperand(operand2)) {
+				throw "Not implemented yet. ";
+				// There is no support for unions yet.
+				//generateMethodOperatorUnionDoubleAnyAnyOperands(unionOperator, operand1, operand2);
+			} else if (isSomeOperand(operand2)) {
+				throw "Not implemented yet. ";
+				// There is no support for countables yet.
+				// generateMethodOperatorUnionDoubleAnySomeOperands(unionOperator, operand1, operand2);
+			} else {
+				throw "Unexpected operand found: " + operand2;
+			}
+		} else if (isSomeOperand(operand1)) {
+			if (isAnyOperand(operand2)) {
+				throw "Not implemented yet. ";
+				// There is no support for countables yet.
+				// generateMethodOperatorUnionDoubleSomeAnyOperands(unionOperator, operand1, operand2);
+			} else if (isSomeOperand(operand2)) {
+				throw "Not implemented yet. ";
+				// There is no support for countables yet.
+				// generateMethodOperatorUnionDoubleSomeSomeOperands(unionOperator, operand1, operand2);
+			} else {
+				throw "Unexpected operand found: " + operand2;
+			}
+		} else {
+			throw "Unexpected operand found: " + operand1;
+		}
+	} else {
+		throw "Unexpected operands found: " + operand1 + " and " + operand2;
+	}
+}
+
+operation generateMethodOperatorCombinatorSingleAnyOperand(combinatorOperator, operand1){
+	generateMethodOperatorUnionSingleAnyOperand(combinatorOperator, operand1); //Its the same thing
+}
+
+operation generateMethodOperatorUnionSingleAnyOperand(unionOperator, operand){
+	%]
+	
+	[% generateResultPatternChangedFlag(unionOperator); %]
+	
+	int sourcePatternSize = [%=getArrayListPatternField(operand.pattern)%].size();
+	for (int i = 0; i<sourcePatternSize; i++){
+		[%=getClassPattern(operand.pattern)%] sourcePatternInstance = [%=getArrayListPatternField(operand.pattern)%].get(i);
+		
+		[%
+		generateConditionalCallEvaluation(unionOperator, operand, null, "sourcePatternInstance", null);
+		%]
+		
+		[%
+		generateOutputForEachTargetPattern(unionOperator, operand, null, "sourcePatternInstance", null);
+		%]
+	}
+	
+	[%generateUpdateReadInstances(unionOperator, operand.pattern);%]
+	
+	[%generateConditionalCallToAffectedOperators(unionOperator);%]
+	
+	[%
+}
+
+operation generateMethodOperatorUnionDoubleAnyAnyOperands(unionOperator, operand1, operand2){
+	%]
+	
+	[% generateResultPatternChangedFlag(unionOperator); %]
+	
+	int sourcePatternSize1 = [%=getArrayListPatternField(operand1.pattern)%].size();
+	
+	for (int i = 0; i<sourcePatternSize1; i++){
+		[%=getClassPattern(operand1.pattern)%] sourcePatternInstance = [%=getArrayListPatternField(operand1.pattern)%].get(i);
+		
+		[%
+		throw "Not tested yet!";
+		generateConditionalCallEvaluation(unionOperator, operand, null, "sourcePatternInstance", null);
+		%]
+		
+		[%
+		generateOutputForEachTargetPattern(unionOperator, operand1, null, "sourcePatternInstance", null);
+		%]
+	}
+	
+	[%generateUpdateReadInstances(unionOperator, operand1.pattern);%]
+	
+	int sourcePatternSize2 = [%=getArrayListPatternField(operand2.pattern)%].size();
+	
+	for (int i = [%=getIntCounterField(operand2.pattern,unionOperator)%]; i<sourcePatternSize2; i++){
+		[%=getClassPattern(operand2.pattern)%] sourcePatternInstance = [%=getArrayListPatternField(operand2.pattern)%].get(i);
+		
+		[%
+		throw "Not tested yet!";
+		generateConditionalCallEvaluation(unionOperator, operand, null, "sourcePatternInstance", null);
+		%]
+		
+		[%
+		generateOutputForEachTargetPattern(unionOperator, operand2, null, "sourcePatternInstance", null);
+		%]
+	}
+	
+	[%generateUpdateReadInstances(unionOperator, operand2.pattern);%]
+	
+	[%generateConditionalCallToAffectedOperators(unionOperator);%]
+	
+	[%
+}
+
+operation generateMethodOperatorUnionDoubleSomeAnyOperands(unionOperator, operand1, operand2) {
+	generateMethodOperatorUnionDoubleAnySomeOperands(unionOperator, operand2, operand1); // The order of the operands is switched. This is not a problem because we are dealing with a union operator.
+}
+
+operation generateMethodOperatorUnionDoubleAnySomeOperands(unionOperator, operand1, operand2) {
+	%]
+	[% generateResultPatternChangedFlag(unionOperator); %]
+	
+	int sourcePatternSize1 = [%=getArrayListPatternField(operand1.pattern)%].size();
+	
+	for (int i = [%=getIntCounterField(operand1.pattern,unionOperator)%]; i<sourcePatternSize1; i++){
+		[%=getClassPattern(operand1.pattern)%] sourcePatternInstance = [%=getArrayListPatternField(operand1.pattern)%].get(i);
+		
+		[%
+		throw "Not tested yet!";
+		generateConditionalCallEvaluation(unionOperator, operand1, null, "sourcePatternInstance", null);
+		%]
+		
+		[%
+		generateOutputForEachTargetPattern(unionOperator, operand1, null, "sourcePatternInstance", null);
+		%]
+	}
+	
+	[%generateUpdateReadInstances(unionOperator, operand1.pattern);%]
+	
+	int sourcePatternSize2 = [%=getArrayListPatternField(operand2.pattern)%].size();
+	
+	for (int i = [%=getIntCounterField(operand2.pattern,unionOperator)%]; i<sourcePatternSize2; i++){
+		[% generateOperandCounterFieldIncrement(operand2); %]
+		
+		[% generateOperandCounterFieldCheck(operand2); %]
+		
+		[%=getClassPattern(operand2.pattern)%] sourcePatternInstance = [%=getArrayListPatternField(operand2.pattern)%].get(i);
+		
+		[%
+		throw "Not tested yet!";
+		generateConditionalCallEvaluation(unionOperator, operand2, null, "sourcePatternInstance", null);
+		%]
+		
+		[%
+		generateOutputForEachTargetPattern(unionOperator, operand2, null, "sourcePatternInstance", null);
+		%]
+	}
+	
+	[%generateUpdateReadInstances(unionOperator, operand2.pattern);%]
+	
+	[%generateConditionalCallToAffectedOperators(unionOperator);%]
+	
+	[%
+}
+
+operation generateMethodOperatorCombinatorDoubleAnySomeOperands(combinatorOperator, operand1, operand2) {
+	%]
+	[% generateResultPatternChangedFlag(combinatorOperator); %]
+	
+	int sourcePatternSize1 = [%=getArrayListPatternField(operand1.pattern)%].size();
+	
+	for (int i = 0; i<sourcePatternSize1; i++){
+		
+		[%=getClassPattern(operand1.pattern)%] sourcePatternInstance1 = [%=getArrayListPatternField(operand1.pattern)%].get(i);
+		
+		[%
+		if (hasJoinConditions(combinatorOperator, operand1, operand2)) {
+			var sameRelation = selectJoinCondition(combinatorOperator, operand1, operand2);
+			%]
+			
+			[% generateOperandCounterFieldCheck(operand2); %] // A break here means to end the operator's execution.
+			
+			LinkedList<[%=getClassPattern(operand2.pattern)%]> sourcePatternInstances2 = [%=getHashMapNodeInPatternField(selectNodeInPattern(sameRelation.source, sameRelation.target, operand2.pattern),operand2.pattern)%].get(sourcePatternInstance1.[%=getFieldNameNodePattern(selectNodeInPattern(sameRelation.source, sameRelation.target, operand1.pattern))%]);
+			
+			if (sourcePatternInstances2 != null) {
+				for ([%=getClassPattern(operand2.pattern)%] sourcePatternInstance2 : sourcePatternInstances2) {
+					
+					[%
+					throw "Not tested yet!";
+					generateConditionalCallEvaluation(combinatorOperator, operand1, operand2, "sourcePatternInstance1",  "sourcePatternInstance2");
+					%]
+					
+					[%
+					generateRemainingJoinConditions(combinatorOperator, operand1, operand2, sameRelation);
+					%]
+					
+					[% generateOperandCounterFieldIncrement(operand2); // Beware that this means that only the elements that satisfy the join conditions will count.
+					%] 
+					[% generateOperandCounterFieldCheck(operand2); %]
+					
+					[%
+					generateOutputForEachTargetPattern(combinatorOperator, operand1, operand2, "sourcePatternInstance1", "sourcePatternInstance2");
+					%]
+				}
+			}
+			[%
+		} else {
+			%]
+			int sourcePatternSize2 = [%=getArrayListPatternField(operand2.pattern)%].size();
+			
+			[% generateOperandCounterFieldCheck(operand2); // A break here means to end the operator's execution. 
+			%] 
+			
+			for (int j = 0; j<sourcePatternSize2; j++){
+				[%=getClassPattern(operand2.pattern)%] sourcePatternInstance2 = [%=getArrayListPatternField(operand2.pattern)%].get(j);
+				
+				[%
+				throw "Not tested yet!";
+				generateConditionalCallEvaluation(combinatorOperator, operand1, operand2, "sourcePatternInstance1",  "sourcePatternInstance2");
+				%]
+				
+				[%
+				generateRemainingJoinConditions(combinatorOperator, operand1, operand2, null);
+				%]
+				
+				[% generateOperandCounterFieldIncrement(operand2); 
+				// Beware that this means that only the elements that satisfy the join conditions will count.
+				%] 
+				[% generateOperandCounterFieldCheck(operand2); %]
+				
+				[%
+				generateOutputForEachTargetPattern(combinatorOperator, operand1, operand2, "sourcePatternInstance1", "sourcePatternInstance2");
+				%]
+			}
+			[%
+		}
+		%]
+	
+	}
+	
+	[%generateConditionalCallToAffectedOperators(combinatorOperator);%]
+	
+	[%
+}
+
+operation generateMethodOperatorCombinatorDoubleSomeAnyOperands(combinatorOperator, operand1, operand2) {
+	%]
+	
+	[% generateResultPatternChangedFlag(combinatorOperator); %]
+	
+	int sourcePatternSize1 = [%=getArrayListPatternField(operand1.pattern)%].size();
+	
+	for (int i = 0; i<sourcePatternSize1; i++){
+	
+		[%=getClassPattern(operand1.pattern)%] sourcePatternInstance1 = [%=getArrayListPatternField(operand1.pattern)%].get(i);
+		
+		[% generateOperandCounterFieldCheck(operand1); %] // We only perform this check here to not evaluate joins without the need.
+		
+		[%
+		if (hasJoinConditions(combinatorOperator, operand1, operand2)) {
+			var sameRelation = selectJoinCondition(combinatorOperator, operand1, operand2);
+			%]
+			LinkedList<[%=getClassPattern(operand2.pattern)%]> sourcePatternInstances2 = [%=getHashMapNodeInPatternField(selectNodeInPattern(sameRelation.source, sameRelation.target, operand2.pattern),operand2.pattern)%].get(sourcePatternInstance1.[%=getFieldNameNodePattern(selectNodeInPattern(sameRelation.source, sameRelation.target, operand1.pattern))%]);
+			
+			if (sourcePatternInstances2 != null) {
+				for ([%=getClassPattern(operand2.pattern)%] sourcePatternInstance2 : sourcePatternInstances2) {
+					
+					[%
+					throw "Not tested yet!";
+					generateConditionalCallEvaluation(combinatorOperator, operand1, operand2, "sourcePatternInstance1",  "sourcePatternInstance2");
+					%]
+					
+					[%
+					generateRemainingJoinConditions(combinatorOperator, operand1, operand2, sameRelation);
+					%]
+					
+					[% generateOperandCounterFieldIncrement(operand1); %]  // The counter has to be verified here because we can only count those elements that join successfully.
+					[% generateOperandCounterFieldCheck(operand1); %]
+					
+					[%
+					generateOutputForEachTargetPattern(combinatorOperator, operand1, operand2, "sourcePatternInstance1", "sourcePatternInstance2");
+					%]
+				}
+			}
+			[%
+		} else {
+			%]
+			int sourcePatternSize2 = [%=getArrayListPatternField(operand2.pattern)%].size();
+			
+			for (int j = 0; j<sourcePatternSize2; j++){
+				[%=getClassPattern(operand2.pattern)%] sourcePatternInstance2 = [%=getArrayListPatternField(operand2.pattern)%].get(j);
+				
+				[%
+				throw "Not tested yet!";
+				generateConditionalCallEvaluation(combinatorOperator, operand1, operand2, "sourcePatternInstance1",  "sourcePatternInstance2");
+				%]
+				
+				[%
+				generateRemainingJoinConditions(combinatorOperator, operand1, operand2, null);
+				%]
+				
+				[% generateOperandCounterFieldIncrement(operand1); %]  // The counter has to be verified here because we can only count those elements that join successfully.
+				[% generateOperandCounterFieldCheck(operand1); %]
+				
+				[%
+				generateOutputForEachTargetPattern(combinatorOperator, operand1, operand2, "sourcePatternInstance1", "sourcePatternInstance2");
+				%]
+			}
+			[%
+		}
+		%]
+	}
+	
+	[%generateConditionalCallToAffectedOperators(combinatorOperator);%]
+	
+	[%
+}
+
+operation generateMethodOperatorCombinatorDoubleSomeSomeOperands(combinatorOperator, operand1, operand2) {
+	%]
+	[% generateResultPatternChangedFlag(combinatorOperator); %]
+	
+	int sourcePatternSize1 = [%=getArrayListPatternField(operand1.pattern)%].size();
+	
+	for (int i = 0; i<sourcePatternSize1; i++) {
+		[%=getClassPattern(operand1.pattern)%] sourcePatternInstance1 = [%=getArrayListPatternField(operand1.pattern)%].get(i);
+		[% generateOperandCounterFieldCheck(operand1); %]
+		[% generateOperandCounterFieldCheck(operand2); %]  // If the two operands are exausted, no further results will be produced.
+		[%
+		if (hasJoinConditions(combinatorOperator, operand1, operand2)) {
+			var sameRelation = selectJoinCondition(combinatorOperator, operand1, operand2);
+			%]
+			LinkedList<[%=getClassPattern(operand2.pattern)%]> sourcePatternInstances2 = [%=getHashMapNodeInPatternField(selectNodeInPattern(sameRelation.source, sameRelation.target, operand2.pattern),operand2.pattern)%].get(sourcePatternInstance1.[%=getFieldNameNodePattern(selectNodeInPattern(sameRelation.source, sameRelation.target, operand1.pattern))%]);
+			
+			if (sourcePatternInstances2 != null) {
+				for ([%=getClassPattern(operand2.pattern)%] sourcePatternInstance2 : sourcePatternInstances2) {
+					
+					[%
+					throw "Not tested yet!";
+					generateConditionalCallEvaluation(combinatorOperator, operand1, operand2, "sourcePatternInstance1",  "sourcePatternInstance2");
+					%]
+					
+					[%
+					generateRemainingJoinConditions(combinatorOperator, operand1, operand2, sameRelation);
+					%]
+					
+					[% generateOperandCounterFieldIncrement(operand1); %]  // The counter has to be verified here because we can only count those elements that join successfully.
+					[% generateOperandCounterFieldCheck(operand1); %]
+					[% generateOperandCounterFieldIncrement(operand2); %]  // The counter has to be verified here because we can only count those elements that join successfully.
+					[% generateOperandCounterFieldCheck(operand2); %]
+					
+					[%
+					generateOutputForEachTargetPattern(combinatorOperator, operand1, operand2, "sourcePatternInstance1", "sourcePatternInstance2");
+					%]
+				}
+			}
+			[%
+		} else {
+			%]
+			int sourcePatternSize2 = [%=getArrayListPatternField(operand2.pattern)%].size();
+			
+			for (int j = 0; j<sourcePatternSize2; j++){
+				[%=getClassPattern(operand2.pattern)%] sourcePatternInstance2 = [%=getArrayListPatternField(operand2.pattern)%].get(j);
+				
+				[%
+				throw "Not tested yet!";
+				generateConditionalCallEvaluation(combinatorOperator, operand1, operand2, "sourcePatternInstance1",  "sourcePatternInstance2");
+				%]
+				
+				[%
+				generateRemainingJoinConditions(combinatorOperator, operand1, operand2, null);
+				%]
+				
+				[% generateOperandCounterFieldIncrement(operand1); %]  // The counter has to be verified here because we can only count those elements that join successfully.
+				[% generateOperandCounterFieldCheck(operand1); %]
+				[% generateOperandCounterFieldIncrement(operand2); %]  // The counter has to be verified here because we can only count those elements that join successfully.
+				[% generateOperandCounterFieldCheck(operand2); %]
+				
+				[%
+				generateOutputForEachTargetPattern(combinatorOperator, operand1, operand2, "sourcePatternInstance1", "sourcePatternInstance2");
+				%]
+			}
+			[%
+		}
+		%]
+	}
+	
+	[%generateConditionalCallToAffectedOperators(combinatorOperator);%]
+	
+	[%
+}
+
+operation generateMethodOperatorCombinatorDoubleAnyAnyOperands(combinatorOperator, operand1, operand2) {
+	%]
+	[% generateResultPatternChangedFlag(combinatorOperator); %]
+	
+	int sourcePatternSize1 = [%=getArrayListPatternField(operand1.pattern)%].size();
+	
+	for (int i = 0; i<sourcePatternSize1; i++){
+		[%=getClassPattern(operand1.pattern)%] sourcePatternInstance1 = [%=getArrayListPatternField(operand1.pattern)%].get(i);
+		
+		[%
+		generateEarlyEvaluationOfSingleConditions(combinatorOperator, operand1, "sourcePatternInstance1");
+		%]
+		
+		[%
+		if (hasJoinConditions(combinatorOperator, operand1, operand2)) {
+			var sameRelation = selectJoinCondition(combinatorOperator, operand1, operand2);
+			%]
+			LinkedList<[%=getClassPattern(operand2.pattern)%]> sourcePatternInstances2 = [%=getHashMapNodeInPatternField(selectNodeInPattern(sameRelation.source, sameRelation.target, operand2.pattern),operand2.pattern)%].get(sourcePatternInstance1.[%=getFieldNameNodePattern(selectNodeInPattern(sameRelation.source, sameRelation.target, operand1.pattern))%]);
+			
+			if (sourcePatternInstances2 != null) {
+				for ([%=getClassPattern(operand2.pattern)%] sourcePatternInstance2 : sourcePatternInstances2) {
+					
+					[%
+					generateConditionalCallEvaluation(combinatorOperator, operand1, operand2, "sourcePatternInstance1",  "sourcePatternInstance2");
+					%]
+					
+					[%
+					generateRemainingJoinConditions(combinatorOperator, operand1, operand2, sameRelation);
+					%]
+					
+					[%
+					generateOutputForEachTargetPattern(combinatorOperator, operand1, operand2, "sourcePatternInstance1", "sourcePatternInstance2");
+					%]
+				}
+			}
+			[%
+		} else {
+			%]
+			int sourcePatternSize2 = [%=getArrayListPatternField(operand2.pattern)%].size();
+			
+			for (int j = 0; j<sourcePatternSize2; j++){
+				[%=getClassPattern(operand2.pattern)%] sourcePatternInstance2 = [%=getArrayListPatternField(operand2.pattern)%].get(j);
+				
+				[%
+				generateConditionalCallEvaluation(combinatorOperator, operand1, operand2, "sourcePatternInstance1",  "sourcePatternInstance2");
+				%]
+				
+				[%
+				generateRemainingJoinConditions(combinatorOperator, operand1, operand2, null);
+				%]
+				
+				[%
+				generateOutputForEachTargetPattern(combinatorOperator, operand1, operand2, "sourcePatternInstance1", "sourcePatternInstance2");
+				%]
+			}
+			[%
+		}
+		%]
+	}
+	
+	[%generateConditionalCallToAffectedOperators(combinatorOperator);%]
+	
+	[%
+}
+
+
+
+operation generateRemainingJoinConditions(operator, operand1, operand2, joinCondition) {
+	var remainingConditions = getRemainingConditions(operator, operand1, operand2, joinCondition);
+	
+	for (condition in remainingConditions) {
+		generateJoinCondition(condition, operator, operand1, operand2);
+	}
+}
+
+operation generateJoinCondition(condition, operator, operand1, operand2) {
+	if (condition.isKindOf(CoreModel!Same)) {
+		generateSameJoinCondition(condition, operator, operand1, operand2);
+	} else if (condition.isKindOf(CoreModel!Different)) {
+		generateDifferentJoinCondition(condition, operator, operand1, operand2);
+	} else if (condition.isKindOf(CoreModel!Keep)) {
+		// Do nothing, it's unexpected.
+	} else {
+		throw "Unexpected type of restriction: " + condition;
+	}
+}
+
+operation generateSameJoinCondition(condition, operator, operand1, operand2) {
+	%]
+	if (! sourcePatternInstance1.[%=getFieldNameNodePattern(selectNodeInPattern(condition.source, condition.target, operand1.pattern))%].equals(sourcePatternInstance2.[%=getFieldNameNodePattern(selectNodeInPattern(condition.source, condition.target, operand2.pattern))%])) {
+		continue;
+	}
+	[%
+}
+
+operation generateDifferentJoinCondition(condition, operator, operand1, operand2) {
+	%]
+	if ( sourcePatternInstance1.[%=getFieldNameNodePattern(selectNodeInPattern(condition.source, condition.target, operand1.pattern))%].equals(sourcePatternInstance2.[%=getFieldNameNodePattern(selectNodeInPattern(condition.source, condition.target, operand2.pattern))%])) {
+		continue;
+	}
+	[%
+}
+
+
+
+operation generateMethodOperatorUnionDoubleSomeSomeOperands(unionOperator, operand1, operand2) {
+	%]
+	[% generateResultPatternChangedFlag(unionOperator); %]
+	
+	int sourcePatternSize1 = [%=getArrayListPatternField(operand1.pattern)%].size();
+	
+	for (int i = [%=getIntCounterField(operand1.pattern,unionOperator)%]; i<sourcePatternSize1; i++){
+		[% generateOperandCounterFieldIncrement(operand1); %]
+		
+		[% generateOperandCounterFieldCheck(operand1); %]
+		
+		[%=getClassPattern(operand1.pattern)%] sourcePatternInstance = [%=getArrayListPatternField(operand1.pattern)%].get(i);
+		
+		[%
+		throw "Not tested yet!";
+		generateConditionalCallEvaluation(unionOperator, operand1, null, "sourcePatternInstance", null);
+		%]
+		
+		[%
+		generateOutputForEachTargetPattern(unionOperator, operand1, null, "sourcePatternInstance", null);
+		%]
+	}
+	
+	[%generateUpdateReadInstances(unionOperator, operand1.pattern);%]
+	
+	int sourcePatternSize2 = [%=getArrayListPatternField(operand2.pattern)%].size();
+	
+	for (int i = [%=getIntCounterField(operand2.pattern,unionOperator)%]; i<sourcePatternSize2; i++){
+		[% generateOperandCounterFieldIncrement(operand2); %]
+		
+		[% generateOperandCounterFieldCheck(operand2); %]
+		
+		[%=getClassPattern(operand2.pattern)%] sourcePatternInstance = [%=getArrayListPatternField(operand2.pattern)%].get(i);
+		
+		[%
+		throw "Not tested yet!";
+		generateConditionalCallEvaluation(unionOperator, operand2, null, "sourcePatternInstance", null);
+		%]
+		
+		[%
+		generateOutputForEachTargetPattern(unionOperator, operand2, null, "sourcePatternInstance", null);
+		%]
+	}
+	
+	[%generateUpdateReadInstances(unionOperator, operand2.pattern);%]
+	
+	[%generateConditionalCallToAffectedOperators(unionOperator);%]
+	
+	[%
+}
+
+operation generateOperandCounterFieldCheck(someOperand){
+	%]
+	if ([%=getOperandCounterField(someOperand)%] > [%=someOperand.count%]) {
+		break;
+	}
+	[%
+}
+
+operation generateOperandCounterFieldIncrement(someOperand){
+	%]
+	[%=getOperandCounterField(someOperand)%]++;
+	[%
+}
+
+
+operation generateMethodOperatorUnionSingleSomeOperand(unionOperator, operand){
+	%]
+	
+	[% generateResultPatternChangedFlag(unionOperator); %]
+	
+	int sourcePatternSize = [%=getArrayListPatternField(operand.pattern)%].size();
+	for (int i = [%=getIntCounterField(operand.pattern,unionOperator)%]; i<sourcePatternSize; i++){
+		
+		[% generateOperandCounterFieldIncrement(operand); %]
+		
+		[% generateOperandCounterFieldCheck(operand); %]
+		
+		[%=getClassPattern(operand.pattern)%] sourcePatternInstance = [%=getArrayListPatternField(operand.pattern)%].get(i);
+		
+		[%
+		throw "Not tested yet!";
+		generateConditionalCallEvaluation(unionOperator, operand, null, "sourcePatternInstance", null);
+		%]
+		
+		[%
+		generateOutputForEachTargetPattern(unionOperator, operand, null, "sourcePatternInstance", null);
+		%]
+	}
+	
+	[%generateUpdateReadInstances(unionOperator, operand.pattern);%]
+	
+	[%generateConditionalCallToAffectedOperators(unionOperator);%]
+	
+	[%
+}
+
+operation generateConditionalCallToAffectedOperators(operator) {
+	
+	//clagms: Isto passa a nao ter qualquer efeito uma vez que o method run vai tratar de toda a execucao.
+	/*
+	for (pattern in getPatternSucessorsFromOperator(operator)) {
+	%]
+		if ([%=getPatternHasChangedFlag(pattern)%]) {
+			[%generateCallToAffectedOperators(pattern); %]
+		}
+	[%
+	}
+	*/
+}
+
+operation generateUpdateReadInstances(operator, pattern){
+	/* There is no support for countable stuff yet.
+	%]
+	[%=getIntCounterField(pattern,operator)%] = [%=getArrayListPatternField(pattern)%].size();
+	[%
+	*/
+}
+
+operation generateOutputForEachTargetPattern(operator, operand1, operand2, sourcePatternInstance1, sourcePatternInstance2){
+	for (result in operator.results) {
+		generateOutputForTargetPattern(operator, operand1, operand2, result, sourcePatternInstance1, sourcePatternInstance2);
+	}
+}
+
+operation generateConditionalCallEvaluation(operator, operand1, operand2, sourcePatternInstance1, sourcePatternInstance2) {
+	for (externalConditionalCall in operator.conditions.select(condition | condition.isKindOf(CoreModel!ExternalConditionCall))) {
+		if (isOnlyOneOperand(operand1, operand2)) {
+			generateExternalConditionalCallEvaluation(externalConditionalCall, operand1.pattern, null , sourcePatternInstance1, null);
+		} else {
+			generateExternalConditionalCallEvaluation(externalConditionalCall, operand1.pattern, operand2.pattern , sourcePatternInstance1, sourcePatternInstance2);
+		}
+		
+	}
+	
+	// TODO Other conditions are evaluated here.
+}
+
+operation generateEarlyEvaluationOfSingleConditions(combinatorOperator, operand1, sourcePatternInstance) {
+	for (externalConditionalCall in combinatorOperator.conditions.select(condition | condition.isKindOf(CoreModel!ExternalConditionCall) and dependsOnlyOnOnePattern(condition, operand1.pattern))) {
+		generateExternalConditionalCallEvaluation(externalConditionalCall, operand1.pattern, null , sourcePatternInstance, null);
+	}
+}
+
+operation generateExternalConditionalCallEvaluation(externalConditionalCall, pattern1, pattern2, sourcePatternInstance1, sourcePatternInstance2) {
+	%]
+	[%
+	generateNonNullVerificationForAllParameters(externalConditionalCall.parameters, pattern1, pattern2, sourcePatternInstance1, sourcePatternInstance2);
+	%]
+	if (! [%=externalConditionalCall.qualifiedName%]([% generateParametersExternalRef(externalConditionalCall.parameters, pattern1, pattern2, sourcePatternInstance1, sourcePatternInstance2); %])) {
+		continue;
+	}
+	[%
+}
+
+operation generateOutputForTargetPattern(operator, operand1, operand2, result, sourcePatternInstance1, sourcePatternInstance2){
+	if (isAnyResult(result)) {
+		//generateOutputForTargetPatternAnyResult(operator, operand, result, sourcePatternInstance1, sourcePatternInstance2, counter);
+		generateOutputForTargetPatternAnyResult(operator, operand1, operand2, result, sourcePatternInstance1, sourcePatternInstance2);
+	} else if (isSomeResult(result)) {
+		throw "Unexpected result type: " + result;
+	} else {
+		throw "Unexpected result type: " + result;
+	}
+}
+
+
+operation generateOutputForTargetPatternAnyResult(operator, operand1, operand2 , result, sourcePatternInstance1, sourcePatternInstance2){
+	%]
+	{
+		[%=getClassPattern(result.pattern)%] targetInstance = new [%=getClassPattern(result.pattern)%]();
+		[% generateAssignmentsForNewNodes(operator, operand1, operand2, result, sourcePatternInstance1, sourcePatternInstance2); %]
+		[% generateAssignmentsForKeepNodes(operator, operand1, operand2, result, sourcePatternInstance1, sourcePatternInstance2); %]
+		if ([%=getHashSetPatternField(result.pattern)%].add(targetInstance)) {
+			[%=getArrayListPatternField(result.pattern)%].add(targetInstance);
+			[%
+			for (node in getJoinableNodes(result.pattern.nodes)) {
+				generateAddNodeToHashMap(node, result.pattern, "targetInstance");
+			}
+			%]
+			[%generateAssignmentTruePatternChangedFlag(result.pattern);%]
+		}
+	}
+	[%
+}
+
+operation generateAssignmentTruePatternChangedFlag(pattern) {
+	%]
+	//[%=getPatternHasChangedFlag(pattern)%] = true; // Isto agora deixa de fazer sentido ja que o controlo passa a estar no metofdo run.
+	operatorHasExecuted = true;
+	[%
+}
+
+operation generateAddNodeToHashMap(node,pattern, element){
+	%]
+	{
+		if (![%=getHashMapNodeInPatternField(node,pattern)%].containsKey([%=element%].[%=getFieldNameNodePattern(node)%])) {
+			[%=getHashMapNodeInPatternField(node,pattern)%].put([%=element%].[%=getFieldNameNodePattern(node)%], new LinkedList<[%=getClassPattern(pattern)%]>());
+		}
+		[%=getHashMapNodeInPatternField(node,pattern)%].get([%=element%].[%=getFieldNameNodePattern(node)%]).add([%=element%]);
+	}
+	[%
+}
+
+
+
+operation generateAssignmentsForNewNodes(operator, operand1, operand2, result, sourcePatternInstance1, sourcePatternInstance2){
+	if (isOnlyOneOperand(operand1, operand2)) {
+		
+		for (node in getAllNewNodePatterns(operand1.pattern, result.pattern)) {
+				
+				%]
+				{
+				[% generateNewNodeCreation(node, operand1.pattern, null, "sourcePatternInstance", null); %]
+				
+				targetInstance.[%=getFieldNameNodePattern(node)%] = node;
+				
+				}
+				[%
+		}
+	} else if (isDoubleOperand(operand1, operand2)){
+		
+		var setOfAllreadyCreatedNodes = new Set; // This avoids duplicate code to be generated for the created of new nodes.
+		
+		for (node in getAllNewNodePatterns(operand1.pattern, result.pattern)) {
+			// Check is this node is really new, i.e., if there is not a keep relation to the other pattern.
+			if (isNewNodePattern(node, operand2.pattern) and (not setOfAllreadyCreatedNodes.includes(node))) {
+				%]
+				{
+				[% generateNewNodeCreation(node, operand1.pattern, operand2.pattern, "sourcePatternInstance1", "sourcePatternInstance2"); %]
+				
+				targetInstance.[%=getFieldNameNodePattern(node)%] = node;
+				}
+				[%
+				setOfAllreadyCreatedNodes.add(node);
+			}
+		}
+		for (node in getAllNewNodePatterns(operand2.pattern, result.pattern)) {
+			// Check is this node is really new, i.e., if there is not a keep relation to the other pattern.
+			if (isNewNodePattern(node, operand1.pattern) and (not setOfAllreadyCreatedNodes.includes(node))) {
+				%]
+				{
+				[% generateNewNodeCreation(node, operand1.pattern, operand2.pattern, "sourcePatternInstance1", "sourcePatternInstance2"); %]
+				
+				targetInstance.[%=getFieldNameNodePattern(node)%] = node;
+				
+				}
+				[%
+				setOfAllreadyCreatedNodes.add(node);
+			}
+		}
+	} else {
+		throw "Unexpected operands: " + operand1 + " , " + operand2;
+	}
+}
+
+operation generateNewNodeCreation(node, pattern1, pattern2, pattern1Var, pattern2Var) {
+	%]
+	[%=getClassNodePattern(node)%] node = new [%=getClassNodePattern(node)%]();
+	/*
+	Atribuicao de attributos
+	- Cada cada attribute pattern do no,
+		- Verificar se esse attribute pattern esta a ser gerado por alguma ExternalAttributeCalculationCall
+		- Caso esteja, gera o c—digo que chama essa fun‹o usando o qualified name.
+		- Nessa fncao, coloca os parametros respectivos.
+	*/
+	[% generateAttributeAssignments(node, pattern1, pattern2, pattern1Var, pattern2Var);%]
+	node.types.add("[%=node.name%]");
+	[%
+}
+	
+operation generateAttributeAssignments(node, pattern1, pattern2, pattern1Var, pattern2Var) {
+	for (attribute in node.attributes.select(at | attributeIsDerived(at))){
+		generateAttributeAssignment(attribute,pattern1, pattern2, pattern1Var, pattern2Var);
+	}
+}
+
+
+operation generateAttributeAssignment(attribute, pattern1, pattern2, pattern1Var, pattern2Var) {
+	if (not attributeIsDerived(attribute)){
+		throw "Unexpected usage of generateAttributeAssignment";
+	}
+	if (isDerivedByExternalAttributeCall(attribute)) {
+		
+		generateAttributeAssignmentByExternalAttributeCall(attribute, pattern1, pattern2, pattern1Var, pattern2Var);
+	}
+}
+
+operation generateAttributeAssignmentByExternalAttributeCall(attribute, pattern1, pattern2, pattern1Var, pattern2Var) {
+	var externalAttributeCall = attribute.attributeExternalCalculationCall;
+	//("External attribute call: " + externalAttributeCall).println();
+	
+	%]
+	node.attributes.put("[%=attribute.name%]", [%=externalAttributeCall.qualifiedName%]([% generateParametersExternalRef(externalAttributeCall.parameters, pattern1, pattern2, pattern1Var, pattern2Var); %]));
+	[%
+	
+}
+
+operation generateParametersExternalRef(parameters, pattern1, pattern2, pattern1Var, pattern2Var) {
+	var index = 0;
+	var comma = false;
+	var numberOfParameters = parameters.size();
+	
+	while (numberOfParameters > 0) {
+		
+		index = getNextParameterIndex(parameters, index);
+		
+		var nextParameter = getParameterWithIndex(parameters, index);
+		
+		if (comma) {
+		%],[%
+		}
+		generateParameterAcessor(nextParameter.parameter, pattern1, pattern2, pattern1Var, pattern2Var);
+		
+		comma = true;
+		
+		numberOfParameters = numberOfParameters - 1;
+		index = index + 1;
+	}
+	
+}
+
+operation generateNonNullVerificationForAllParameters(parameterRefs, pattern1, pattern2, sourcePatternInstance1, sourcePatternInstance2) {
+	for (attributeParameter in getAllAttributeParameters(parameterRefs)) {
+		generateNonNullVerificationForParameter(attributeParameter, pattern1, pattern2, sourcePatternInstance1, sourcePatternInstance2);
+	}
+}
+
+operation generateNonNullVerificationForParameter(parameter, pattern1, pattern2, sourcePatternInstance1, sourcePatternInstance2) {
+	
+	if (not parameter.isKindOf(CoreModel!AttributePattern)) {
+		throw "Wrong usage of function";
+	}
+	
+	%]
+	if ([%generateParameterAcessor(parameter, pattern1, pattern2, sourcePatternInstance1, sourcePatternInstance2);%]==null) {
+		continue;
+	}
+	[%
+}
+
+operation getNextParameterIndex(parameters, index) {
+	var result = index;
+	var nextParameter = getParameterWithIndex(parameters, result);
+	while (nextParameter == null) {
+		result = result + 1; // try next
+		nextParameter = getParameterWithIndex(parameters, result);
+	}
+	return result;
+}
+
+
+operation generateParameterAcessor(parameter, pattern1, pattern2, pattern1Var, pattern2Var) {
+	if (parameter.isKindOf(CoreModel!AttributePattern)) {
+		generateAttributePatternAcessor(parameter, pattern1, pattern2, pattern1Var, pattern2Var);
+	} else if (parameter.isKindOf(CoreModel!ExternalCalculationCall)) {
+		generateExternalCalculationAcessor(parameter, pattern1, pattern2, pattern1Var, pattern2Var);
+	} else if (parameter.isKindOf(CoreModel!NodePattern)) {
+		generateNodePatternAcessor(parameter, pattern1, pattern2, pattern1Var, pattern2Var);
+	} else {
+		("pattern1: " + pattern1).println();
+		("pattern2: " + pattern2).println();
+		("parameter: " + parameter).println();
+		throw "Not implemented yet!";
+	}
+}
+
+operation generateExternalCalculationAcessor(externalcall, pattern1, pattern2, pattern1Var, pattern2Var) {
+	%]
+	[%=externalcall.qualifiedName%]([% generateParametersExternalRef(externalcall.parameters, pattern1, pattern2, pattern1Var, pattern2Var); %])
+	[%
+}
+
+operation generateAttributePatternAcessor(attribute, pattern1, pattern2, pattern1Var, pattern2Var) {
+	var ownerNode = attribute.ownerNode;
+	if (ownerNode.pattern == pattern1) {
+		%][%=pattern1Var%].[%=getFieldNameNodePattern(ownerNode)%].attributes.get("[%=attribute.name%]")[%
+	} else {
+		if (pattern2 == null or ownerNode.pattern <> pattern2) {
+			throw "Error: attribute calculation with non operand parameters.";
+		} else {
+			%][%=pattern2Var%].[%=getFieldNameNodePattern(ownerNode)%].attributes.get("[%=attribute.name%]")[%
+		}
+	}
+}
+
+operation generateNodePatternAcessor(node, pattern1, pattern2, pattern1Var, pattern2Var) {
+	if (node.pattern == pattern1) {
+		%][%=pattern1Var%].[%=getFieldNameNodePattern(node)%][%
+	} else {
+		if (pattern2 == null or node.pattern <> pattern2) {
+			throw "Error: calculation non operand parameters.";
+		} else {
+			%][%=pattern2Var%].[%=getFieldNameNodePattern(node)%][%
+		}
+	}
+}
+
+
+operation generateAssignmentsForKeepNodes(operator, operand1, operand2, result, sourcePatternInstance1, sourcePatternInstance2){
+	if (isOnlyOneOperand(operand1, operand2)) {
+		for (node in getAllKeepNodePatterns(operand1.pattern, result.pattern)) {
+			%]
+			{
+			targetInstance.[%=getFieldNameNodePattern(node)%] = [%=sourcePatternInstance1%].[%=getFieldNameNodePattern(getCorrespondingNode(node, operand1.pattern))%];
+			targetInstance.[%=getFieldNameNodePattern(node)%].types.add("[%=node.name%]");
+			}
+			[%
+		}
+	} else if (isDoubleOperand(operand1, operand2)){
+		for (node in getAllKeepNodePatterns(operand1.pattern, result.pattern)) {
+			%]
+			{
+			targetInstance.[%=getFieldNameNodePattern(node)%] = [%=sourcePatternInstance1%].[%=getFieldNameNodePattern(getCorrespondingNode(node, operand1.pattern))%];
+			targetInstance.[%=getFieldNameNodePattern(node)%].types.add("[%=node.name%]");
+			}
+			[%
+		}
+		// Now for the other operands' keep.
+		for (node in getAllKeepNodePatterns(operand2.pattern, result.pattern)) {
+			%]
+			{
+			targetInstance.[%=getFieldNameNodePattern(node)%] = [%=sourcePatternInstance2%].[%=getFieldNameNodePattern(getCorrespondingNode(node, operand2.pattern))%];
+			targetInstance.[%=getFieldNameNodePattern(node)%].types.add("[%=node.name%]");
+			}
+			[%
+		}
+	} else {
+		throw "Unexpected operands: " + operand1 + " , " + operand2;
+	}
+}
+
+operation generateMethodOperatorCombinator(combinatorOperator) {
+	var operand1 = getFirstOperand(combinatorOperator);
+	
+	var operand2 = getSecondOperand(combinatorOperator);
+	
+	if (isOnlyOneOperand(operand1, operand2)) {
+		if (isAnyOperand(operand1)) {
+			generateMethodOperatorCombinatorSingleAnyOperand(combinatorOperator, operand1);
+		} else if (isSomeOperand(operand1)) {
+			throw "Not implemented yet. ";
+			// There is no support for countables yet.
+			// generateMethodOperatorCombinatorSingleSomeOperand(combinatorOperator, operand1);
+		} else {
+			throw "Unexpected operand found: " + operand1;
+		}
+	} else if (isDoubleOperand(operand1, operand2)){
+		if (isAnyOperand(operand1)) {
+			if (isAnyOperand(operand2)) {
+				generateMethodOperatorCombinatorDoubleAnyAnyOperands(combinatorOperator, operand1, operand2);
+			} else if (isSomeOperand(operand2)){
+				throw "Not implemented yet. ";
+				// There is no support for countables yet.
+				// generateMethodOperatorCombinatorDoubleAnySomeOperands(combinatorOperator, operand1, operand2);
+			} else if (isAntiOperand(operand2)){
+				throw "Unexpected operand found: " + operand2; // For now this is not implemented because it raises some interesting issues...
+			} else if (isOptionalOperand(operand2)){
+				throw "Unexpected operand found: " + operand2;  // For now this is not implemented since it raises some issues (as anti operand)...
+			} else {
+				throw "Unexpected operand found: " + operand2;
+			}
+		} else if (isSomeOperand(operand1)){
+			if (isAnyOperand(operand2)) {
+				throw "Not implemented yet. ";
+				// There is no support for countables yet.
+				// generateMethodOperatorCombinatorDoubleSomeAnyOperands(combinatorOperator, operand1, operand2);
+			} else if (isSomeOperand(operand2)){
+				throw "Not implemented yet. ";
+				// There is no support for countables yet.
+				// generateMethodOperatorCombinatorDoubleSomeSomeOperands(combinatorOperator, operand1, operand2);
+			} else if (isAntiOperand(operand2)){
+				throw "Unexpected operand found: " + operand2; // For now this is not implemented because it raises some interesting issues...
+			} else if (isOptionalOperand(operand2)){
+				throw "Unexpected operand found: " + operand2; // For now this is not implemented because it raises some interesting issues...
+			} else {
+				throw "Unexpected operand found: " + operand2; // For now this is not implemented because it raises some interesting issues...
+			}
+		} else if (isAntiOperand(operand1)){
+			if (isAnyOperand(operand2)) {
+				throw "Unexpected operand found: " + operand2; // For now this is not implemented because it raises some interesting issues...
+			} else if (isSomeOperand(operand2)){
+				throw "Unexpected operand found: " + operand2; // For now this is not implemented because it raises some interesting issues...
+			} else if (isAntiOperand(operand2)){
+				throw "Unexpected operand found: " + operand2; // For now this is not implemented because it raises some interesting issues...
+			} else if (isOptionalOperand(operand2)){
+				throw "Unexpected operand found: " + operand2; // For now this is not implemented because it raises some interesting issues...
+			} else {
+				throw "Unexpected operand found: " + operand2; // For now this is not implemented because it raises some interesting issues...
+			}
+		} else if (isOptionalOperand(operand1)){
+			if (isAnyOperand(operand2)) {
+				throw "Unexpected operand found: " + operand2; // For now this is not implemented because it raises some interesting issues...
+			} else if (isSomeOperand(operand2)){
+				throw "Unexpected operand found: " + operand2; // For now this is not implemented because it raises some interesting issues...
+			} else if (isAntiOperand(operand2)){
+				throw "Unexpected operand found: " + operand2; // For now this is not implemented because it raises some interesting issues...
+			} else if (isOptionalOperand(operand2)){
+				throw "Unexpected operand found: " + operand2; // For now this is not implemented because it raises some interesting issues...
+			} else {
+				throw "Unexpected operand found: " + operand2; // For now this is not implemented because it raises some interesting issues...
+			}
+		} else {
+			throw "Unexpected operand found: " + operand1;
+		}
+	} else {
+		throw "Unexpected operands found: " + operand1 + " and " + operand2;
+	}
+}
+
+operation generateMethodOperatorCombinatorSingleSomeOperand(combinatorOperator, operand){
+	generateMethodOperatorUnionSingleSomeOperand(combinatorOperator, operand); // It the same thing
+}
+
+operation generateRunMethod() {
+	%]
+	
+	// aqui fica a execucao de todo o plano de execucao da transformacao, idealmente, incluindo os ciclos.
+	public void run() {
+		
+		[%
+		
+		var operatorIterator = getFirstOperatorToBeExecuted();
+		
+		generateCallToAffectedOperator(operatorIterator);
+		
+		while (hasMoreOperatorSucessors(operatorIterator)) {
+			("operatorIterator: " + operatorIterator).println();
+		
+			var nextOperators = getNextOperators(operatorIterator);
+			if (nextOperators.size() == 1) {
+				operatorIterator = nextOperators.first();
+				generateCallToAffectedOperator(operatorIterator);
+			} else if (nextOperators.size() == 2){
+				("Branch found at : " + operatorIterator).println();
+				// there might be a simple cycle here... or it can be just an ambiguity.
+				var nextOperator1 = nextOperators.first;
+				var nextOperator2 = nextOperators.last;
+				var operatorStartingCycle;
+				var operatorExitingCycle;
+				// is there is a path (of any size) between nextOp1 and operatorIterator it means there is a cycle between the two. Vice versa.
+				if (thereIsAPathBetween(nextOperator1, operatorIterator)) {
+					operatorStartingCycle = nextOperator1;
+					operatorExitingCycle = nextOperator2;
+					// some validation
+					if (thereIsAPathBetween(operatorExitingCycle, operatorIterator)) {
+						throw "Cycle not supported";
+					}
+					
+					("operatorStartingCycle: " + operatorStartingCycle).println();
+					("operatorExitingCycle: " + operatorExitingCycle).println();
+					
+				} else if (thereIsAPathBetween(nextOperator2, operatorIterator)) {
+					operatorStartingCycle = nextOperator2;
+					operatorExitingCycle = nextOperator1;
+					// some validation
+					if (thereIsAPathBetween(operatorExitingCycle, operatorIterator)) {
+						throw "Cycle not supported";
+					}
+					
+					("operatorStartingCycle: " + operatorStartingCycle).println();
+					("operatorExitingCycle: " + operatorExitingCycle).println();
+					
+				} else {
+					throw "Ambiguity found in execution plan";
+				}
+				
+				// now we have an operator that is withing the cycle and an operator that represents the exit of the cycle.
+				generateExecutionCycle(operatorStartingCycle, operatorIterator);
+				
+				// after the cycle we have exausted all the operators in the path of the cycle and now life continues;
+				operatorIterator = operatorExitingCycle;
+				generateCallToAffectedOperator(operatorIterator);
+				
+			} else {
+				throw "Unexpected execution plan found";
+			}
+			
+		}
+		
+		%]
+		
+	}
+	[%
+}
+
+operation generateExecutionCycle(startOperator, endOperator) {
+	if (not thereIsAPathBetween(startOperator, endOperator)) {
+		throw "Wrong usage of function generateExecutionCycle";
+	}
+	
+	%]
+	while([%=getOperatorMethodName(startOperator)%]()) {
+		[%
+		// there is always one result only in  getNextOperators(startOp)
+	
+		var operatorIterator = getNextOperators(startOperator).first;
+		
+		while (operatorIterator <> endOperator) {
+			generateCallToAffectedOperator(operatorIterator);
+			operatorIterator = getNextOperators(operatorIterator).first;
+		}
+		// here we know that operatorIterator == endOp so have to run it again
+		generateCallToAffectedOperator(operatorIterator);
+		%]
+	}
+	[%
+	
+}
+
+
+operation generateNotifyMethodPattern(inputPattern){
+	%]
+	public void notify([%=getClassPattern(inputPattern)%] element){
+		if ([%=getHashSetPatternField(inputPattern)%].add(element)) {
+			[%=getArrayListPatternField(inputPattern)%].add(element);
+			[%
+			for (node in getJoinableNodes(inputPattern.nodes)) {
+				generateAddNodeToHashMap(node, inputPattern, "element");
+			}
+			%]
+			/*
+			[% generateCallToAffectedOperators(inputPattern); %]
+			*/
+		}
+	}
+	[%
+}
+
+operation generateCallToAffectedOperators(pattern){
+	for (operator in getOperatorSucessorsFromPattern(pattern)) {
+		if (isInternalOperator(operator) or isOutputOperator(operator)){
+			generateCallToAffectedOperator(operator);
+		} else {
+			throw "Unexpected operator: " + operator;
+		}
+	}
+}
+
+operation generateCallToAffectedOperator(operator){
+	%]
+	[%=getOperatorMethodName(operator)%]();
+	[%
+}
+
+operation generateImplementsInterfaces(){
+	var comma = false;
+	for (inputPattern in getAllInputPatternsSet()){
+		if (not comma) {
+		%]
+			[%= getInterfacePatternListener(inputPattern) %]
+		[%
+			comma = true;
+		} else {
+		%]
+			,[%= getInterfacePatternListener(inputPattern) %]
+		[%
+		}
+	}
+	
+	for (outPattern in getAllOutputPatternsSet()) {
+		if (not comma) {
+		%]
+			[%= getInterfacePatternPublisher(outPattern) %]
+		[%
+			comma = true;
+		} else {
+		%]
+			,[%= getInterfacePatternPublisher(outPattern) %]
+		[%
+		}
+	}
+}
+
+operation generatePublisherMethodsPattern(outPattern){
+%]
+LinkedList<[%=getInterfacePatternListener(outPattern)%]> listeners[%=getClassPattern(outPattern)%];
+
+public void registerListener([%=getInterfacePatternListener(outPattern)%] listener){
+	listeners[%=getClassPattern(outPattern)%].add(listener);
+}
+	
+public void notifyListeners([%=getClassPattern(outPattern)%] element){
+	for ([%=getInterfacePatternListener(outPattern)%] listener : listeners[%=getClassPattern(outPattern)%]){
+		listener.notify(element);
+	}
+}
+
+[%
+}
+
+operation generateFieldsForPattern(pattern){
+	
+	generateArrayListPatternDeclaration(pattern);
+	
+	// This is not yet used because there is not support for countable operands of results.
+	// generateOperatorSpecificCounters(pattern);
+	
+	generateHashSetPatternDeclaration(pattern);
+	generateHashMapsForEachNodeInPatternDeclaration(pattern);
+}
+
+
+operation generateFieldsInitializersForPattern(pattern){
+	generateArrayListPatternInitialization(pattern);
+	// This is not used anymore because of the evaluation plans.
+	//generateOperatorSpecificCountersInitialization(pattern);
+	generateHashSetPatternInitialization(pattern);
+	generateHashMapsForEachNodeInPatternInitialization(pattern);
+}
+
+operation generateOperatorSpecificCountersInitialization(pattern) {
+	for (operator in getOperatorSucessorsFromPattern(pattern)) {
+		generateOperatorSpecificCounterInitialization(pattern,operator);
+	}
+}
+
+operation generateOperatorSpecificCounters(pattern){
+	for (operator in getOperatorSucessorsFromPattern(pattern)) {
+		generateOperatorSpecificCounter(pattern,operator);
+	}
+}
+
+operation generateFieldsForPatterns(){
+	for (pattern in CoreModel!Pattern.all){
+		generateFieldsForPattern(pattern);
+	}
+}
+
+// Generates the fileds that hold a reference to the publishers of the input patterns.
+operation generateFieldsForInputOperatorsInstances() {
+	for (operator in getAllExternalInputOperators()){
+		generateFieldForInputOperatorInstance(operator);
+	}
+}
+
+// Generates the fileds that hold a reference to the output patterns produced in the network.
+operation generateFieldsForOutputOperatorsInstances() {
+	for (operator in getAllExternalOutputOperators()){
+		generateFieldForOutputOperatorInstance(operator);
+	}
+}
+
+operation generateOperatorSpecificCounterInitialization(pattern,operator) {
+	%]
+	[%=getIntCounterField(pattern,operator)%] = 0;
+	[%
+}
+
+operation generateOperatorSpecificCounter(pattern,operator){
+	%]
+	int [%=getIntCounterField(pattern,operator)%];
+	[%
+}
+
+operation generateArrayListPatternDeclaration(pattern){
+	%]
+	ArrayList<[%=getClassPattern(pattern)%]> [%=getArrayListPatternField(pattern)%];
+	[%
+}
+
+operation generateFieldForInputOperatorInstance(operator) {
+	%]
+	[%=getJavaClassExternalInputOperator(operator)%] [%=getFieldForInputOperator(operator)%];
+	[%
+}
+
+operation generateFieldForOutputOperatorInstance(operator) {
+	%]
+	[%=getJavaClassExternalOutputOperator(operator)%] [%=getFieldForOutputOperator(operator)%];
+	[%
+}
+
+operation getFieldForInputOperator(operator) {
+	return "input" + operator.id.firstToUpperCase();
+}
+operation getFieldForOutputOperator(operator) {
+	return "output" + operator.id.firstToUpperCase();
+}
+
+
+operation generateArrayListPatternInitialization(pattern){
+	%]
+	[%=getArrayListPatternField(pattern)%] = new ArrayList<[%=getClassPattern(pattern)%]>([%=pattern.expected_size.round()%]); 
+	[%
+}
+
+operation generateHashSetPatternDeclaration(pattern){
+	%]
+	HashSet<[%=getClassPattern(pattern)%]> [%=getHashSetPatternField(pattern)%]; 
+	[%
+}
+
+operation generateHashSetPatternInitialization(pattern){
+	%]
+	[%=getHashSetPatternField(pattern)%] = new HashSet<[%=getClassPattern(pattern)%]>([%=pattern.expected_size.round()%]); 
+	[%
+}
+
+operation generateHashMapsForEachNodeInPatternDeclaration(pattern){ // For now we generate more hasmaps than we really need. Later we can optimise this for those really needed.
+	for (node in getJoinableNodes(pattern.nodes)) {
+		%]
+		HashMap<[%=getClassNodePattern(node)%], LinkedList<[%=getClassPattern(pattern)%]>> [%=getHashMapNodeInPatternField(node,pattern)%];
+		[%
+	}
+}
+
+operation generateHashMapsForEachNodeInPatternInitialization(pattern){
+	for (node in getJoinableNodes(pattern.nodes)) {
+		%]
+		[%=getHashMapNodeInPatternField(node,pattern)%] = new HashMap<[%=getClassNodePattern(node)%], LinkedList<[%=getClassPattern(pattern)%]>>([%=pattern.expected_size.round()%]);
+		[%
+	}
+}
+
+
+
+operation generateListenersListInitializer(outPattern) {
+	%]
+	listeners[%=getClassPattern(outPattern)%] = new LinkedList<[%=getInterfacePatternListener(outPattern)%]>();
+	[%
+	}
+%]
+
+

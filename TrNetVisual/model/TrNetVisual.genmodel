@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" copyrightText="" modelDirectory="/TrNetVisual/src" modelPluginID="TrNetVisual"
+    modelName="Trnetvisual" importerID="org.eclipse.emf.importer.ecore" complianceLevel="6.0"
+    copyrightFields="false">
+  <foreignModel>TrNetVisual.emf</foreignModel>
+  <genPackages prefix="Trnetvisual" disposableProviderFactory="true" ecorePackage="TrNetVisual.ecore#/">
+    <genClasses ecoreClass="TrNetVisual.ecore#//TrNetModel">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//TrNetModel/patterns"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//TrNetModel/operators"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//TrNetModel/id"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//TrNetModel/restrictions"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//TrNetModel/operands"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//TrNetModel/results"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//TrNetModel/flowRules"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//TrNetModel/calculations"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="TrNetVisual.ecore#//NodePattern">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//NodePattern/incoming"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//NodePattern/outgoing"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//NodePattern/sameOut"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//NodePattern/sameIn"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference TrNetVisual.ecore#//NodePattern/pattern"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//NodePattern/attributes"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//NodePattern/name"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//NodePattern/keepIn"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//NodePattern/keepOut"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//NodePattern/differentIn"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//NodePattern/differentOut"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//NodePattern/id"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//NodePattern/expectedNumberOfDistinctValues"/>
+    </genClasses>
+    <genClasses ecoreClass="TrNetVisual.ecore#//EdgePattern">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//EdgePattern/source"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//EdgePattern/target"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference TrNetVisual.ecore#//EdgePattern/pattern"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//EdgePattern/name"/>
+    </genClasses>
+    <genClasses ecoreClass="TrNetVisual.ecore#//Pattern">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Pattern/nodes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Pattern/edges"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Pattern/incomingResults"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Pattern/outgoingOperands"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//Pattern/id"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//Pattern/expected_size"/>
+    </genClasses>
+    <genClasses ecoreClass="TrNetVisual.ecore#//Same">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Same/source"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Same/target"/>
+    </genClasses>
+    <genClasses ecoreClass="TrNetVisual.ecore#//Different">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Different/source"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Different/target"/>
+    </genClasses>
+    <genClasses ecoreClass="TrNetVisual.ecore#//AttributePattern">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//AttributePattern/name"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//AttributePattern/attributeExternalCalculationCall"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference TrNetVisual.ecore#//AttributePattern/ownerNode"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//AttributePattern/expectedNumberOfDistinctValues"/>
+    </genClasses>
+    <genClasses ecoreClass="TrNetVisual.ecore#//Keep">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Keep/source"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Keep/target"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="TrNetVisual.ecore#//Restriction"/>
+    <genClasses ecoreClass="TrNetVisual.ecore#//MandatoryNode"/>
+    <genClasses ecoreClass="TrNetVisual.ecore#//OptionalNode"/>
+    <genClasses ecoreClass="TrNetVisual.ecore#//Combinator"/>
+    <genClasses ecoreClass="TrNetVisual.ecore#//External"/>
+    <genClasses image="false" ecoreClass="TrNetVisual.ecore#//Operator">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Operator/operands"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Operator/results"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//Operator/id"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Operator/flowOut"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Operator/flowIn"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Operator/conditions"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Operator/actions"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="TrNetVisual.ecore#//Result">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Result/pattern"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Result/operator"/>
+    </genClasses>
+    <genClasses ecoreClass="TrNetVisual.ecore#//AnyResult"/>
+    <genClasses ecoreClass="TrNetVisual.ecore#//SomeResult">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//SomeResult/count"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="TrNetVisual.ecore#//Operand">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Operand/operator"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Operand/pattern"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//Operand/index"/>
+    </genClasses>
+    <genClasses ecoreClass="TrNetVisual.ecore#//AnyOperand"/>
+    <genClasses ecoreClass="TrNetVisual.ecore#//SomeOperand">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//SomeOperand/count"/>
+    </genClasses>
+    <genClasses ecoreClass="TrNetVisual.ecore#//AntiOperand"/>
+    <genClasses ecoreClass="TrNetVisual.ecore#//OptionalOperand"/>
+    <genClasses image="false" ecoreClass="TrNetVisual.ecore#//FlowRule">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//FlowRule/source"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//FlowRule/target"/>
+    </genClasses>
+    <genClasses ecoreClass="TrNetVisual.ecore#//Next"/>
+    <genClasses ecoreClass="TrNetVisual.ecore#//Eventually"/>
+    <genClasses ecoreClass="TrNetVisual.ecore#//NextDerived"/>
+    <genClasses image="false" ecoreClass="TrNetVisual.ecore#//AttributeCalculation"/>
+    <genClasses ecoreClass="TrNetVisual.ecore#//ExternalAttributeCalculationCall">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//ExternalAttributeCalculationCall/id"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//ExternalAttributeCalculationCall/qualifiedName"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//ExternalAttributeCalculationCall/result"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//ExternalAttributeCalculationCall/parameters"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="TrNetVisual.ecore#//Parameter">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Parameter/externalAttributeCalculationCallRef"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Parameter/externalConditionCallRef"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Parameter/externalActionCallRef"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//Parameter/externalCalculationCallRef"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="TrNetVisual.ecore#//ApplicationCondition"/>
+    <genClasses ecoreClass="TrNetVisual.ecore#//ExternalConditionCall">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//ExternalConditionCall/id"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//ExternalConditionCall/qualifiedName"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//ExternalConditionCall/parameters"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="TrNetVisual.ecore#//Action"/>
+    <genClasses ecoreClass="TrNetVisual.ecore#//ExternalActionCall">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//ExternalActionCall/id"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//ExternalActionCall/qualifiedName"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//ExternalActionCall/parameters"/>
+    </genClasses>
+    <genClasses ecoreClass="TrNetVisual.ecore#//ExternalAttributeCalculationCallParameter">
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference TrNetVisual.ecore#//ExternalAttributeCalculationCallParameter/owner"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//ExternalAttributeCalculationCallParameter/parameter"/>
+    </genClasses>
+    <genClasses ecoreClass="TrNetVisual.ecore#//ExternalConditionCallParameter">
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference TrNetVisual.ecore#//ExternalConditionCallParameter/owner"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//ExternalConditionCallParameter/parameter"/>
+    </genClasses>
+    <genClasses ecoreClass="TrNetVisual.ecore#//ExternalActionCallParameter">
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference TrNetVisual.ecore#//ExternalActionCallParameter/owner"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//ExternalActionCallParameter/parameter"/>
+    </genClasses>
+    <genClasses ecoreClass="TrNetVisual.ecore#//ParameterRef">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//ParameterRef/index"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="TrNetVisual.ecore#//Calculation"/>
+    <genClasses ecoreClass="TrNetVisual.ecore#//ExternalCalculationCall">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//ExternalCalculationCall/id"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TrNetVisual.ecore#//ExternalCalculationCall/qualifiedName"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//ExternalCalculationCall/parameters"/>
+    </genClasses>
+    <genClasses ecoreClass="TrNetVisual.ecore#//ExternalCalculationCallParameter">
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference TrNetVisual.ecore#//ExternalCalculationCallParameter/owner"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TrNetVisual.ecore#//ExternalCalculationCallParameter/parameter"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>

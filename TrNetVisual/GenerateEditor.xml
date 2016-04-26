@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="GenerateEditor" default="main" basedir=".">
+
+	<!-- Generate GMF Editor -->
+	<target name="main">
+
+		<!-- Remove previously generated files. -->
+
+		<delete quiet="true" includeEmptyDirs="true">
+			<fileset dir="../TrNetVisual.diagram/src" />
+		</delete>
+
+		<delete quiet="true" includeEmptyDirs="true">
+			<fileset dir="../TrNetVisual.tests/src" />
+		</delete>
+
+		<delete quiet="true" includeEmptyDirs="true">
+			<fileset dir="../TrNetVisual.editor/src" />
+		</delete>
+
+		<delete quiet="true" includeEmptyDirs="true">
+			<fileset dir="../TrNetVisual.edit/src" />
+		</delete>
+
+		<delete quiet="true" includeEmptyDirs="true">
+			<fileset dir="./src" />
+		</delete>
+
+		<delete file="./model/TrNetVisual.ecore" />
+		<delete file="./model/TrNetVisual.ecorediag" />
+		<delete file="./model/TrNetVisual.genmodel" />
+		<delete file="./model/TrNetVisual.gmfgen" />
+		<delete file="./model/TrNetVisual.gmfgraph" />
+		<delete file="./model/TrNetVisual.gmfmap" />
+		<delete file="./model/TrNetVisual.gmftool" />
+		<delete file="./model/TrNetVisual.trace" />
+
+		<eclipse.refreshLocal resource="TrNetVisual" depth="infinite" />
+		<eclipse.refreshLocal resource="TrNetVisual.diagram" depth="infinite" />
+		<eclipse.refreshLocal resource="TrNetVisual.edit" depth="infinite" />
+		<eclipse.refreshLocal resource="TrNetVisual.editor" depth="infinite" />
+		<eclipse.refreshLocal resource="TrNetVisual.tests" depth="infinite" />
+
+		<epsilon.eugenia src="model/TrNetVisual.emf" />
+
+		<eclipse.refreshLocal resource="TrNetVisual" depth="infinite" />
+		<eclipse.refreshLocal resource="TrNetVisual.diagram" depth="infinite" />
+		<eclipse.refreshLocal resource="TrNetVisual.edit" depth="infinite" />
+		<eclipse.refreshLocal resource="TrNetVisual.editor" depth="infinite" />
+		<eclipse.refreshLocal resource="TrNetVisual.tests" depth="infinite" />
+
+
+		<!-- Inject Validation Code On Save -->
+		<copy todir="../TrNetVisual.diagram/src/trnetvisual/diagram/part" file="injection/source/TrnetvisualDocumentProvider.java" overwrite="true">
+		</copy>
+		
+		<!-- Inject Validation Epsilon into the respective plugin -->
+		<copy todir="../TrNetVisualValidation/validation" file="../TrNetCompilation/validation/TrNetVisualValidation.evl" overwrite="true">
+		</copy>
+
+		<!-- Inject Generate IDs Action EOL into the respective plugin -->
+		<copy todir="../TrNetVisualGenerateIDs/src/trnetvisual/diagram/generateids" file="../TrNetCompilation/analysis/GenerateIds.eol" overwrite="true">
+		</copy>
+
+		<!-- Inject Generate Operand Indexes Action EOL into the respective plugin -->
+		<copy todir="../TrNetVisualGenerateOperandsIndexes/src/trnetvisual/diagram/generateoperandsindexes" file="../TrNetCompilation/analysis/GenerateOperandIndexes.eol" overwrite="true">
+		</copy>
+
+		<!-- Inject Generate Expected Sizes Action EOL into the respective plugin -->
+		<copy todir="../TrNetVisualGenerateExpectedSizes/src/trnetvisual/diagram/generatesizes" file="../TrNetCompilation/analysis/GenerateExpectedSizes.eol" overwrite="true">
+		</copy>
+
+		<!-- Inject Compile Action ETL into the respective plugin  DEPRECATED
+		<copy todir="../TrNetVisualCompile/src/trnetvisual/diagram/compile" file="../TrNetCompilation/transformation/TrNetVisual2TrNet.etl" overwrite="true">
+		</copy>-->
+
+		<!-- Inject Compile Action EGL into the respective plugin -->
+		<copy todir="../TrNetVisualCompile/src/trnetvisual/diagram/compile" file="../TrNetCompilation/TrNet2Java.egl" overwrite="true" />
+		<copy todir="../TrNetVisualCompile/src/trnetvisual/diagram/compile" file="../TrNetCompilation/GenerateClassesForInputExternalOperators.egl" overwrite="true" />
+		<copy todir="../TrNetVisualCompile/src/trnetvisual/diagram/compile" file="../TrNetCompilation/GenerateClassesForOutputExternalOperators.egl" overwrite="true" />
+		<copy todir="../TrNetVisualCompile/src/trnetvisual/diagram/compile" file="../TrNetCompilation/GenerateClassesFromNodePatterns.egl" overwrite="true" />
+		<copy todir="../TrNetVisualCompile/src/trnetvisual/diagram/compile" file="../TrNetCompilation/GenerateClassesFromPatterns.egl" overwrite="true" />
+		<copy todir="../TrNetVisualCompile/src/trnetvisual/diagram/compile" file="../TrNetCompilation/GeneratePatternListenerInterface.egl" overwrite="true" />
+		<copy todir="../TrNetVisualCompile/src/trnetvisual/diagram/compile" file="../TrNetCompilation/GeneratePatternPublisherInterface.egl" overwrite="true" />
+		<copy todir="../TrNetVisualCompile/src/trnetvisual/diagram/compile" file="../TrNetCompilation/GenerateTransformationClass.egl" overwrite="true" />
+
+		<copy todir="../TrNetVisualCompile/src/trnetvisual/diagram/compile" file="../TrNetCompilation/Utils.eol" overwrite="true">
+		</copy>
+
+
+		<!-- Deploy diagram icon files 
+		<copy todir="../new/dir"  overwrite="true">
+			<fileset dir="src_dir" />
+		</copy>
+		-->
+
+	</target>
+
+
+
+</project>

@@ -1,0 +1,7 @@
+# Tracing options for the TrNetVisual.diagram plug-in
+
+# Common issues
+TrNetVisual.diagram/debug=false
+
+# Visual IDs
+TrNetVisual.diagram/debug/visualID=false

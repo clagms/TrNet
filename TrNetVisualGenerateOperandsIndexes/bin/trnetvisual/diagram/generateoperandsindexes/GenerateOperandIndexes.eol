@@ -1,0 +1,181 @@
+-*
+
+*-
+import "../Utils.eol";
+
+generateAllOperandIndexes();
+
+operation clearAllGeneratedIndexes(){
+	"Clearing All Indexes...".println();
+	
+	for (operand in VisualModel!Operand.all) { 
+		
+		("Index of " + operand + " Cleared!").println();
+		operand.index = (-1);
+		
+	}
+	
+	"Clearing All Indexes... DONE".println();
+}
+
+
+operation generateAllOperandIndexes(){
+
+	clearAllGeneratedIndexes();
+	
+	"Generating All Indexes...".println();
+	
+	for (operator in VisualModel!Operator.all) { 
+		
+		("Generating Indexes for " + operator + " ...").println();
+		
+		/*if (operator.isKindOf(VisualModel!Union)) {
+			generateOperandIndexesUnion(operator);
+		} else*/ if (operator.isKindOf(VisualModel!Combinator)){
+			generateOperandIndexesCombinator(operator);
+		} else if (operator.isKindOf(VisualModel!External)){
+			generateOperandIndexesExternal(operator);
+		}
+		
+		("Generating Indexes for " + operator + " ... DONE").println();
+	}
+	
+	"Generating All Indexes... DONE".println();
+}
+
+operation generateOperandIndexesUnion(operator: VisualModel!Union){
+	generateRandomIndexes(operator);
+}
+
+operation generateOperandIndexesCombinator(operator: VisualModel!Combinator){
+	generateOperandIndexesCombinatorOrExternal(operator);
+}
+
+operation generateOperandIndexesExternal(operator: VisualModel!External){
+	generateOperandIndexesCombinatorOrExternal(operator);
+}
+
+operation generateOperandIndexesCombinatorOrExternal(operator: VisualModel!Operator){
+	if (operator.hasOnlyOneOperand()){
+		operator.operands.first.index = 1;
+	} else if (operator.hasTwoOperands()){
+		// Has two operands
+		if (operator.operands.first.isKindOf(VisualModel!AntiOperand)){
+			throw("not implemented yet");
+			operator.operands.first.index = 2;
+			operator.operands.last.index = 1;
+		} else if (operator.operands.last.isKindOf(VisualModel!AntiOperand)){
+			throw("not implemented yet");
+			operator.operands.first.index = 1;
+			operator.operands.last.index = 2;
+		} else if (operator.operands.first.isKindOf(VisualModel!OptionalOperand)){
+			throw("not implemented yet");
+			operator.operands.first.index = 2;
+			operator.operands.last.index = 1;
+		} else if (operator.operands.last.isKindOf(VisualModel!OptionalOperand)){
+			throw("not implemented yet");
+			operator.operands.first.index = 1;
+			operator.operands.last.index = 2;
+		} else if (operator.operands.first.isKindOf(VisualModel!SomeOperand)){
+			throw("not implemented yet");
+			operator.operands.first.index = 1;
+			operator.operands.last.index = 2;
+		} else if (operator.operands.last.isKindOf(VisualModel!SomeOperand)){
+			throw("not implemented yet");
+			operator.operands.first.index = 2;
+			operator.operands.last.index = 1;
+		} else if (operator.operands.first.isKindOf(VisualModel!AnyOperand) and operator.operands.last.isKindOf(VisualModel!AnyOperand)){
+			/*
+			If there is no natural joins, 
+			the order of the operands is irrelevant.
+			But, if there are natural joins,
+			then we use the statistical information to decide wich order will yield a lower execution cost (in the notebook).
+			Also, in the presence of several join conditions, we select one join condition: the most restrictive one. This is also implemented in the code generation (codeGen).
+			*/
+			var joinCondition = selectMostRestrictiveJoinCondition(operator);
+			
+			if (joinCondition <> null) {
+				var pattern1 = getSourcePattern(joinCondition);
+				var pattern2 = getTargetPattern(joinCondition);
+				var node1 = joinCondition.source;
+				var node2 = joinCondition.target;
+				
+				var noip1 = pattern1.expected_size;
+				var noip2 = pattern2.expected_size;
+				var noip1p2 = noip1 * noip2;
+				
+				var ndv1 = node1.expectedNumberOfDistinctValues;
+				var ndv2 = node2.expectedNumberOfDistinctValues;
+				
+				var condp1 = computeSelectivityDenominatorForConditionsInPattern(operator, pattern1); 
+				var condp2 = computeSelectivityDenominatorForConditionsInPattern(operator, pattern2);
+				
+				
+				if ((noip1/condp1)*(1 + (noip2/(ndv2*condp2))) < (noip2/condp2)*(1 + (noip1/(ndv1*condp1)))) {
+					// should start with pattern 1
+					getOperandFromPattern(operator, pattern1).index = 1;
+					getOperandFromPattern(operator, pattern2).index = 2;
+				} else {
+					// should start with pattern 2
+					getOperandFromPattern(operator, pattern2).index = 1;
+					getOperandFromPattern(operator, pattern1).index = 2;
+				}
+			} else {
+				operator.operands.first.index = 1;
+				operator.operands.last.index = 2;
+			}
+		} else {
+			throw ("Error: Unexpected new types of operands in operator " + operator + "...");
+		}
+		
+	} else {
+		// has more than two operands.
+		
+		if ( not operator.isKindOf(VisualModel!External)){
+			throw ("Error: Unexpected number of operands in operator " + operator + "...");
+		}
+		
+	}
+}
+
+operation computeSelectivityDenominatorForConditionsInPattern(operator, pattern) {
+	var result = 1.0d;
+	
+	("operator: " + operator).println();
+	("getConditionsWithfirstParameterInPattern(operator.conditions, pattern): " + getConditionsWithFirstParameterInPattern(operator.conditions, pattern)).println();
+	
+	for (appCondition in getConditionsWithFirstParameterInPattern(operator.conditions, pattern)) {
+		result = result * computeSelectivityCondition(appCondition);
+	}
+	
+	return result;
+}
+
+operation computeSelectivityCondition(appCondition) {
+
+		("AppCondition: " + appCondition).println();
+		("Relevant parameter: " + getFirstParameterCondition(appCondition)).println();
+
+		var parameter = getFirstParameterCondition(appCondition);
+		
+		if (parameter.isKindOf(VisualModel!Calculation)) {
+ 			//TODO recursively fetch the node or the attribute pattern;
+ 			// assign parameter to that.
+ 			// don't forget to update attributeIsParameterOfSomeCondition and nodeIsParameterOfSomeCondition functions too! They have to search recursevly to see if a certain element is a parameter.
+ 			throw "Not implemented yet!";
+ 		}
+ 		
+ 		if (parameter.isKindOf(VisualModel!AttributePattern)) {
+ 			("Selectivity: " + parameter.expectedNumberOfDistinctValues).println();
+ 			return parameter.expectedNumberOfDistinctValues;
+ 			
+ 		} else if (parameter.isKindOf(VisualModel!NodePattern)) {
+ 			// assert (sourcePattern.expected_size >= getNumberOfDistinctValuesNodePattern(parameter), "Invariant sourcePattern.expected_size >= getNumberOfDistinctValuesNodePattern(parameter) violated!");
+ 			// we ignore these parameters.
+ 			//result = result * (getNumberOfDistinctValuesNodePattern(parameter));
+ 		}
+		
+		return 1.0d; //means no effect;
+}
+
+

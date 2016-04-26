@@ -1,0 +1,81 @@
+[%
+import "Utils.eol";
+
+%]
+package [%=getPackageExternalOutputOperator(externalOutputOperator)%];
+
+import java.util.LinkedList;
+import [%=getGenericPackage()%].*;
+
+public class [%=getJavaClassExternalOutputOperator(externalOutputOperator)%]
+implements [%=getGenericPatternInterfacePublisher()%]
+[% 
+for (connectedPattern in getPatternPredecessorsFromOperator(externalOutputOperator)){
+	%]
+	,[%= getInterfacePatternListener(connectedPattern) %]
+	[%
+}
+%]
+{
+
+LinkedList<[%=getGenericPatternInterfaceListener()%]> listeners;
+
+public [%=getJavaClassExternalOutputOperator(externalOutputOperator)%]() {
+	listeners = new LinkedList<[%=getGenericPatternInterfaceListener()%]>();
+}
+
+public void registerListener([%=getGenericPatternInterfaceListener()%] listener){
+	listeners.add(listener);
+}
+	
+public void notifyListeners([%=getGenericPatternClass()%] element){
+	for ([%=getGenericPatternInterfaceListener()%] listener : listeners){
+		listener.notify(element);
+	}
+}
+
+[%
+for (connectedPattern in getPatternPredecessorsFromOperator(externalOutputOperator)){
+	%]
+	public void notify([%=getClassPattern(connectedPattern)%] element){
+		[%generateConvertionToGenericPattern(connectedPattern);%]
+	}
+	[%
+}
+%]
+
+}
+
+
+[%
+operation generateConvertionToGenericPattern(pattern) {
+	%]
+	ModelPattern genericPattern = new ModelPattern();
+	
+	[%
+	for (node in pattern.nodes) {
+		%]
+		genericPattern.nodes.add(element.[%=getFieldNameNodePattern(node)%]);
+		[%
+	}
+	%]
+	
+	[%
+	for (edge in pattern.edges) {
+		%]
+		{
+		ModelEdge edge = new ModelEdge();
+		edge.name = "[%=edge.name%]";
+		edge.source = element.[%=getFieldNameNodePattern(edge.source)%];
+		edge.target = element.[%=getFieldNameNodePattern(edge.target)%];
+		genericPattern.edges.add(edge);
+		}
+		[%
+	}
+	%]
+	
+	notifyListeners(genericPattern);
+	
+	[%
+}
+%]

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="decompositionprocess" nsURI="http://decompositionprocess/1.0"
+    nsPrefix="decompositionprocess">
+  <eClassifiers xsi:type="ecore:EClass" name="Decomposition" eSuperTypes="#//Split">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="file" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DecomposeOp">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="splits" upperBound="-1"
+        eType="#//Split" containment="true" eOpposite="#//Split/parent"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="parent" lowerBound="1"
+        eType="#//Split" eOpposite="#//Split/op"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="min" eType="#//Split"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="max" eType="#//Split"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Split" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="minCost" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="op" eType="#//DecomposeOp"
+        containment="true" eOpposite="#//DecomposeOp/parent"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="parent" lowerBound="1"
+        eType="#//DecomposeOp" eOpposite="#//DecomposeOp/splits"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maxCost" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDouble"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OperandSplit" eSuperTypes="#//Split">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GenericSplit" eSuperTypes="#//Split"/>
+</ecore:EPackage>

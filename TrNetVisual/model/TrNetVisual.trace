@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<trace:TraceModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:trace="http://www.eclipse.org/gmf/2006/Trace">
+  <nodeTraces visualID="2001" queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'ExternalAttributeCalculationCall') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'TrNetModel') and _containmentMF_.name = 'restrictions')">
+    <nodeLabelTraces visualID="5001" queryText="true"/>
+  </nodeTraces>
+  <nodeTraces visualID="2002" queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'ExternalCalculationCall') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'TrNetModel') and _containmentMF_.name = 'calculations')">
+    <nodeLabelTraces visualID="5002" queryText="true"/>
+  </nodeTraces>
+  <nodeTraces visualID="2003" queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'Combinator') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'TrNetModel') and _containmentMF_.name = 'operators')">
+    <compartmentTraces visualID="7001" queryText="true"/>
+    <compartmentTraces visualID="7002" queryText="true"/>
+  </nodeTraces>
+  <nodeTraces visualID="2004" queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'External') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'TrNetModel') and _containmentMF_.name = 'operators')">
+    <compartmentTraces visualID="7003" queryText="true"/>
+    <compartmentTraces visualID="7004" queryText="true"/>
+  </nodeTraces>
+  <nodeTraces visualID="2005" queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'Pattern') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'TrNetModel') and _containmentMF_.name = 'patterns')">
+    <compartmentTraces visualID="7005" queryText="true"/>
+  </nodeTraces>
+  <childNodeTraces visualID="3001" queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'ExternalConditionCall') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'Operator') and _containmentMF_.name = 'conditions')">
+    <nodeLabelTraces visualID="5003" queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces visualID="3002" queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'ExternalActionCall') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'Operator') and _containmentMF_.name = 'actions')">
+    <nodeLabelTraces visualID="5004" queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces visualID="3003" queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'MandatoryNode') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'Pattern') and _containmentMF_.name = 'nodes')">
+    <nodeLabelTraces visualID="5006" queryText="true"/>
+    <compartmentTraces visualID="7006" queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces visualID="3004" queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'AttributePattern') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'NodePattern') and _containmentMF_.name = 'attributes')">
+    <nodeLabelTraces visualID="5005" queryText="true"/>
+  </childNodeTraces>
+  <childNodeTraces visualID="3005" queryText="(let _eClass_:ecore::EClass = modelFacet.metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'OptionalNode') and (let _containmentMF_:ecore::EStructuralFeature = modelFacet.containmentMetaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _containmentMF_.eContainingClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'Pattern') and _containmentMF_.name = 'nodes')">
+    <nodeLabelTraces visualID="5007" queryText="true"/>
+    <compartmentTraces visualID="7007" queryText="true"/>
+  </childNodeTraces>
+  <linkTraces visualID="4001" queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'Same')"/>
+  <linkTraces visualID="4002" queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'Keep')"/>
+  <linkTraces visualID="4003" queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'AnyResult')"/>
+  <linkTraces visualID="4004" queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'SomeResult')"/>
+  <linkTraces visualID="4005" queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'AnyOperand')"/>
+  <linkTraces visualID="4006" queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'SomeOperand')"/>
+  <linkTraces visualID="4007" queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'AntiOperand')"/>
+  <linkTraces visualID="4008" queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'OptionalOperand')"/>
+  <linkTraces visualID="4009" queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'Next')"/>
+  <linkTraces visualID="4010" queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'Eventually')"/>
+  <linkTraces visualID="4011" queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'NextDerived')"/>
+  <linkTraces visualID="4012" queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'ExternalAttributeCalculationCallParameter')">
+    <linkLabelTraces visualID="6001" queryText="true"/>
+  </linkTraces>
+  <linkTraces visualID="4013" queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'ExternalConditionCallParameter')">
+    <linkLabelTraces visualID="6002" queryText="true"/>
+  </linkTraces>
+  <linkTraces visualID="4014" queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'ExternalActionCallParameter')">
+    <linkLabelTraces visualID="6003" queryText="true"/>
+  </linkTraces>
+  <linkTraces visualID="4015" queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'ExternalCalculationCallParameter')">
+    <linkLabelTraces visualID="6004" queryText="true"/>
+  </linkTraces>
+  <linkTraces visualID="4016" queryText="modelFacet.oclIsKindOf(gmfgen::TypeLinkModelFacet) and (let _eClass_:ecore::EClass = modelFacet.oclAsType(gmfgen::TypeLinkModelFacet).metaClass.ecoreClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'EdgePattern')">
+    <linkLabelTraces visualID="6005" queryText="true"/>
+  </linkTraces>
+  <linkTraces visualID="4017" queryText="modelFacet.oclIsKindOf(gmfgen::FeatureLinkModelFacet) and (let _feature_:ecore::EStructuralFeature = modelFacet.oclAsType(gmfgen::FeatureLinkModelFacet).metaFeature.ecoreFeature in (let _eClass_:ecore::EClass = _feature_.eContainingClass in _eClass_.ePackage.nsURI = 'http://trnetvisual/1.0' and _eClass_.name = 'ExternalAttributeCalculationCall') and _feature_.name = 'result')">
+    <linkLabelTraces visualID="6006" queryText="true"/>
+  </linkTraces>
+</trace:TraceModel>

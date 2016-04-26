@@ -1,0 +1,244 @@
+@gmf(foo="bar")
+@namespace(uri="http://trnetvisual/1.0", prefix="trnetvisual")
+package trnetvisual;
+
+@gmf.diagram(foo="bar")
+class TrNetModel {
+  val Pattern[*] patterns;
+  val Operator[*] operators;
+  attr String[1] ~id;
+  val Restriction[*] restrictions;
+  val Operand[*] operands;
+  val Result[*] results;
+  val FlowRule[*] flowRules;
+  val Calculation[*] calculations;
+}
+
+@gmf.node(label="name", figure="rectangle")
+abstract class NodePattern extends Parameter {
+  ref EdgePattern[*]#target incoming;
+  ref EdgePattern[*]#source outgoing;
+  ref Same[*]#source sameOut;
+  ref Same[*]#target sameIn;
+  ref Pattern[1]#nodes pattern;
+
+  @gmf.compartment(collapsible="true", layout="list")
+  val AttributePattern[*]#ownerNode attributes;
+  attr String[1] name;
+  ref Keep[*]#target keepIn;
+  ref Keep[*]#source keepOut;
+  ref Different[*]#target differentIn;
+  ref Different[*]#source differentOut;
+  attr String[1] ~id;
+  
+  attr double expectedNumberOfDistinctValues;
+}
+
+@gmf.link(label="name", source="source", target="target", target.decoration="arrow", width="1", tool.name="Edge")
+class EdgePattern {
+  ref NodePattern[1]#outgoing source;
+  ref NodePattern[1]#incoming target;
+  ref Pattern[1]#edges pattern;
+  attr String[1] name;
+}
+
+@gmf.node(label.placement="none", figure="rounded", tool.name="Pattern")
+class Pattern {
+
+  @gmf.compartment(collapsible="false")
+  val NodePattern[+]#pattern nodes;
+  val EdgePattern[*]#pattern edges;
+  ref Result[*]#pattern incomingResults;
+  ref Operand[*]#pattern outgoingOperands;
+  attr String[1] ~id;
+  attr double expected_size;
+}
+
+@gmf.link(source="source", target="target", color="0,214,32", tool.name="Same Node", width="2")
+class Same extends Restriction {
+  ref NodePattern[1]#sameOut source;
+  ref NodePattern[1]#sameIn target;
+}
+
+class Different extends Restriction {
+  ref NodePattern[1]#differentOut source;
+  ref NodePattern[1]#differentIn target;
+}
+
+@gmf.node(label="name", figure="rectangle")
+class AttributePattern extends Parameter {
+  attr String[1] name;
+  ref ExternalAttributeCalculationCall#result attributeExternalCalculationCall;
+  ref NodePattern[1]#attributes ownerNode;
+  
+  attr double expectedNumberOfDistinctValues;
+}
+
+@gmf.link(source="source", target="target", color="51,153,255", target.decoration="arrow", tool.name="Keep Node", width="2")
+class Keep extends Restriction {
+  ref NodePattern[1]#keepOut source;
+  ref NodePattern[1]#keepIn target;
+}
+
+abstract class Restriction {
+}
+
+@gmf.node(tool.name="Node", border.style="solid")
+class MandatoryNode extends NodePattern {
+}
+
+class OptionalNode extends NodePattern {
+}
+
+@gmf.node(label.placement="none", figure="rectangle", color="145,145,145", tool.name="Combine Operator")
+class Combinator extends Operator {
+}
+
+@gmf.node(label.placement="none", figure="rectangle", color="255,255,255", tool.name="External")
+class External extends Operator {
+}
+
+@gmf.node(foo="bar")
+abstract class Operator {
+  ref Operand[*]#operator operands;
+  ref Result[*]#operator results;
+  attr String[1] ~id;
+  ref FlowRule[*]#source flowOut;
+  ref FlowRule[*]#target flowIn;
+
+  @gmf.compartment(collapsible="true", layout="list")
+  val ApplicationCondition[*] conditions;
+
+  @gmf.compartment(collapsible="true", layout="list")
+  val Action[*] actions;
+}
+
+@gmf.link(source="operator", target="pattern", target.decoration="arrow", width="3")
+abstract class Result {
+  ref Pattern[1]#incomingResults pattern;
+  ref Operator[1]#results operator;
+}
+
+@gmf.link(tool.name="All Result")
+class AnyResult extends Result {
+}
+
+class SomeResult extends Result {
+  attr int[1] count;
+}
+
+@gmf.link(source="pattern", target="operator", target.decoration="arrow", width="3")
+abstract class Operand {
+  ref Operator[1]#operands operator;
+  ref Pattern[1]#outgoingOperands pattern;
+  attr int[1] index;
+}
+
+@gmf.link(tool.name="All Operand")
+class AnyOperand extends Operand {
+}
+
+class SomeOperand extends Operand {
+  attr int[1] count;
+}
+
+class AntiOperand extends Operand {
+}
+
+class OptionalOperand extends Operand {
+}
+
+@gmf.link(source="source", target="target", target.decoration="arrow", width="3")
+abstract class FlowRule {
+  ref Operator[1]#flowOut source;
+  ref Operator[1]#flowIn target;
+}
+
+class Next extends FlowRule {
+}
+
+class Eventually extends FlowRule {
+}
+
+@gmf.link(color="255,207,254")
+class NextDerived extends FlowRule {
+}
+
+abstract class AttributeCalculation extends Restriction {
+}
+
+@gmf.node(label="id", figure="rectangle", size="120,30", color="100,226,255")
+class ExternalAttributeCalculationCall extends AttributeCalculation {
+  attr String[1] ~id;
+  attr String[1] qualifiedName;
+
+  @gmf.link(target.decoration="arrow", width="3", color="90,90,90")
+  ref AttributePattern[1]#attributeExternalCalculationCall result;
+  val ExternalAttributeCalculationCallParameter[*]#owner parameters;
+}
+
+abstract class Parameter {
+  ref ExternalAttributeCalculationCallParameter[*]#parameter externalAttributeCalculationCallRef;
+  ref ExternalConditionCallParameter[*]#parameter externalConditionCallRef;
+  ref ExternalActionCallParameter[*]#parameter externalActionCallRef;
+  ref ExternalCalculationCallParameter[*]#parameter externalCalculationCallRef;
+}
+
+abstract class ApplicationCondition {
+}
+
+@gmf.node(label="id", figure="rectangle", size="120,30", color="252,186,255")
+class ExternalConditionCall extends ApplicationCondition {
+  attr String[1] ~id;
+  attr String[1] qualifiedName;
+  val ExternalConditionCallParameter[*]#owner parameters;
+}
+
+abstract class Action {
+}
+
+@gmf.node(label="id", figure="rectangle", size="120,30", color="176,255,161")
+class ExternalActionCall extends Action {
+  attr String[1] ~id;
+  attr String[1] qualifiedName;
+  val ExternalActionCallParameter[*]#owner parameters;
+}
+
+@gmf.link(source="owner", target="parameter", label="index", target.decoration="arrow", width="3", color="90,90,90", style="dash")
+class ExternalAttributeCalculationCallParameter extends ParameterRef {
+  ref ExternalAttributeCalculationCall[1]#parameters owner;
+  ref Parameter[1]#externalAttributeCalculationCallRef parameter;
+}
+
+@gmf.link(source="owner", target="parameter", label="index", target.decoration="arrow", width="3", color="90,90,90", style="dash")
+class ExternalConditionCallParameter extends ParameterRef {
+  ref ExternalConditionCall[1]#parameters owner;
+  ref Parameter[1]#externalConditionCallRef parameter;
+}
+
+@gmf.link(source="owner", target="parameter", label="index", target.decoration="arrow", width="3", color="90,90,90", style="dash")
+class ExternalActionCallParameter extends ParameterRef {
+  ref ExternalActionCall[1]#parameters owner;
+  ref Parameter[1]#externalActionCallRef parameter;
+}
+
+class ParameterRef {
+  attr int[1] index;
+}
+
+abstract class Calculation extends Parameter {
+}
+
+@gmf.node(label="id", figure="rectangle", size="120,30", color="100,226,255")
+class ExternalCalculationCall extends Calculation {
+  attr String[1] ~id;
+  attr String qualifiedName;
+  val ExternalCalculationCallParameter[*]#owner parameters;
+}
+
+@gmf.link(source="owner", target="parameter", label="index", target.decoration="arrow", width="3", color="90,90,90", style="dash")
+class ExternalCalculationCallParameter extends ParameterRef {
+  ref ExternalCalculationCall[1]#parameters owner;
+  ref Parameter[1]#externalCalculationCallRef parameter;
+}
+

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/TrNetDecompositionProcess/src" modelPluginID="TrNetDecompositionProcess"
+    modelName="Decompositionprocess" importerID="org.eclipse.emf.importer.ecore" complianceLevel="6.0"
+    copyrightFields="false">
+  <foreignModel>DecompositionProcess.ecore</foreignModel>
+  <genPackages prefix="Decompositionprocess" disposableProviderFactory="true" ecorePackage="DecompositionProcess.ecore#/">
+    <genClasses ecoreClass="DecompositionProcess.ecore#//Decomposition">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute DecompositionProcess.ecore#//Decomposition/file"/>
+    </genClasses>
+    <genClasses ecoreClass="DecompositionProcess.ecore#//DecomposeOp">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute DecompositionProcess.ecore#//DecomposeOp/id"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DecompositionProcess.ecore#//DecomposeOp/splits"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference DecompositionProcess.ecore#//DecomposeOp/parent"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DecompositionProcess.ecore#//DecomposeOp/min"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference DecompositionProcess.ecore#//DecomposeOp/max"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="DecompositionProcess.ecore#//Split">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute DecompositionProcess.ecore#//Split/minCost"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference DecompositionProcess.ecore#//Split/op"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference DecompositionProcess.ecore#//Split/parent"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute DecompositionProcess.ecore#//Split/maxCost"/>
+    </genClasses>
+    <genClasses ecoreClass="DecompositionProcess.ecore#//OperandSplit">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute DecompositionProcess.ecore#//OperandSplit/id"/>
+    </genClasses>
+    <genClasses ecoreClass="DecompositionProcess.ecore#//GenericSplit"/>
+  </genPackages>
+</genmodel:GenModel>

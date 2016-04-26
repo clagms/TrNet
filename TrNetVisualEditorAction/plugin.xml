@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="trnetvisual.custom"
+            name="Custom">
+      </category>
+      <command
+            categoryId="trnetvisual.custom"
+            description="A Test Command"
+            id="trnetvisual.custom.test"
+            name="Test">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="false"
+            id="trnetvisual.custom.objectcontribution"
+            objectClass="trnetvisual.diagram.edit.parts.TrNetModelEditPart">
+         <action
+               class="trnetvisual.actions.TestAction"
+               definitionId="trnetvisual.custom.test"
+               enablesFor="1"
+               id="trnetvisual.custom.testaction"
+               label="Run Test"
+               menubarPath="additions">
+         </action>
+      </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="trnetvisual.custom.test"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+I">
+      </key>
+   </extension>
+
+</plugin>

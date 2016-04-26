@@ -1,0 +1,11 @@
+[%
+import "Utils.eol";
+
+%]
+package [%=getPackageNodePattern(node)%];
+
+import [%=getGenericPackage()%].*;
+
+public class [%=getClassNodePattern(node)%] extends [%=getGenericNodeClass()%]{
+
+}

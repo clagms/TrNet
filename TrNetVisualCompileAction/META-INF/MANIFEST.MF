@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: TrNetVisualCompileAction
+Bundle-SymbolicName: TrNetVisualCompileAction
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.eclipse.gef;bundle-version="3.9.0",
+ org.eclipse.gmf.runtime.diagram.ui;bundle-version="1.6.0",
+ TrNetVisualCompile;bundle-version="1.0.0"
+Export-Package: trnetvisual.diagram.compile

@@ -1,0 +1,952 @@
+// global maps:
+var nodePattern2AttributeDistinctValues = new Map;
+
+initializeNodePattern2AttributeDistinctValues();
+
+clearAllExpectedSizes();
+estimateExpectedSizesInStartPatterns();
+generateExpectedSizesFromStartPatterns();
+
+//nodePattern2AttributeDistinctValues.println();
+
+/* DEBUG
+for (pattern in VisualModel!Pattern.all()){
+	pattern.println();
+	for (parent in getAllParentsSet(pattern)){
+		parent.println();
+	}
+	isUnfilled(pattern).println();
+	canBeFilled(pattern).println();
+}
+*/
+
+operation generateExpectedSizesFromStartPatterns(){
+	var changesHaveBeenMade = true;
+	
+	while (changesHaveBeenMade) {
+		changesHaveBeenMade = false;
+		for (pattern in getAllSuitedPatterns()){
+			
+			("Setting size of pattern " + pattern + " ...").println;
+			computeExpectedSize(pattern);
+			changesHaveBeenMade = true;
+			
+			("Expected size of pattern " + pattern + " set!").println;
+		}
+	}
+}
+
+operation computeExpectedSize(pattern) {
+	for (operator in getIncomingOperatorsSet(pattern)){
+		if (operator.isKindOf(VisualModel!External)){
+			throw("Unexpected unfilled pattern found: " + pattern);
+		} else if (operator.isKindOf(VisualModel!Combinator)){
+			if (operatorHasOneOperand(operator)){
+				if (operator.operands.first.isKindOf(VisualModel!AntiOperand)) {
+					throw ("Error: Anti Operands have to be combined with some other pattern. In " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!AnyOperand)){
+					fillStatisticsSingleCombinator(pattern , operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!OptionalOperand)){
+					throw ("Error: Operand not supported yet. In " + operator.operands.first);
+				} else {
+					throw("Unexpected kind of operand " + operator.operands.first);
+				}
+			} else if (operatorHasTwoOperands(operator)) {
+				
+				// AnyOperand combined with all
+				if (operator.operands.first.isKindOf(VisualModel!AnyOperand) and operator.operands.last.isKindOf(VisualModel!AnyOperand)) {
+					 fillStatisticsDoubleCombinator(pattern , operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!AnyOperand) and operator.operands.last.isKindOf(VisualModel!AntiOperand)){
+					throw ("Error: feature not supported yet. In " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!AnyOperand) and operator.operands.last.isKindOf(VisualModel!OptionalOperand)){
+					throw ("Error: feature not supported yet. In " + operator);
+				
+				// SomeOperand combined with all
+				} else if (operator.operands.first.isKindOf(VisualModel!SomeOperand) and operator.operands.last.isKindOf(VisualModel!AnyOperand)){
+					throw ("Error: feature not supported yet. In " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!SomeOperand) and operator.operands.last.isKindOf(VisualModel!SomeOperand)){
+					throw ("Error: feature not supported yet. In " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!SomeOperand) and operator.operands.last.isKindOf(VisualModel!AntiOperand)){
+					throw ("Error: feature not supported yet. In " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!SomeOperand) and operator.operands.last.isKindOf(VisualModel!OptionalOperand)){
+					throw ("Error: feature not supported yet. In " + operator);
+				
+				// AntiOperand combined with all
+				} else if (operator.operands.first.isKindOf(VisualModel!AntiOperand) and operator.operands.last.isKindOf(VisualModel!AnyOperand)){
+					throw ("Error: feature not supported yet. In " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!AntiOperand) and operator.operands.last.isKindOf(VisualModel!SomeOperand)){
+					throw ("Error: feature not supported yet. In " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!AntiOperand) and operator.operands.last.isKindOf(VisualModel!AntiOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!AntiOperand) and operator.operands.last.isKindOf(VisualModel!OptionalOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				
+				// OptionalOperand combined with all
+				} else if (operator.operands.first.isKindOf(VisualModel!OptionalOperand) and operator.operands.last.isKindOf(VisualModel!AnyOperand)){
+					throw ("Error: feature not supported yet. In " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!OptionalOperand) and operator.operands.last.isKindOf(VisualModel!SomeOperand)){
+					throw ("Error: feature not supported yet. In " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!OptionalOperand) and operator.operands.last.isKindOf(VisualModel!AntiOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				} else if (operator.operands.first.isKindOf(VisualModel!OptionalOperand) and operator.operands.last.isKindOf(VisualModel!OptionalOperand)){
+					throw ("Unexpected combination of operands in " + operator);
+				}
+			} else {
+				throw ("Error: Unexpected number of operands in operator " + operator);
+			}
+		} else {
+			throw ("Error: Unexpected kind of operator in " + operator);
+		}
+	}
+}
+
+operation fillStatisticsDoubleCombinator(pattern , combinator) {
+	assert(operatorHasTwoOperands(combinator), "fillStatisticsDoubleCombinator with one operand in combinator " + combinator);
+	
+	var sourcePattern1 = combinator.operands.first.pattern;
+	var sourcePattern2 = combinator.operands.last.pattern;
+	
+	/*
+	We compute the selectivity of the operator simulating the join operation in both directions:
+	first we take a tuple from the left operand, and estimate how many result it will produce we joined with the right operands
+	and then we do the same for a tuple in the right operand.
+	The result is the minimum between the two selectivities. If the vary, this means there will be tuples that do not join the other operands, 
+	and hence, will not be apart of the final result. In this case we choose the estimate that gives the lowest selectivity.
+	*/
+	var selectivityJoinLeft2Right = computeSelectivityOperatorJoinConditions(combinator, sourcePattern1, sourcePattern2);
+	var selectivityJoinRight2Left = computeSelectivityOperatorJoinConditions(combinator, sourcePattern2, sourcePattern1);
+	// Remember that we have the lowest selectivity, means the highest selectivity denominator.
+	var selectivityJoin = max(selectivityJoinLeft2Right, selectivityJoinRight2Left);
+	
+	("selectivityJoin: " + selectivityJoin).println();
+	
+	
+	//("Selectivity join for " + sourcePattern1.id + " and " + sourcePattern2.id + " is " + selectivityJoinLeft2Right).println();
+	//("Selectivity join for " + sourcePattern2.id + " and " + sourcePattern1.id + " is " + selectivityJoinRight2Left).println();
+	
+	
+	// Now must take into account other possible operator conditions
+	var selectivityOtherConditions = computeSelectivityOperatorConditions(combinator);
+	
+	("selectivityOtherConditions: " + selectivityOtherConditions).println();
+	
+	var expectedNumberOfInstancesInPattern = (sourcePattern1.expected_size*sourcePattern2.expected_size)/(selectivityJoin*selectivityOtherConditions);
+	
+	("expectedNumberOfInstancesInPattern: " + expectedNumberOfInstancesInPattern).println();
+	
+	assert(expectedNumberOfInstancesInPattern>0.0, "expectedNumberOfInstancesInPattern>0.0 in fillStatisticsDoubleCombinator");
+	
+	var maxExpectedNumberOfInstancesInPattern = 1.0d;
+	
+	// Note that cannot be more distinct patterns than the combinations of all the node distinct patterns.
+	// Althouthg this creates a circular dependency between the number of distinct values for a pattern and the number of distinct values for each node pattern, it
+	// is easy to see that, if the number of distinct values in the pattern restricts the number of distinct values of some node pattern, 
+	// this count here will have no effect. Note that the number of instances in the pattern will never lower below the values of the number of instances for each node pattern.
+	for (nodePattern in pattern.nodes) {
+		("Setting size of node " + nodePattern.id + " " + nodePattern + " ...").println;
+		var nodePatternExpectedNumberOfDistinctValues = fillStatisticsDoubleCombinatorNodePattern(nodePattern, combinator, expectedNumberOfInstancesInPattern);
+		assert(nodePatternExpectedNumberOfDistinctValues > 0.0, "nodePatternExpectedNumberOfDistinctValues > 0.0 in fillStatisticsDoubleCombinator");
+		maxExpectedNumberOfInstancesInPattern = multiplySafe(maxExpectedNumberOfInstancesInPattern,nodePatternExpectedNumberOfDistinctValues);
+		("nodePatternExpectedNumberOfDistinctValues: " + nodePatternExpectedNumberOfDistinctValues).println();
+		("maxExpectedNumberOfInstancesInPattern: " + maxExpectedNumberOfInstancesInPattern).println();
+		
+		("Size of node " + nodePattern + " Set!").println;
+	}
+	
+	("maxExpectedNumberOfInstancesInPattern: " + maxExpectedNumberOfInstancesInPattern).println();
+	
+	// update the pattern expected size taking into account that there are no duplicates.
+	expectedNumberOfInstancesInPattern = min(expectedNumberOfInstancesInPattern, maxExpectedNumberOfInstancesInPattern);
+	
+	pattern.expected_size = computePatternSizeFromOldValue(pattern.expected_size, expectedNumberOfInstancesInPattern);
+	
+}
+
+operation multiplySafe(a,b) {
+	if (a * b < a or a * b < b) {
+		throw "Overflow!";
+	}
+	return a * b;
+}
+
+operation fillStatisticsSingleCombinator(pattern , combinator) {
+	assert(operatorHasOneOperand(combinator), "fillStatisticsSingleCombinator with two operands in combinator " + combinator);
+	
+	var sourcePattern = combinator.operands.first.pattern;
+	
+	// we calculate the selectivity ( 1/(conditions) ) of the operation taking into account the existing conditions.
+	var selectivity_denominator = computeSelectivityOperatorConditions(combinator);
+	
+	("selectivity_denominator: " + selectivity_denominator).println();
+	
+	("sourcePattern.expected_size: " + sourcePattern.expected_size).println();
+	
+	var expectedNumberOfInstancesInPattern = (sourcePattern.expected_size/selectivity_denominator);
+	
+	("expectedNumberOfInstancesInPattern: " + expectedNumberOfInstancesInPattern).println();
+	
+	var maxExpectedNumberOfInstancesInPattern = 1.0d;
+	
+	// now calculate the statistics for each node pattern.
+	// Note that cannot be more distinct patterns than the combinations of all the node distinct patterns.
+	// Althouthg this creates a circular dependency between the number of distinct values for a pattern and the number of distinct values for each node pattern, it
+	// is easy to see that, if the number of distinct values in the pattern restricts the number of distinct values of some node pattern, 
+	// this count here will have no effect. Note that the number of instances in the pattern will never lower below the values of the number of instances for each node pattern.
+	for (nodePattern in pattern.nodes) {
+		("Setting size of node " + nodePattern + " ...").println;
+		var nodeExpectedNumberOfInstances = fillStatisticsSingleCombinatorNodePattern(nodePattern, combinator, combinator.operands.first.pattern, expectedNumberOfInstancesInPattern);
+		maxExpectedNumberOfInstancesInPattern = multiplySafe(maxExpectedNumberOfInstancesInPattern,nodeExpectedNumberOfInstances);
+		("Size of node " + nodePattern + " Set!").println;
+	}
+	
+	("maxExpectedNumberOfInstancesInPattern: " + maxExpectedNumberOfInstancesInPattern).println();
+	
+	expectedNumberOfInstancesInPattern = min(expectedNumberOfInstancesInPattern, maxExpectedNumberOfInstancesInPattern);
+	
+	pattern.expected_size = computePatternSizeFromOldValue(pattern.expected_size, expectedNumberOfInstancesInPattern);
+}
+
+operation  computePatternSizeFromOldValue(oldValue, expectedNumberOfInstancesInPattern) {
+	return max(oldValue, expectedNumberOfInstancesInPattern);
+}
+
+operation fillStatisticsDoubleCombinatorNodePattern(nodePattern, combinator, expectedNumberOfInstancesInPattern) {
+	var sourcePattern1 = combinator.operands.first.pattern;
+	var sourcePattern2 = combinator.operands.last.pattern;
+	
+	if (isKeepNodePattern(nodePattern, sourcePattern1)) {
+		// if it is a keep node from source pattern 1, we have two cases,
+		// either that source node pattern belongs to a same condition of some other node pattern in source pattern 2
+		// or it doesn't.
+		
+		("Node kept fom sourcePattern1: " + sourcePattern1).println();
+		
+		return fillStatisticsDoubleCombinatorNodePattern_NodeKeptFromPattern(nodePattern, sourcePattern1, sourcePattern2, combinator, expectedNumberOfInstancesInPattern);
+		
+	} else if (isKeepNodePattern(nodePattern, sourcePattern2)) {
+		// if not a keep from source pattern 1, it might be a keep from source pattern 2.
+		// This case is analogous to the first case: we only swap sourceNode1 with sourceNode2.
+		
+		("Node kept fom sourcePattern2: " + sourcePattern2).println();
+		
+		return fillStatisticsDoubleCombinatorNodePattern_NodeKeptFromPattern(nodePattern, sourcePattern2, sourcePattern1, combinator, expectedNumberOfInstancesInPattern);
+		
+	} else {
+	
+		("Node Not Kept").println();
+		// in this case, we have a new node pattern instance for each pattern instance.
+		// this case is handled by the fillStatisticsSingleCombinatorNodePattern function.
+		return fillStatisticsSingleCombinatorNodePattern(nodePattern, combinator, sourcePattern1, expectedNumberOfInstancesInPattern);
+	}
+}
+
+operation fillStatisticsDoubleCombinatorNodePattern_NodeKeptFromPattern(nodePattern, sourcePattern1, sourcePattern2, combinator, expectedNumberOfInstancesInPattern) {
+	var sourceNodePattern1 = getCorrespondingNode(nodePattern, sourcePattern1);
+	
+	if (nodePatternBelongsToSameCondition(sourceNodePattern1, sourcePattern1, sourcePattern2)) {
+	
+		("nodePatternBelongsToSameCondition: " + nodePattern).println();
+		("expectedNumberOfInstancesInPattern: " + expectedNumberOfInstancesInPattern).println();
+	
+		// If the source node belongs to the same condition, we have to make two calculations:
+		// one as considering the sourceNode1 and the other as considering the sourceNode2.
+		// Then we compute the minimum of those two because it is a natural join between sourceNode1 and sourceNode2.
+		// The attributes must also be subjected to these two calculations and to the minimum between them.
+		
+		var sourceNodePattern2 = getOtherEndOfSameCondition(sourceNodePattern1, sourcePattern1, sourcePattern2);
+		
+		var expectedNumberOfDistinctValuesSourceNode1 = computeExpectedNumberOfDistinctValuesKeptNodePattern(nodePattern, combinator, sourceNodePattern1, expectedNumberOfInstancesInPattern);
+		var expectedNumberOfDistinctValuesSourceNode2 = computeExpectedNumberOfDistinctValuesKeptNodePattern(nodePattern, combinator, sourceNodePattern2, expectedNumberOfInstancesInPattern);
+		
+		var expectedNumberOfDistinctValuesSourceNode = min(expectedNumberOfDistinctValuesSourceNode1, expectedNumberOfDistinctValuesSourceNode2);
+		
+		// there con not be more distinct values in a node pattern than in its owner pattern.
+		expectedNumberOfDistinctValuesSourceNode = min(expectedNumberOfDistinctValuesSourceNode, expectedNumberOfInstancesInPattern);
+		
+		
+		nodePattern.expectedNumberOfDistinctValues = computeNodePatternDistinctValuesFromOldValue(expectedNumberOfDistinctValuesSourceNode, nodePattern.expectedNumberOfDistinctValues);
+		
+		
+		// cover all attributes inherited from both source node patterns
+		var attributeNameSet = new Set;
+		attributeNameSet.addAll(getAttributeNameList(sourceNodePattern1).keySet());
+		
+		// Not necessary because the node patterns are the same, and hence, they have the same attributes.
+		//attributeNameSet.addAll(getAttributeNameList(sourceNodePattern2).keySet());
+		
+		for (attributeName in attributeNameSet) {
+			
+			assert(nodePattern2AttributeDistinctValues.get(sourceNodePattern2).containsKey(attributeName));
+			
+			var expectedNumberOfDistinctValues1 = getAttributeDistinctValues(sourceNodePattern1, attributeName);
+			var expectedNumberOfDistinctValues2 = getAttributeDistinctValues(sourceNodePattern2, attributeName);
+			
+			var expectedNumberOfDistinctValues = min(expectedNumberOfDistinctValues1, expectedNumberOfDistinctValues2);
+			
+			// there won be more distinct values in an attribute that in its owning node pattern
+			registerAttributeDistinctValues(nodePattern, attributeName, min(expectedNumberOfDistinctValues, expectedNumberOfDistinctValuesSourceNode));
+		}
+		
+		// Update the displayed attribute distinct values
+		updateDisplayedAttributesInNodePattern(nodePattern);
+		
+		return expectedNumberOfDistinctValuesSourceNode;
+		
+	} else {
+		// since the node pattern belongs to a single pattern, the case is treated in the same way as the 
+		// fillStatisticsSingleCombinatorNodePattern function but with the source pattern 
+		// as the pattern sourceNodePattern1.pattern;
+		// The attributes are handled already by the function  fillStatisticsSingleCombinatorNodePattern.
+		return fillStatisticsSingleCombinatorNodePattern(nodePattern, combinator, sourceNodePattern1.pattern, expectedNumberOfInstancesInPattern);
+	}
+}
+
+operation computeNodePatternDistinctValuesFromOldValue(expectedNumberOfDistinctValuesSourceNode, oldDistinctValues) {
+	/*
+		We compute the max between an already existing number of distinct values because we can have 
+		multiple operators resulting to the same pattern.
+		In that case, we have to compute the maximum number of distinct values available.
+		
+		This is dificult to implemente: "After some experiments, I'd say that summing the distinct values to the old ones is a better approach.
+		Since this is not just a query language, there are frequent cases were elements are created, increasing the domain of dintinct values.
+		Hence, this seems to be more realistic". Maybe future work.
+	*/
+	return max(oldDistinctValues, expectedNumberOfDistinctValuesSourceNode);
+	//return expectedNumberOfDistinctValuesSourceNode + oldDistinctValues;
+}
+
+operation computeExpectedNumberOfDistinctValuesKeptNodePattern(nodePattern, combinator, sourceNodePattern, expectedNumberOfInstancesInPattern) {
+	
+	var expectedNumberOfDistinctValuesNodePattern = 0.0d;
+	
+	/*
+		if the node is kept from the source pattern to the target pattern, 
+		 we have to check if there is a condition on this node pattern
+		 if there is, then we assume that that condition is going to be 
+		 true only for one kind of node pattern, hence the number of distinct values will be 1.
+
+		On the other hand, if this node does not participate in the condition,
+		we assume that the distribution of distinct values is independent of the distribution of the parameters of the condition,
+		and so the number of instances is conservatively approximated to
+		min(nDV(sourceNodePattern) , expectedNumberOfInstancesInPattern).
+		Meaning that in the worst case, the number of distinct values remains the same as the source node pattern.
+	*/
+
+	if (nodeIsParameterOfSomeCondition(sourceNodePattern, combinator)) {
+		
+		// Even if it is a parameter, we assume that the number of distinct values does not change.
+		expectedNumberOfDistinctValuesNodePattern = 1.0d;
+		
+	} else {
+		
+		assert(sourceNodePattern.expectedNumberOfDistinctValues > 0.0, "sourceNodePattern.expectedNumberOfDistinctValues > 0.0 in computeExpectedNumberOfDistinctValuesKeptNodePattern");
+		assert(expectedNumberOfInstancesInPattern > 0.0, "expectedNumberOfInstancesInPattern > 0.0 in computeExpectedNumberOfDistinctValuesKeptNodePattern");
+		
+		/*
+			Remember that we assumed that the conditions' (if there are any) parameters are independent of this node.
+			This means that if this node has an attributes that is a parameter of some condition, the values of the
+			attribute are independent of the nodes. This is not the case, for instance, for id attributes.
+			Nevertheless, this remains a reasonable approximation.
+			*/
+		expectedNumberOfDistinctValuesNodePattern = min(sourceNodePattern.expectedNumberOfDistinctValues, expectedNumberOfInstancesInPattern);
+	}
+	
+	assert(expectedNumberOfDistinctValuesNodePattern > 0.0d, "expectedNumberOfDistinctValuesNodePattern > 0.0d in computeExpectedNumberOfDistinctValuesKeptNodePattern");
+	
+	return expectedNumberOfDistinctValuesNodePattern;
+}
+
+operation fillStatisticsSingleCombinatorNodePattern(nodePattern, combinator, sourcePattern, expectedNumberOfInstancesInPattern) {
+	
+	var expectedNumberOfDistinctValuesNodePattern = 0.0d;
+	
+	if (isKeepNodePattern(nodePattern, sourcePattern)) {
+		
+		var sourceNodePattern = getCorrespondingNode(nodePattern, sourcePattern);
+		
+		expectedNumberOfDistinctValuesNodePattern = computeExpectedNumberOfDistinctValuesKeptNodePattern(nodePattern, combinator, sourceNodePattern, expectedNumberOfInstancesInPattern);
+
+		
+		// We can never have more distinct values in a node pattern then instances in the pattern...
+		expectedNumberOfDistinctValuesNodePattern = min(expectedNumberOfDistinctValuesNodePattern, expectedNumberOfInstancesInPattern);
+		
+		
+		nodePattern.expectedNumberOfDistinctValues = computeNodePatternDistinctValuesFromOldValue(expectedNumberOfDistinctValuesNodePattern, nodePattern.expectedNumberOfDistinctValues);
+		
+		
+		
+		// fill the statistics for the attributes.
+		/*
+		Since this is a kept node, by default it ihnerits all the statistics for the attributes of the sourceNodePattern.
+		However, each statistic is conditioned to the number of distinct instances of the new node pattern.
+		And we have to update the statiscts for the attributes that are involved in some condition of the operator.
+		*/
+		
+		// inherit all attributes (restricted to the number of distinct instances of the new node pattern)
+		for (attributeName in getAttributeNameList(sourceNodePattern).keySet()) {
+			var expectedNumberOfDistinctValues = getAttributeDistinctValues(sourceNodePattern, attributeName);
+			// there won be more distinct values in an attribute that in its owning node pattern
+			registerAttributeDistinctValues(nodePattern, attributeName, min(expectedNumberOfDistinctValues, expectedNumberOfDistinctValuesNodePattern));
+		}
+		
+		// update the statistics for attribute involved in the condition.
+		for (sourceAttributePattern in sourceNodePattern.attributes) {
+			if (attributeIsParameterOfSomeCondition(sourceAttributePattern, combinator)) {
+				/*
+				In this case we assume the condition is verifying if the attribute has some given value.
+				Which means the number of distinct values for this attribute in the end is one.
+				*/
+				registerAttributeDistinctValues(nodePattern, sourceAttributePattern.name, 1.0d);
+			}
+		}
+		
+		assert(expectedNumberOfDistinctValuesNodePattern > 0.0, "expectedNumberOfDistinctValuesNodePattern > 0.0 in fillStatisticsSingleCombinatorNodePattern [then]");
+		
+	} else {
+		// then a new instance is created for each new pattern instance.
+		expectedNumberOfDistinctValuesNodePattern = expectedNumberOfInstancesInPattern;
+		
+		nodePattern.expectedNumberOfDistinctValues = computeNodePatternDistinctValuesFromOldValue(expectedNumberOfDistinctValuesNodePattern, nodePattern.expectedNumberOfDistinctValues);
+		
+		
+		// fill the statistics for the attributes.
+		/*
+		The new instance only has the attributes that are the result of some function.
+		We assume that that function is injective.
+		This means that the number of distinct values of the target attribute is the minimum
+		between the number of distinct node instances, and the number of distinct values for the source attribute (the first parameter) of that function.
+		
+		An attribute that is declared but which does not receive any value yields an error.
+		*/
+		for (attributePattern in nodePattern.attributes) {
+			var calculationForAttributePattern = getAttributeCalculationCallsTargetingAttribute(attributePattern, combinator).first;
+			
+			//assert(calculationForAttributePattern<>null , "Attribute declared but not result of any calculation found: " + attributePattern.name + " in node " + nodePattern.id + " in pat " + nodePattern.pattern.id + " -> Maybe there a node pattern as parameter.");
+			var expectedNumberOfDistinctValues;
+			
+			if (calculationForAttributePattern == null) {
+				// Is a constant calculation, which means the number of distinct values is 1.
+				expectedNumberOfDistinctValues = 1.0d;
+				
+			} else {
+				var sourceAttributePattern = getFirstParameterInCalculation(calculationForAttributePattern);
+				
+				if (sourceAttributePattern == null) {
+					expectedNumberOfDistinctValues = 1.0d;
+				} else {
+					expectedNumberOfDistinctValues = sourceAttributePattern.expectedNumberOfDistinctValues;				
+				}
+				
+			}
+			
+			registerAttributeDistinctValues(nodePattern, attributePattern.name, min(expectedNumberOfDistinctValues, expectedNumberOfDistinctValuesNodePattern));
+		}
+		
+		assert(expectedNumberOfDistinctValuesNodePattern > 0.0, "expectedNumberOfDistinctValuesNodePattern > 0.0 in fillStatisticsSingleCombinatorNodePattern [else]");
+	}
+	
+	
+	// finally, update the value for any attribute pattern existing in the target node pattern.
+	updateDisplayedAttributesInNodePattern(nodePattern);
+	
+	assert(expectedNumberOfDistinctValuesNodePattern > 0.0, "expectedNumberOfDistinctValuesNodePattern > 0.0 in fillStatisticsSingleCombinatorNodePattern");
+	
+	return expectedNumberOfDistinctValuesNodePattern;
+	
+}
+
+
+operation getFirstParameterInCalculation(calculationForAttributePattern) {
+	("getFirstParameterInCalculation : getFirstParameterInCalculation: " + calculationForAttributePattern).println();
+	
+	var potencialParameters = getAllParameters(calculationForAttributePattern);
+	
+	return potencialParameters.first;
+
+}
+
+operation getAllParameters(calculationForAttributePattern) {
+	var result = new Bag;
+	
+	for (parameterRef in calculationForAttributePattern.parameters) {
+		var parameter = parameterRef.parameter;
+		if (parameter.isKindOf(VisualModel!AttributePattern)) {
+			result.add(parameter);		
+		} else if (parameter.isKindOf(VisualModel!NodePattern)) {
+			result.add(parameter);
+		} else if (parameter.isKindOf(VisualModel!ExternalCalculationCall)) {
+			result.addAll(getAllParameters(parameter));
+		} else {
+			assert (false, "Unexpected kind of parameter found in getAllParameters");
+		}
+	}
+	
+	return result;
+	
+}
+
+operation updateDisplayedAttributesInNodePattern(nodePattern){
+	for (attributePattern in nodePattern.attributes) {
+		var expectedNumberOfDistinctValues = getAttributeDistinctValues(nodePattern, attributePattern.name);
+		attributePattern.expectedNumberOfDistinctValues = expectedNumberOfDistinctValues;
+	}
+}
+
+operation nodePatternBelongsToSameCondition(nodePattern, pattern1, pattern2) {
+	assert(pattern1.nodes.includes(nodePattern), "Wrong usage of function nodePatternBelongsToSameCondition");
+	
+	return nodePattern.sameOut.exists( cond | conditionIsBetweenPatterns(cond, pattern1, pattern2))
+		or nodePattern.sameIn.exists( cond | conditionIsBetweenPatterns(cond, pattern1, pattern2));
+}
+
+operation getOtherEndOfSameCondition(nodePattern, pattern1, pattern2) {
+	assert(pattern1.nodes.includes(nodePattern), "Wrong usage of function getOtherEndOfSameCondition");
+	
+	for (condition in nodePattern.sameOut) {
+		if (conditionIsBetweenPatterns(condition, pattern1, pattern2)) {
+			return condition.target;
+		}
+	}
+	
+	for (condition in nodePattern.sameIn) {
+		if (conditionIsBetweenPatterns(condition, pattern1, pattern2)) {
+			return condition.source;
+		}
+	}
+	
+	assert(false, "Condition not found in function getOtherEndOfSameCondition");
+	
+}
+
+operation conditionIsBetweenPatterns(cond, pattern1, pattern2) {
+	return ( pattern1.nodes.includes(cond.source) and pattern2.nodes.includes(cond.target) ) or 
+			( pattern1.nodes.includes(cond.target) and pattern2.nodes.includes(cond.source) );
+}
+
+operation getAttributeCalculationCallsTargetingAttribute(attributePattern, operator) {
+	// TODO: cover also the case were the parameters are node patterns.
+	
+	assert(attributePattern.attributeExternalCalculationCall <> null, "Wrong usage of function getFirstAttributeCalculationCallsTargetingAttribute");
+	
+	if (operator.operands.size() == 1) {
+		var sourcePattern = operator.operands.first.pattern;	
+		return attributePattern.attributeExternalCalculationCall.select(attrCalculation | calculationHasAtLeastOneParameterInsidePattern(attrCalculation, sourcePattern));
+	} else {
+		assert(operator.operands.size() == 2, "Invalid number of operands for operator " + operator);
+		
+		var result = new Bag;
+		
+		var sourcePattern1 = operator.operands.first.pattern;
+		var sourcePattern2 = operator.operands.last.pattern;
+		
+		result.addAll(attributePattern.attributeExternalCalculationCall.select(attrCalculation |  calculationHasAtLeastOneParameterInsidePattern(attrCalculation, sourcePattern1)));
+		result.addAll(attributePattern.attributeExternalCalculationCall.select(attrCalculation | calculationHasAtLeastOneParameterInsidePattern(attrCalculation, sourcePattern2)));
+		
+		return result;
+	}
+}
+
+operation calculationHasAtLeastOneParameterInsidePattern(attrCalculation, sourcePattern) {
+	return attrCalculation.parameters.collect(param | param.parameter).exists(attrPattern | attrPattern.isKindOf(VisualModel!AttributePattern) and attributePatternIsContainedInPattern(attrPattern, sourcePattern));
+}
+
+operation attributePatternIsContainedInPattern(attrPattern, sourcePattern) {
+	return sourcePattern.nodes.collect(node | node.attributes).exists(setOfAttrs | setOfAttrs.includes(attrPattern));
+}
+
+operation nodeIsParameterOfSomeCondition(sourceNodePattern, combinator) {
+	return combinator.conditions.exists(condition | condition.isKindOf(VisualModel!ExternalConditionCall) and condition.parameters.exists(paramRef | paramRef.parameter == sourceNodePattern));
+}
+
+operation attributeIsParameterOfSomeCondition(sourceAttributePattern, combinator) {
+	return combinator.conditions.exists(condition | condition.isKindOf(VisualModel!ExternalConditionCall) and condition.parameters.exists(paramRef | paramRef.parameter == sourceAttributePattern));
+}
+
+operation getCorrespondingNode(node, pattern) {
+	return node.keepIn.selectOne(rel : CoreModel!Keep | patternContains(pattern, rel.source)).source;
+}
+
+operation patternContains(pattern, node) {
+	return pattern.nodes.includes(node);
+}
+
+operation isKeepNodePattern(node, sourcePattern){
+	return hasAKeepRelationInSourcePattern(node, sourcePattern);
+}
+
+operation hasAKeepRelationInSourcePattern(node, sourcePattern){
+	return sourcePattern.nodes.exists(sourceNode: CoreModel!NodePattern | hasAKeepRelation(sourceNode, node));
+}
+
+operation hasAKeepRelation(sourceNode, targetNode){
+	return sourceNode.keepOut.exists(relation:CoreModel!Keep | relation.target = targetNode);
+}
+
+
+operation assert(condition, message) {
+	if (not condition) {
+		throw "Assertion error: " + message;
+	}
+}
+
+operation computeSelectivityOperatorJoinConditions(combinator, sourcePattern1, sourcePattern2) {
+	
+	var sameConditionsBetweenPatterns = getSameConditionsBetweenPatterns(sourcePattern1, sourcePattern2);
+	
+	var result = 1.0d;
+	
+	for (sameCondition in sameConditionsBetweenPatterns) {
+		var targetNodePattern = getNodePatternFromPatternInCondition(sameCondition, sourcePattern2);
+		("sourcePattern2.expected_size: " + sourcePattern2.expected_size).println();
+		("getNumberOfDistinctValuesNodePattern(targetNodePattern): " + getNumberOfDistinctValuesNodePattern(targetNodePattern)).println();
+		assert (sourcePattern2.expected_size >= getNumberOfDistinctValuesNodePattern(targetNodePattern), "Invariant sourcePattern2.expected_size >= getNumberOfDistinctValuesNodePattern(targetNodePattern) violated! sourcePattern2: " + sourcePattern2 + "; targetNodePattern: " + targetNodePattern + "; sourcePattern1: " + sourcePattern1 );
+		result = result * getNumberOfDistinctValuesNodePattern(targetNodePattern);
+	}
+	
+	assert(result > 0.0d, "Invalid selectivity result in computeSelectivityOperatorJoinConditions."); 
+	
+	return result;
+}
+
+operation getNodePatternFromPatternInCondition(sameCondition, pattern) {
+	
+	if (pattern.nodes.includes(sameCondition.source)) {
+		return sameCondition.source;
+	}
+	
+	if (pattern.nodes.includes(sameCondition.target)) {
+		return sameCondition.target;
+	}
+	
+	assert(false, "This should not happen in getNodePatternFromPatternInCondition");
+	
+}
+
+operation getSameConditionsBetweenPatterns(sourcePattern1, sourcePattern2) {
+	var result = new Bag;
+	for (nodePattern1 in sourcePattern1.nodes) {
+		// the direction of the same condition does not matter
+		for (sameCondition in nodePattern1.sameOut) {
+			var nodePattern2 = sameCondition.target;
+			assert (nodePattern2 <> nodePattern1, "Same condition to the same element found in getSameConditionsBetweenPatterns");
+			if (sourcePattern2.nodes.includes(nodePattern2)) {
+				result.add(sameCondition);
+			}
+		}
+		for (sameCondition in nodePattern1.sameIn) {
+			var nodePattern2 = sameCondition.source;
+			assert (nodePattern2 <> nodePattern1, "Same condition to the same element found in getSameConditionsBetweenPatterns");
+			if (sourcePattern2.nodes.includes(nodePattern2)) {
+				result.add(sameCondition);
+			}
+		}
+	}
+	
+	return result;
+}
+
+operation computeSelectivityOperatorConditions(operator) {
+	// computes the selectivity denominator for each possible result.
+	// As a simplification, we treat each aditional condition as a conjuntion.
+	// this might not be true for all conditions but as an approximation rule of thumb it is fine.
+	// Also, for each condition, we only take into account the first parameter. 
+	// Again, in general this remains a good approximation.
+	// Also, conditions without parameters are assumed to be always true.
+	// var sourcePattern = operator.operands.first.pattern;
+	
+	
+	var result = 1.0d;
+	for (appCondition in operator.conditions) {
+		 assert(appCondition.isKindOf(VisualModel!ExternalConditionCall), "Unexpected kind of ApplicationCondition: " + appCondition);
+		 
+		 for (parameterRef in appCondition.parameters) {
+		 	if (parameterRef.index == 0) {
+		 		
+		 		var parameter = parameterRef.parameter;
+		 		
+		 		if (parameter.isKindOf(VisualModel!Calculation)) {
+		 			//TODO recursively fetch the node or the attribute pattern;
+		 			// assign parameter to that.
+		 			// don't forget to update attributeIsParameterOfSomeCondition and nodeIsParameterOfSomeCondition functions too! They have to search recursevly to see if a certain element is a parameter.
+		 			throw "Not implemented yet!";
+		 		}
+		 		
+		 		if (parameter.isKindOf(VisualModel!AttributePattern)) {
+		 			// I think the minimum here is redundant since sourcePattern.expected_size will always be greater or equal to the number of distinct values by construction.
+		 			// We can make this an invariant.
+		 			// Unless there attributes that are lists. In that case, a single node pattern can have a helluva lot attributes. But we are not covering that case. 
+		 			assert (parameter.ownerNode.pattern.expected_size >= getNumberOfDistinctValuesAttributePattern(parameter), "Invariant sourcePattern.expected_size >= getNumberOfDistinctValuesAttributePattern(parameter) violated!");
+		 			result = result * getNumberOfDistinctValuesAttributePattern(parameter);
+		 		} else if (parameter.isKindOf(VisualModel!NodePattern)) {
+		 			// assert (sourcePattern.expected_size >= getNumberOfDistinctValuesNodePattern(parameter), "Invariant sourcePattern.expected_size >= getNumberOfDistinctValuesNodePattern(parameter) violated!");
+		 			
+		 			// we ignore these parameters.
+		 			//result = result * (getNumberOfDistinctValuesNodePattern(parameter));
+		 		}
+		 	}
+		 	
+		 }
+	}
+	
+	assert(result > 0.0d, "Invalid selectivity result.");
+	
+	return result;
+}
+
+operation getNumberOfDistinctValuesAttributePattern(attributePattern) {
+	var attributeDistinctValues = getAttributeDistinctValues(attributePattern.ownerNode, attributePattern.name);
+	assert (attributeDistinctValues <> null, "Missing distinct values for attribute " + attributePattern);
+	assert (attributeDistinctValues > 0.0d, "Invalid number of distinct values");
+	return attributeDistinctValues;
+}
+
+operation getNumberOfDistinctValuesNodePattern(nodePattern) {
+	var distinctValues = nodePattern.expectedNumberOfDistinctValues;
+	assert (distinctValues > 0.0d, "Invalid number of distinct values");
+	return distinctValues;
+}
+
+operation getAllSuitedPatterns() {
+	return VisualModel!Pattern.all().select(p| isUnfilled(p) and canBeFilled(p));
+}
+
+operation canBeFilled(pattern) {
+	return hasFilledParents(pattern);
+}
+
+operation hasFilledParents(pattern) {
+	return getAllParentsSet(pattern).forAll(p | isFilled(p));
+}
+
+operation isUnfilled(pattern) {
+	return (pattern.expected_size.isUndefined) or (pattern.expected_size==0); // TODO when the network is disconected (and hence, invalid) this goes in an infinite cycle.
+}
+
+operation getAllParentsSet(pattern) {
+	var result = new Set;
+	
+	for (operator in getIncomingOperatorsSet(pattern)) {
+		result.addAll(getIncomingPatternsSet(operator));
+	}
+	
+	return result;
+}
+
+operation getIncomingPatternsSet(operator){
+	return operator.operands.collect(operand | operand.pattern).asSet();
+}
+
+operation getIncomingOperatorsSet(pattern) {
+	return pattern.incomingResults.collect(result | result.operator).asSet();
+}
+
+operation clearAllExpectedSizes(){
+	"Clearing sizes for all patterns...".println();
+	for (pattern in VisualModel!Pattern.all) {
+		pattern.expected_size = 0.0d;
+		
+	}
+	
+	for (node in VisualModel!NodePattern.all) {
+		node.expectedNumberOfDistinctValues = 0.0d;
+	}
+	
+	for (attribute in VisualModel!AttributePattern.all) {
+		attribute.expectedNumberOfDistinctValues = 0.0d;
+	}
+	
+	"Clearing sizes for all patterns... DONE".println();
+}
+
+operation getAllNonStartingPatterns(){
+	return VisualModel!Pattern.all().select(e | not isAStartPattern(e));
+}
+
+operation estimateExpectedSizesInStartPatterns(){
+	"Estimating size for start patterns...".println();
+	
+	for (startPattern in getAllStartPatterns()){
+		fillPatternEstimateFromCatalog(startPattern);
+		("Size estimated for pattern " + startPattern).println();
+	}
+	
+	"Estimating size for start patterns... DONE".println();
+	
+}
+
+operation allStartPatternsHaveDefinedExpectedSizes() {
+	return getAllStartPatterns().forAll(p | isFilled(p));
+}
+
+operation min(a,b) {
+	if (a>b) {
+		return b;
+	} else {
+		return a;
+	}
+}
+
+operation max(a,b) {
+	if (a>b) {
+		return a;
+	} else {
+		return b;
+	}
+}
+
+operation isFilled(pattern) {
+	return not isUnfilled(pattern);
+}
+
+operation getAllStartPatterns(){
+	return VisualModel!Pattern.all().select(e | isAStartPattern(e));
+}
+
+operation isAStartPattern(pattern) {
+	return not pattern.incomingResults.select(r | resultsComesFromAnExternalOperator(r)).isEmpty();
+}
+
+operation resultsComesFromAnExternalOperator(result) {
+	return result.operator.isKindOf(VisualModel!External);
+}
+
+operation operatorHasTwoOperands(operator){
+	return operator.operands.size() == 2;
+}
+operation operatorHasOneOperand(operator){
+	return operator.operands.size() == 1;
+}
+
+operation fillPatternEstimateFromCatalog(pattern) {
+	if (isAtomicNodePattern(pattern)) {
+		var nodeTypeCatalog = getNodeFromCatalog(pattern.nodes.first);
+		var nodeNumberOfDistinctValues = nodeTypeCatalog.aggregatedNumberOfInstances + 0.0d;
+		pattern.expected_size = max(nodeNumberOfDistinctValues, 1.0d);
+		pattern.nodes.first.expectedNumberOfDistinctValues = max(nodeNumberOfDistinctValues, 1.0d);
+		
+		var nodePattern = pattern.nodes.first;
+		
+		("pattern: " + pattern).println();
+		("nodePattern: " + nodePattern).println();
+		
+		// fill attribute statistics for this node.
+		for (attributeCatalog in nodeTypeCatalog.attributes) {
+			registerAttributeDistinctValues(nodePattern, attributeCatalog.name, attributeCatalog.aggregatedNumberOfDistinctValues);
+		}
+		
+		// register the distinct values for each attribute pattern. Event if there aren't any, we still keep the attribute catalogs because they might be needed later.
+		for (attributePattern in nodePattern.attributes) {
+			var attributeCatalogDistinctValues = getAttributeDistinctValues(nodePattern, attributePattern.name);
+			assert(attributeCatalogDistinctValues <> null, "Missing catalog information for attribute " + attributePattern);
+			attributePattern.expectedNumberOfDistinctValues = attributeCatalogDistinctValues;
+		}
+		
+		
+		
+	} else {
+		if( not isAtomicEdgePattern(pattern)) {
+			throw "Non atomic pattern found! " ;
+		}
+		
+		var edge = pattern.edges.first;
+		var sourceNode = edge.source;
+		var targetNode = edge.target;
+		
+		var edgeCatalog = getEdgeFromCatalog(edge);
+		
+		pattern.expected_size = max(edgeCatalog.aggregatedNumberOfInstances + 0.0d, 1.0d);
+		
+		sourceNode.expectedNumberOfDistinctValues = max(edgeCatalog.aggregatedNumberOfDistinctSourceInstances + 0.0d, 1.0d);
+		targetNode.expectedNumberOfDistinctValues = max(edgeCatalog.aggregatedNumberOfDistinctTargetInstances + 0.0d, 1.0d);
+		
+		var sourceNodeTypeCatalog = getNodeFromCatalog(sourceNode);
+		var targetNodeTypeCatalog = getNodeFromCatalog(targetNode);
+		
+		// fill attribute statistics for source node. Remember that there are no more attribute distinct values in a node's attribute than in the node itself.
+		for (attributeCatalog in sourceNodeTypeCatalog.attributes) {
+			registerAttributeDistinctValues(sourceNode, attributeCatalog.name, min(sourceNode.expectedNumberOfDistinctValues, attributeCatalog.aggregatedNumberOfDistinctValues));
+		}
+		// fill attribute statistics for target node. Remember that there are no more attribute distinct values in a node's attribute than in the node itself.
+		for (attributeCatalog in targetNodeTypeCatalog.attributes) {
+			registerAttributeDistinctValues(targetNode, attributeCatalog.name, min(targetNode.expectedNumberOfDistinctValues,attributeCatalog.aggregatedNumberOfDistinctValues));
+		}
+		
+		
+		for (attributePattern in sourceNode.attributes) {
+			var attributeCatalogDistinctValues = getAttributeDistinctValues(sourceNode, attributePattern.name);
+			assert(attributeCatalogDistinctValues <> null, "Missing catalog information for attribute " + attributePattern);
+			attributePattern.expectedNumberOfDistinctValues = attributeCatalogDistinctValues;
+		}
+		for (attributePattern in targetNode.attributes) {
+			var attributeCatalogDistinctValues = getAttributeDistinctValues(targetNode, attributePattern.name);
+			assert(attributeCatalogDistinctValues <> null, "Missing catalog information for attribute " + attributePattern);
+			attributePattern.expectedNumberOfDistinctValues = attributeCatalogDistinctValues;
+		}
+		
+	}
+}
+
+operation registerAttributeDistinctValues(nodePattern, attributeName, numberOfDistinctValues) {
+	
+	var oldAttributeNumberOfDistinctValues = 1.0d;
+	
+	if (nodePattern2AttributeDistinctValues.get(nodePattern).containsKey(attributeName)) {
+		oldAttributeNumberOfDistinctValues = nodePattern2AttributeDistinctValues.get(nodePattern).get(attributeName);
+	}
+	
+	// we compute the max between the old number of distincts and the new because we can have multiple operators 
+	// pointing to the same result pattern.
+	nodePattern2AttributeDistinctValues.get(nodePattern).put(attributeName, max(numberOfDistinctValues+0.0d , oldAttributeNumberOfDistinctValues));
+}
+
+operation initializeNodePattern2AttributeDistinctValues() {
+	for (nodePattern in VisualModel!NodePattern.all) {
+		nodePattern2AttributeDistinctValues.put(nodePattern, new Map);
+	}
+}
+
+operation getAttributeDistinctValues(nodePattern, attributeCatalogName) {
+	return nodePattern2AttributeDistinctValues.get(nodePattern).get(attributeCatalogName);
+}
+
+operation getAttributeNameList(nodePattern) {
+	assert(nodePattern2AttributeDistinctValues.containsKey(nodePattern), "nodePattern2AttributeDistinctValues does not contain key " + nodePattern);
+	
+	return nodePattern2AttributeDistinctValues.get(nodePattern);
+}
+
+operation getNodeFromCatalog(node) {
+	var nodeTypeCatalog = CatalogModel!TypeCatalog.all.selectOne(c | c.name = node.name);
+	if (nodeTypeCatalog = null) {
+		CatalogModel!TypeCatalog.all.println();
+		throw "No type catalog found for node " + node;
+	}
+	return nodeTypeCatalog;
+}
+
+operation getEdgeFromCatalog(edge) {
+	var resultSet = CatalogModel!ReferenceCatalog.all.select(e | e.name = edge.name);
+	
+	// search for the specific edge (accounting for source and target nodes)
+	var result = resultSet.selectOne(e | e.source.name = edge.source.name and e.target.name = edge.target.name);
+	
+	if (result = null) {
+		CatalogModel!ReferenceCatalog.all.println();
+		throw "No reference catalog found for edge " + edge;
+	}
+	
+	return result;
+}
+
+// tests
+operation isAtomicNodePattern(pattern) {
+	return (pattern.nodes.size==1);
+}
+
+operation isAtomicEdgePattern(pattern) {
+	return (pattern.nodes.size==2 and pattern.edges.size==1);
+}
+
+for (startPattern in getAllStartPatterns()){
+	startPattern.println();
+}
