@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="CreaterandomActivityModel" default="main" basedir=".">
+
+	<target name="main">
+		
+		<epsilon.emf.register file="../TrNetCompilation/model/original_minimal_metamodel.ecore" />
+		
+		<!-- Loads the models. The name of the models are important because they are used throughout the transformations -->
+		<epsilon.emf.loadModel name="ActivityDiagram" modelfile="dsltrans_benchmark_200000.xmi" metamodeluri="minuml1" read="false" store="true" />
+		
+		<!-- Fill the catalog model -->
+		<epsilon.eol src="./create_random_activity_model.eol">
+			<model ref="ActivityDiagram" />
+		</epsilon.eol>
+		
+	</target>
+
+</project>

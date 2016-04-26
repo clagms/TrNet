@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: RandomJavaActivityModelGeneration
+Bundle-SymbolicName: RandomJavaActivityModelGeneration
+Bundle-Version: 1.0.0.qualifier
+Export-Package: benchmark
+Import-Package: minuml1,
+ org.eclipse.emf.common.util,
+ org.eclipse.emf.ecore.resource,
+ org.eclipse.emf.ecore.resource.impl,
+ org.eclipse.emf.ecore.xmi.impl
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7

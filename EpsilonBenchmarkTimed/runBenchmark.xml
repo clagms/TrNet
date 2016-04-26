@@ -1,0 +1,27 @@
+<project default="transform">
+	
+	
+	
+	
+	<!-- macro for timing a sequence of tasks -->
+	<macrodef name="timed">
+		<attribute name="identifier" default=""/>
+		<element name="tasks" optional="no"/>
+		<sequential>
+			<antcall target="timestamp">
+				<param name="message" value="Start @{identifier}..." />
+			</antcall>
+	  		<tasks/>
+			<antcall target="timestamp">
+				<param name="message" value="End @{identifier}." />
+			</antcall>
+	   </sequential>
+	</macrodef>
+	
+	<target name="timestamp" >
+		<tstamp>
+			<format property="now" pattern="yyyy/MM/dd HH:mm:ss SS" locale="en,UK"/>
+		</tstamp>
+		<echo message="${now} ${message}"/>
+	</target>
+</project>

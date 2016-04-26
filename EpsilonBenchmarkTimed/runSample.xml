@@ -1,0 +1,57 @@
+<project default="transform">
+	
+	<target name="load">
+		<timed identifier="Load Java Model">
+			<tasks>
+				<!--<epsilon.emf.loadModel name="Java" modelfile="case/jamopp/1_small-model.xmi" metamodelfile="case/jamopp/java.ecore" read="true" />-->
+				<epsilon.emf.loadModel name="Java" modelfile="case/jamopp/3_big-model.xmi" metamodelfile="case/jamopp/java.ecore" read="true" />
+			</tasks>
+		</timed>
+		
+		<timed identifier="Create Empty StateMachine Model">
+			<tasks>
+				<epsilon.emf.loadModel name="StateMachine" modelfile="StateMachine.model" metamodelfile="case/statemachine/StateMachine.ecore" read="false" store="true" />
+			</tasks>
+		</timed>
+	</target>
+		
+	<target name="transform" depends="load">
+		<timed identifier="Transform">
+			<tasks>
+				<epsilon.etl src="Java2StateMachine.etl">
+					<model ref="Java"/>
+					<model ref="StateMachine"/>
+				</epsilon.etl>
+			</tasks>
+		</timed>
+		
+		<timed identifier="Dispose Models">
+			<tasks>
+				<epsilon.disposeModels/>
+			</tasks>
+		</timed>
+	</target>
+	
+	
+	<!-- macro for timing a sequence of tasks -->
+	<macrodef name="timed">
+		<attribute name="identifier" default=""/>
+		<element name="tasks" optional="no"/>
+		<sequential>
+			<antcall target="timestamp">
+				<param name="message" value="Start @{identifier}..." />
+			</antcall>
+	  		<tasks/>
+			<antcall target="timestamp">
+				<param name="message" value="End @{identifier}." />
+			</antcall>
+	   </sequential>
+	</macrodef>
+	
+	<target name="timestamp" >
+		<tstamp>
+			<format property="now" pattern="yyyy/MM/dd HH:mm:ss SS" locale="en,UK"/>
+		</tstamp>
+		<echo message="${now} ${message}"/>
+	</target>
+</project>

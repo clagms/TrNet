@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="EpsilonFlockBenchmark" default="main" basedir=".">
+
+	<target name="main">
+		<!-- Loads the models. The name of the models are important because they are used throughout the transformations -->
+		<epsilon.emf.loadModel name="Original" modelfile="original_model.xmi" metamodeluri="minuml1" read="true" store="false" />
+		<epsilon.emf.loadModel name="Migrated" modelfile="evolved_model.xmi" metamodeluri="http://www.eclipse.org/uml2/3.0.0/UML" read="false" store="true" />
+
+		<!-- Validations on the DSLTrans Model -->
+		<epsilon.flock src="CoreTask.mig">
+			<model ref="Original" />
+			<model ref="Migrated" />
+		</epsilon.flock>
+
+	</target>
+
+</project>

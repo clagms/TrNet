@@ -1,0 +1,38 @@
+<project default="main">
+
+	<target name="main">
+		<timed identifier="main">
+			<tasks>
+				<epsilon.emf.loadModel name="Original" modelfile="random_model_10000.xmi" metamodeluri="minuml1" read="true" store="false" />
+				<epsilon.emf.loadModel name="Migrated" modelfile="evolved_model.xmi" metamodeluri="http://uml2/3.0.0/UML" read="false" store="true" />
+
+				<epsilon.flock src="CoreTask.mig" originalModel="Original"  migratedModel="Migrated">
+					<model ref="Original" />
+					<model ref="Migrated" />
+				</epsilon.flock>
+			</tasks>
+		</timed>
+	</target>
+
+	<!-- macro for timing a sequence of tasks -->
+	<macrodef name="timed">
+		<attribute name="identifier" default="" />
+		<element name="tasks" optional="no" />
+		<sequential>
+			<antcall target="timestamp">
+				<param name="message" value="Start @{identifier}..." />
+			</antcall>
+			<tasks />
+			<antcall target="timestamp">
+				<param name="message" value="End @{identifier}." />
+			</antcall>
+		</sequential>
+	</macrodef>
+
+	<target name="timestamp">
+		<tstamp>
+			<format property="now" pattern="yyyy/MM/dd HH:mm:ss SS" locale="en,UK" />
+		</tstamp>
+		<echo message="${now} ${message}" />
+	</target>
+</project>

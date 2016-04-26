@@ -1,0 +1,41 @@
+retype ActivityGraph to Activity
+
+retype Partition to ActivityPartition
+
+retype ActionState to OpaqueAction
+
+retype Pseudostate to InitialNode  when: original.kind = Original!PseudostateKind#initial
+retype Pseudostate to DecisionNode when: original.kind = Original!PseudostateKind#junction
+retype Pseudostate to ForkNode     when: original.kind = Original!PseudostateKind#fork
+retype Pseudostate to JoinNode     when: original.kind = Original!PseudostateKind#join
+
+retype FinalState to ActivityFinalNode
+
+retype ObjectFlowState to ActivityParameterNode
+
+retype Transition to ObjectFlow when: original.source.isTypeOf(Original!ObjectFlowState) or original.target.isTypeOf(Original!ObjectFlowState)
+
+retype Transition to ControlFlow
+
+retype Guard to OpaqueExpression 
+
+
+migrate Guard {
+	migrated.body.add(original.expression.body);
+}
+
+migrate Partition {
+	migrated.edge := original.contents.collect(e : Original!Transition | e.equivalent());
+	migrated.node := original.contents.collect(n : Original!StateVertex | n.equivalent());	
+}
+
+
+migrate ActivityGraph{
+	var pkg := new Migrated!Package;
+	pkg.packagedElement.add(migrated);
+	
+	migrated.node.addAll(original.top.subvertex.equivalent());
+	migrated.edge.addAll(original.transitions.equivalent());
+	migrated.`group` = original.partition.equivalent();
+	
+}

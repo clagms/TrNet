@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="CreateRandomClassModel" default="main" basedir=".">
+
+	<target name="main">
+
+		<epsilon.emf.register file="../TrNetCompilation/model/Classes.ecore" />
+		
+		<epsilon.emf.loadModel name="Model" modelfile="model/Random.xmi" metamodeluri="http://classes/1.0" read="false" store="true" />
+
+		<!-- Fill the catalog model -->
+		<epsilon.eol src="CreateRandomClassModel.eol">
+			<model ref="Model" />
+		</epsilon.eol>
+
+	</target>
+
+</project>

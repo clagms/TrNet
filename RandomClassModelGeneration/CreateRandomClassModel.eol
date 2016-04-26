@@ -1,0 +1,116 @@
+var N = 10000;
+
+generateRandomClassInstance(N);
+
+"Random model generated.".println();
+
+operation generateRandomClassInstance(N) {
+	var cmodel = new CModel;
+	
+	var numberOfClassifiers = N;
+	var numberOfAttributes = N;
+	
+	for (i in Sequence{1..numberOfClassifiers}) {
+		createRandomClassifier(i, cmodel);
+	}
+	
+	createDatatype("Integer", cmodel);
+	createDatatype("String", cmodel);
+	
+	for (i in Sequence{1..numberOfAttributes}) {
+		var class = getRandomCClass(cmodel);
+		createRandomAttribute(i, class, cmodel);
+	}
+	
+	var allCClasses = cmodel.contents.select(c | c.isKindOf(CClass));
+	
+	for (cclass in allCClasses) {
+		if (getRandomBoolean()) {
+			var superCClass = getRandomCClass(cmodel);
+			("cclass: " + cclass).println();
+			("superCClass: " + superCClass).println();
+			cclass.extends = superCClass;
+		}
+	}
+	
+	// compute transitive closure on super relations
+	//for (cclass in allCClasses) {
+		//computeTransitiveClosureSuper(cclass);
+	//}
+}
+
+operation computeTransitiveClosureSuper(cclass) {
+	for (cclassSuper in getAllSuperCClasses(cclass)) {
+		cclass.super = cclassSuper;
+	}
+}
+
+operation getAllSuperCClasses(cclass) {
+	var result = new Set;
+	result.add(cclass.super);
+	result.addAll(getAllSuperCClasses(cclass.super));
+	return result;
+}
+
+operation createRandomClassifier(i, cmodel) {
+	var possibleTypes = Set{"CClass"};
+	var choice = possibleTypes.random();
+	
+	if (choice == "CClass") {
+		return createCClass(i, cmodel);
+	} else {
+		throw "error";
+	}
+	
+}
+
+operation getRandomCClass(cmodel) {
+	return cmodel.contents.select(classifier | classifier.isKindOf(CClass)).random();
+}
+
+operation getRandomClassifier(i, cmodel) {
+	return cmodel.contents.random();
+}
+
+operation createCClass(i, cmodel) {
+	var res = new CClass;
+	
+	res.name = "Class" + getRandomName(i);
+	
+	res.abstract = getRandomBoolean();
+	
+	cmodel.contents.add(res);
+	
+}
+
+operation createRandomAttribute(i, class, cmodel) {
+	var res = new Attribute;
+	
+	res.name = "Attribute" + getRandomName(i);
+	
+	res.isMany = getRandomBoolean();
+	
+	res.type = getRandomClassifier(i, cmodel);
+	
+	class.attributes.add(res);
+	
+}
+
+operation getRandomBoolean() {
+	var possibleTypes = Set{true, false};
+	return possibleTypes.random();
+}
+
+ operation getRandomName(seed) {
+	return ""+seed;
+} 
+
+operation createDatatype(name, cmodel) {
+	var res = new Datatype;
+	
+	res.name = name;
+	
+	cmodel.contents.add(res);
+}
+
+
