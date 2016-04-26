@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="GenerateEditor" default="main" basedir=".">
+
+	<!-- Generate GMF Editor -->
+	<target name="main">
+
+		<!-- Remove previously generated files. -->
+
+		<delete quiet="true" includeEmptyDirs="true">
+			<fileset dir="../Catalog.tests/src" />
+		</delete>
+
+		<delete quiet="true" includeEmptyDirs="true">
+			<fileset dir="../Catalog.editor/src" />
+		</delete>
+
+		<delete quiet="true" includeEmptyDirs="true">
+			<fileset dir="../Catalog.edit/src" />
+		</delete>
+
+		<delete quiet="true" includeEmptyDirs="true">
+			<fileset dir="./src" />
+		</delete>
+
+		<delete file="./model/Catalog.genmodel" />
+
+		<eclipse.refreshLocal resource="Catalog" depth="infinite" />
+		<eclipse.refreshLocal resource="Catalog.edit" depth="infinite" />
+		<eclipse.refreshLocal resource="Catalog.editor" depth="infinite" />
+		<eclipse.refreshLocal resource="Catalog.tests" depth="infinite" />
+
+		<epsilon.eugenia src="model/Catalog.ecore" firstStep="genmodel" lastStep="genmodel"/>
+		<epsilon.eugenia src="model/Catalog.ecore" firstStep="emfcode" lastStep="emfcode"/>
+
+		<eclipse.refreshLocal resource="Catalog" depth="infinite" />
+		<eclipse.refreshLocal resource="Catalog.edit" depth="infinite" />
+		<eclipse.refreshLocal resource="Catalog.editor" depth="infinite" />
+		<eclipse.refreshLocal resource="Catalog.tests" depth="infinite" />
+
+	</target>
+
+
+
+</project>

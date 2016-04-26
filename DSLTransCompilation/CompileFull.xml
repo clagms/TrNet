@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="CompileTrNet" default="main" basedir=".">
+
+	<target name="main">
+		
+		<epsilon.emf.register file="../TrNetCompilation/model/original_minimal_metamodel.ecore" />
+		
+		<!-- 
+		We don't need this because our metamodels are in the registry as plugins.
+		<epsilon.emf.register file="TrNetVisual.ecore" />
+		<epsilon.emf.register file="TrNet.ecore" />
+		-->
+		
+		<!-- Loads the models. The name of the models are important because they are used throughout the transformations -->
+		<epsilon.emf.loadModel name="DSLTransModel" modelfile="../DSLTransInterpreterBenchmark/transformation/ActivityDiagramMigration.dsltrans" metamodeluri="http://dsltrans/2.0" read="true" store="false" />
+		<epsilon.emf.loadModel name="TrNetModel" aliases="VisualModel, CoreModel" modelfile="ActivityDiagramMigration.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="false" store="true" />
+		<epsilon.emf.loadModel name="InputMetamodel" aliases="Metamodel" modelfile="../TrNetCompilation/model/original_minimal_metamodel.ecore" metamodeluri="http://www.eclipse.org/emf/2002/Ecore" read="true" store="false" />
+		<epsilon.emf.loadModel name="OutputMetamodel" aliases="Metamodel" modelfile="../TrNetCompilation/model/evolved_metamodel_ligh.ecore" metamodeluri="http://www.eclipse.org/emf/2002/Ecore" read="true" store="false" />
+		<epsilon.emf.loadModel name="CatalogModel" modelfile="../TrNetCompilation/model/CatalogModel.catalog" metamodeluri="http://catalog/1.0" read="true" store="false" />
+		<epsilon.emf.loadModel name="SampleModel" aliases="Model" modelfile="../TrNetCompilation/model/dsltrans_benchmark_10000.xmi" metamodeluri="minuml1" read="true" store="false" />
+		
+		<!-- Validations on the DSLTrans Model -->
+		<epsilon.evl src="DSLTransValidation.evl">
+			<model ref="DSLTransModel" />
+		</epsilon.evl>
+
+		<!-- Transforms Visual model into Core Model -->
+		<epsilon.eol src="DSLTrans2TrNet.eol">
+			<model ref="DSLTransModel" />
+			<model ref="TrNetModel" />
+		</epsilon.eol>
+
+		<!-- Generate IDs on the Visual Model-->
+		<epsilon.eol src="../TrNetCompilation/analysis/GenerateIds.eol">
+			<model ref="TrNetModel" />
+		</epsilon.eol>
+
+		<!-- Create an empty catalog model -->
+		<epsilon.etl src="../TrNetCompilation/analysis/Metamodel2CatalogModel.etl">
+			<model ref="InputMetamodel" />
+			<model ref="CatalogModel" />
+		</epsilon.etl>
+		
+		<!-- Fill the catalog model -->
+		<epsilon.eol src="../TrNetCompilation/analysis/GatherStatistics.eol">
+			<model ref="CatalogModel" />
+			<model ref="Model" />
+		</epsilon.eol>
+		
+		<!-- Generate Expected Cardinalities on the Visual Model -->
+		<epsilon.eol src="../TrNetCompilation/analysis/GenerateExpectedSizes.eol">
+			<model ref="TrNetModel" />
+			<model ref="CatalogModel" />
+		</epsilon.eol>
+
+		<!-- Generate Operand Indexes on the Visual Model -->
+		<epsilon.eol src="../TrNetCompilation/analysis/GenerateOperandIndexes.eol">
+			<model ref="TrNetModel" />
+		</epsilon.eol>
+		
+		<!-- Validations on the Visual Model -->
+		<epsilon.evl src="../TrNetCompilation/validation/TrNetVisualValidation.evl">
+			<model ref="TrNetModel" />
+		</epsilon.evl>
+
+		<!-- Generate the execution plan on the Visual Model -->
+		<epsilon.eol src="../TrNetCompilation/analysis/InferExecutionPlan.eol">
+			<model ref="TrNetModel" />
+		</epsilon.eol>
+
+		<!-- Clear Generated Code -->
+		<delete quiet="true" includeEmptyDirs="true">
+			<fileset dir="./src-gen/" />
+		</delete>
+
+		<!-- Generate Tranformation Code -->
+		<epsilon.egl src="TrNet2Java.egl">
+			<model ref="TrNetModel" />
+		</epsilon.egl>
+
+		<!-- Generate Input Visitor Code -->
+		<epsilon.egl src="Ecore2InputVisitor.egl">
+			<model ref="CoreModel" />
+			<model ref="InputMetamodel" />
+		</epsilon.egl>
+
+		<!-- Generate Output Visitor Code -->
+		<epsilon.egl src="Ecore2OutputVisitor.egl">
+			<model ref="CoreModel" />
+			<model ref="OutputMetamodel" />
+		</epsilon.egl>
+		
+		<!-- Clear the execution plan on the Visual Model -->
+		<epsilon.eol src="../TrNetCompilation/analysis/ClearExecutionPlan.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+		
+	</target>
+
+</project>

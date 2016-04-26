@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="GenerateVisitors" default="main" basedir=".">
+
+	<target name="main">
+
+		<epsilon.emf.loadModel name="InputMetamodel" aliases="Metamodel" modelfile="../TrNetCompilation/model/original_minimal_metamodel.ecore" metamodeluri="http://www.eclipse.org/emf/2002/Ecore" read="true" store="false" />
+		
+		<epsilon.emf.loadModel name="OutputMetamodel" aliases="Metamodel" modelfile="../TrNetCompilation/model/evolved_metamodel_ligh.ecore" metamodeluri="http://www.eclipse.org/emf/2002/Ecore" read="true" store="false" />
+				
+		<!-- Generate Input Visitor Code -->
+		<epsilon.egl src="Ecore2InputVisitor.egl">
+			<model ref="InputMetamodel" />
+		</epsilon.egl>
+
+		<!-- Generate Output Visitor Code -->
+		<epsilon.egl src="Ecore2OutputVisitor.egl">
+			<model ref="OutputMetamodel" />
+		</epsilon.egl>
+
+	</target>
+	
+</project>

@@ -1,0 +1,31 @@
+@namespace(uri="DB", prefix="DB")
+package DB;
+
+abstract class NamedElement {
+  attr String name;
+}
+
+class Database {
+  val DatabaseElement[*] contents;
+}
+
+abstract class DatabaseElement extends NamedElement {
+}
+
+class Table extends DatabaseElement {
+  val Column[*] columns;
+  ref Column[*] primaryKeys;
+}
+
+class Column extends NamedElement {
+  ref Type[1] type;
+}
+
+class Type extends DatabaseElement {
+}
+
+class ForeignKey extends DatabaseElement {
+  ref Column[1] source;
+  ref Column[1] target;
+}
+

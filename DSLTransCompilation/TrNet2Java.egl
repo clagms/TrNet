@@ -1,0 +1,209 @@
+[%
+import "../TrNetCompilation/Utils.eol";
+
+var outputDir = ".";
+
+var srcGenDir = outputDir + "/" + "src-gen";
+
+generatePatternClasses(srcGenDir);
+
+//generateNodeClasses(srcGenDir);
+
+generateTransformationClass(srcGenDir);
+
+generateInputExternalOperatorClasses(srcGenDir);
+
+generateInputPatternListenerInterfaces(srcGenDir);
+
+generateInputPatternPublisherInterfaces(srcGenDir);
+
+generateOutputPatternListenerInterfaces(srcGenDir);
+
+generateOutputPatternPublisherInterfaces(srcGenDir);
+
+generateOutputExternalOperatorClasses(srcGenDir);
+
+
+operation generateInputPatternListenerInterfaces(srcGenDir){
+	// For now everything sits in the same package..
+	var classesDir = srcGenDir + "/" + getTransformationRootPackage(); 
+
+	
+	for (pattern in getAllInputPatterns()) {
+		/* DEBUG 
+		pattern.println();
+		*/
+		generatePatternListenerInterface(pattern,classesDir);
+	}
+}
+
+operation generateOutputPatternListenerInterfaces(srcGenDir){
+	// For now everything sits in the same package..
+	var classesDir = srcGenDir + "/" + getTransformationRootPackage(); 
+
+	
+	for (pattern in getAllOutputPatterns()) {
+		/* DEBUG 
+		pattern.println();
+		*/
+		generatePatternListenerInterface(pattern,classesDir);
+	}
+}
+
+operation generateInputPatternPublisherInterfaces(srcGenDir){
+	// For now everything sits in the same package..
+	var classesDir = srcGenDir + "/" + getTransformationRootPackage(); 
+
+	
+	for (pattern in getAllInputPatterns()) {
+		/* DEBUG 
+		pattern.println();
+		*/
+		generatePatternPublisherInterface(pattern,classesDir);
+	}
+}
+
+operation generateOutputPatternPublisherInterfaces(srcGenDir){
+	// For now everything sits in the same package..
+	var classesDir = srcGenDir + "/" + getTransformationRootPackage(); 
+
+	
+	for (pattern in getAllOutputPatterns()) {
+		/* DEBUG 
+		pattern.println();
+		*/
+		generatePatternPublisherInterface(pattern,classesDir);
+	}
+}
+
+
+operation generatePatternClasses(srcGenDir){
+	// For now everything sits in the same package..
+	var classesDir = srcGenDir + "/" + getTransformationRootPackage(); 
+
+	
+	for (pattern in CoreModel!Pattern.all) {
+		generatePatternClass(pattern,classesDir);
+	}
+}
+
+
+operation generateNodeClasses(srcGenDir){
+	// For now everything sits in the same package..
+	var classesDir = srcGenDir + "/" + getTransformationRootPackage(); 
+
+	
+	for (node in getAllNodePatternsSet()) {
+		generateNodePatternClass(node,classesDir);
+	}
+}
+
+
+operation generateNodePatternClass(node,classesDir){
+	var templateClasses = TemplateFactory.load("../TrNetCompilation/GenerateClassesFromNodePatterns.egl");
+	
+	templateClasses.populate("node", node);
+	
+	templateClasses.generate(classesDir + "/" + getJavaClassNameNode(node));
+}
+
+operation getAllNodePatternsSet() {
+	return removeDuplicateNodesByName(CoreModel!NodePattern.all);
+}
+
+operation removeDuplicateNodesByName(nodesSet) {
+	// Note that we can not create a Collection directly because it is an abstract class.
+	var results = new Set;
+	
+	for (node in nodesSet) {
+		if (not nodeNameExistsInNodes(node, results)){
+			results.add(node);
+		}
+	}
+	
+	return results;
+}
+
+operation nodeNameExistsInNodes(node, results){
+	// Note that while specifying iterators, it appears that there is a bug because we really need to state the type of the element.
+	return results.exists(node2:CoreModel!NodePattern | node.name == node2.name);
+}
+
+operation generateTransformationClass(srcGenDir){
+	// For now everything sits in the same package..
+	var classDir = srcGenDir + "/" + getTransformationRootPackage(); 
+	
+	var templateTransformationClass = TemplateFactory.load("../TrNetCompilation/GenerateTransformationClass.egl");
+	
+	templateTransformationClass.generate(classDir + "/" + getTransformationClassFile());
+}
+
+operation generatePatternListenerInterface(pattern,classesDir){
+	// For now everything sits in the same package..
+	
+	
+	var templatePatternListener = TemplateFactory.load("../TrNetCompilation/GeneratePatternListenerInterface.egl");
+	
+	templatePatternListener.populate("pattern", pattern);
+	
+	templatePatternListener.generate(classesDir + "/" + getJavaInterfaceNamePatternListener(pattern));
+}
+
+operation generatePatternPublisherInterface(pattern, classesDir) {
+	var templatePatternPublisher = TemplateFactory.load("../TrNetCompilation/GeneratePatternPublisherInterface.egl");
+	
+	templatePatternPublisher.populate("pattern", pattern);
+	
+	templatePatternPublisher.generate(classesDir + "/" + getJavaInterfaceNamePatternPublisher(pattern));
+}
+
+
+operation generatePatternClass(pattern,classesDir) {
+	var templateClasses = TemplateFactory.load("../TrNetCompilation/GenerateClassesFromPatterns.egl");
+	
+	templateClasses.populate("pattern", pattern);
+	
+	templateClasses.generate(classesDir + "/" + getJavaClassName(pattern));
+}
+
+operation generateInputExternalOperatorClasses(srcGenDir){
+	// For now everything sits in the same package..
+	var classesDir = srcGenDir + "/" + getTransformationRootPackage(); 
+
+
+	for (externalInputOperator in getAllExternalInputOperators()) {
+		generateInputExternalOperatorClass(externalInputOperator,classesDir);
+	}
+}
+
+operation generateOutputExternalOperatorClasses(srcGenDir){
+	// For now everything sits in the same package..
+	var classesDir = srcGenDir + "/" + getTransformationRootPackage(); 
+
+
+	for (externalOutputOperator in getAllExternalOutputOperators()) {
+		generateOutputExternalOperatorClass(externalOutputOperator,classesDir);
+	}
+}
+
+operation generateInputExternalOperatorClass(externalInputOperator,classesDir){
+	var templateForClass = TemplateFactory.load("../TrNetCompilation/GenerateClassesForInputExternalOperators.egl");
+	
+	templateForClass.populate("externalInputOperator", externalInputOperator);
+	
+	templateForClass.generate(classesDir + "/" + getJavaClassFileExternalInputOperator(externalInputOperator));
+}
+
+
+operation generateOutputExternalOperatorClass(externalOutputOperator,classesDir){
+	var templateForClass = TemplateFactory.load("../TrNetCompilation/GenerateClassesForOutputExternalOperators.egl");
+	
+	templateForClass.populate("externalOutputOperator", externalOutputOperator);
+	
+	templateForClass.generate(classesDir + "/" + getJavaClassFileExternalOutputOperator(externalOutputOperator));
+}
+
+
+
+
+%]

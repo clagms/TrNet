@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ASCII"?>
+<gmfmap:Mapping
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:gmfmap="http://www.eclipse.org/gmf/2008/mappings">
+  <diagram>
+    <diagramCanvas
+        href="Catalog.gmfgraph#catalog"/>
+    <domainModel
+        href="Catalog.ecore#/"/>
+    <palette
+        href="Catalog.gmftool#//@palette"/>
+  </diagram>
+</gmfmap:Mapping>

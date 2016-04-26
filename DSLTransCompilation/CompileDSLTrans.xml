@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="CompileTrNet" default="main" basedir=".">
+
+	<target name="main">
+
+		<!-- 
+		We don't need this because our metamodels are in the registry as plugins.
+		<epsilon.emf.register file="TrNetVisual.ecore" />
+		<epsilon.emf.register file="TrNet.ecore" />
+		-->
+
+		<!-- Loads the models. The name of the models are important because they are used throughout the transformations -->
+		<epsilon.emf.loadModel name="DSLTransModel" modelfile="ActivityDiagramMigration.dsltrans" metamodeluri="http://dsltrans/2.0" read="true" store="false" />
+		<epsilon.emf.loadModel name="TrNetModel" aliases="VisualModel, CoreModel" modelfile="ActivityDiagramMigration.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="false" store="true" />
+
+		<!-- Validations on the DSLTrans Model -->
+		<epsilon.evl src="DSLTransValidation.evl">
+			<model ref="DSLTransModel" />
+		</epsilon.evl>
+
+		<!-- Transforms Visual model into Core Model -->
+		<epsilon.eol src="DSLTrans2TrNet.eol">
+			<model ref="DSLTransModel" />
+			<model ref="TrNetModel" />
+		</epsilon.eol>
+		
+
+	</target>
+
+</project>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ASCII"?>
+<classes:CModel
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:classes="http://classes/1.0">
+  <contents
+      xsi:type="classes:CClass"
+      name="Family"
+      extends="//@contents.4">
+    <attributes
+        name="members"
+        type="//@contents.1"
+        isMany="true"/>
+  </contents>
+  <contents
+      xsi:type="classes:CClass"
+      name="Person"
+      extends="//@contents.4">
+    <attributes
+        name="closestFriend"
+        type="//@contents.1"/>
+    <attributes
+        name="emailsAddresses"
+        type="//@contents.2"
+        isMany="true"/>
+  </contents>
+  <contents
+      xsi:type="classes:Datatype"
+      name="String"/>
+  <contents
+      xsi:type="classes:Datatype"
+      name="Integer"/>
+  <contents
+      xsi:type="classes:CClass"
+      name="NamedElement">
+    <attributes
+        name="name"
+        type="//@contents.2"/>
+  </contents>
+</classes:CModel>

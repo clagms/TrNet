@@ -1,0 +1,8 @@
+pre {
+  "Running ETL...".println();
+}
+
+post {
+  "Running ETL... DONE".println();
+}
+

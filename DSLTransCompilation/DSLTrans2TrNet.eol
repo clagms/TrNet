@@ -1,0 +1,1095 @@
+import "../TrNetCompilation/TrNetManipulationUtils.eol";
+
+var idCount = 0;
+
+compileTransformationModel();
+
+
+operation getFreshId() {
+	var res = idCount;
+	idCount = idCount + 1;
+	return res;
+}
+
+operation compileTransformationModel() {
+	
+	for (transformation in DSLTransModel!TransformationModel.all) {
+		var trnetmodel = new TrNetModel!TrNetModel;
+		trnetmodel.id = ""; 
+		compileTransformationModel(trnetmodel, transformation);
+		runOptimizations(trnetmodel);
+	}
+	
+}
+
+operation runOptimizations(trnetmodel) {
+	cleanTracePatterns(trnetmodel);
+}
+
+
+operation cleanTracePatterns(trnetmodel) {
+	for (pattern in getAllTracePatterns(trnetmodel)) {
+		if (not patternHasOutputs(pattern)) {
+			removePattern(pattern);
+		}
+	}
+}
+
+operation getAllTracePatterns(trnetmodel) {
+	return trnetmodel.patterns.select(pat | isATracePattern(pat));
+}
+
+operation compileTransformationModel(trnetmodel, dsltransmodel) {
+	var sequential2ExternalPortMap = new Map;
+	
+	// avoid recompilation of the same pattern and provides the results of that pattern in case it was already compiled.
+	var source2OutputPatternsSet = new Map;
+	var source2OutputOperatorsSet = new Map;
+	
+	
+	for (source in getAllLastSources(dsltransmodel)) {
+		//source.println();
+		var outputPatternSets = new Bag;
+		var outputExternalOperatorsSet = new Bag;
+		
+		compileAbstractSourceRec(trnetmodel, source, outputPatternSets, outputExternalOperatorsSet, sequential2ExternalPortMap, source2OutputPatternsSet, source2OutputOperatorsSet);
+	}
+	
+	/*
+	for (sequential in getAllLastSources(dsltransmodel)) {
+		
+		var correspondingExternalPort = sequential2ExternalPortMap.get(sequential);
+		if (correspondingExternalPort <> null) {
+			for (operand in correspondingExternalPort.operands) {
+				
+			}
+		}
+	}
+	*/
+}
+
+operation getAllLastSources(dsltransmodel) {
+	return dsltransmodel.source.select(s | isLastSource(s));
+}
+
+operation isLastSource(s) {
+	return not DSLTransModel!Sequential.all.exists(sucessor | sucessor.previousSource.includes(s));
+}
+
+operation compileAbstractSourcesRec(trnetmodel, setOfSources, outputPatternsSetsOUT, outputExternalOperatorsSetsOUT, sequential2ExternalPortMap, source2OutputPatternsSet, source2OutputOperatorsSet) {
+	for (source in setOfSources) {
+		compileAbstractSourceRec(trnetmodel, source, outputPatternsSetsOUT, outputExternalOperatorsSetsOUT, sequential2ExternalPortMap, source2OutputPatternsSet, source2OutputOperatorsSet);
+	}
+}
+
+operation compileAbstractSourceRec(trnetmodel, source, outputPatternsSet, outputExternalOperatorsSet, sequential2ExternalPortMap, source2OutputPatternsSet, source2OutputOperatorsSet){
+	("Compiling source: " + source + "... ").println();
+	
+	// aqui fica o acesso (e possivel retorno imediate) aos mapas que guardam se este source ja foi compilado.
+	// caso isto aconteca, nao faz nada.
+	if (source2OutputPatternsSet.containsKey(source) and source2OutputOperatorsSet.containsKey(source)) {
+		outputPatternsSet.addAll(source2OutputPatternsSet.get(source));
+		outputExternalOperatorsSet.addAll(source2OutputOperatorsSet.get(source));
+		
+		return;
+	}
+	
+	if (source.isKindOf(DSLTransModel!FilePort)) {
+		compileFilePort(trnetmodel, source, outputPatternsSet, outputExternalOperatorsSet);
+		
+	} else if (source.isKindOf(DSLTransModel!Sequential)) { 
+		compileSequential(trnetmodel, source, outputPatternsSet, outputExternalOperatorsSet, sequential2ExternalPortMap, source2OutputPatternsSet, source2OutputOperatorsSet);
+		
+	}
+	
+	// mark this source as compiled and save the output patterns set.
+	source2OutputPatternsSet.put(source, outputPatternsSet );
+	source2OutputOperatorsSet.put(source, outputExternalOperatorsSet);
+	
+	("Compiling source: " + source + "... DONE").println();
+}
+
+
+operation compileFilePort(trnetmodel, source, outputPatternsSet, outputExternalOperatorsSet) {
+
+	var extOp = new TrNetModel!External;
+	
+	extOp.id = extractFileName(source.filePathURI);
+	
+	trnetmodel.operators.add(extOp);
+	
+	outputExternalOperatorsSet.add(extOp);
+
+}
+
+operation compileSequential(trnetmodel, source, outputPatternsSetsOUT, outputExternalOperatorsSetsOUT, sequential2ExternalPortMap, source2OutputPatternsSet, source2OutputOperatorsSet) { // TODO: Validation: a layer always has a previousSource.
+
+	var inputPatternsSets = new Bag;
+	var inputExternalOperatorsSet = new Bag;
+	
+	compileAbstractSourcesRec(trnetmodel, source.previousSource, inputPatternsSets, inputExternalOperatorsSet, sequential2ExternalPortMap, source2OutputPatternsSet, source2OutputOperatorsSet);
+	
+	("Sequential " + source + " context (patterns) : " + inputPatternsSets).println();
+	("Sequential " + source + " context (operators) : " + inputExternalOperatorsSet).println();
+	
+	var externalOperator = getSequentialExternalOperator(trnetmodel, source);
+	
+	sequential2ExternalPortMap.put(source, externalOperator);
+	
+	// connect all previous outputs to this sequential's external operator;
+	inheritAllOutputs(source, sequential2ExternalPortMap, trnetmodel);
+	
+	
+	compileRules(trnetmodel, source, inputPatternsSets, inputExternalOperatorsSet, outputPatternsSetsOUT, outputExternalOperatorsSetsOUT, externalOperator);
+	
+	
+	outputPatternsSetsOUT.addAll(inputPatternsSets);
+	outputExternalOperatorsSetsOUT.addAll(inputExternalOperatorsSet);
+	
+	
+}
+
+
+// Compiles the rules connecting the respective patterns to the 
+// inputPatternsSets and inputExternalOperatorsSet and adds all the new patterns 
+// that serve as output to the outputPatternsSetsOUT and outputExternalOperatorsSetsOUT
+operation compileRules(trnetmodel, source, inputPatternsSets, inputExternalOperatorsSet, outputPatternsSetsOUT, outputExternalOperatorsSetsOUT, externalOperator) {
+	for (rule in source.hasRule) {
+		compileRule(rule, trnetmodel, inputPatternsSets, inputExternalOperatorsSet, outputPatternsSetsOUT, outputExternalOperatorsSetsOUT, externalOperator);
+	}
+}
+
+// Compiles the rule connecting the respective patterns to the 
+// inputPatternsSets and inputExternalOperatorsSet and adds all the new patterns 
+// that serve as output to the outputPatternsSetsOUT and outputExternalOperatorsSetsOUT
+operation compileRule(rule, trnetmodel, inputPatternsSets, inputExternalOperatorsSet, outputPatternsSetsOUT, outputExternalOperatorsSetsOUT, externalOperator) {
+	var matchClasses2NodesTrace = new Map;
+	var applyClasses2NodesTrace = new Map;
+	var matchModel2PatternTrace = new Map;
+	var applyModel2PatternTrace = new Map;
+	var matchAttributes2AttributePatternTrace = new Map;
+	var applyAttributes2AttributePatternTrace = new Map;
+	var attributePattern2AttributePatternBackardTrace = new Map;
+	
+	
+	for (match in rule.match) {
+		compileMatch(rule, match, trnetmodel, inputPatternsSets, inputExternalOperatorsSet, outputPatternsSetsOUT, outputExternalOperatorsSetsOUT, matchClasses2NodesTrace, matchModel2PatternTrace, matchAttributes2AttributePatternTrace);
+	}
+	
+	
+	
+	compileApplyModel(rule, trnetmodel, inputPatternsSets, inputExternalOperatorsSet, outputPatternsSetsOUT, outputExternalOperatorsSetsOUT, applyClasses2NodesTrace, applyModel2PatternTrace, externalOperator, matchClasses2NodesTrace, matchAttributes2AttributePatternTrace, applyAttributes2AttributePatternTrace);
+	
+	
+	
+	var combinator = createCombinator(trnetmodel);
+	
+	for (match in rule.match) {
+		addAsAnyOperand(combinator, matchModel2PatternTrace.get(match), trnetmodel);
+	}
+	
+	
+	
+	addAsAnyResult(combinator, applyModel2PatternTrace.get(rule.apply), trnetmodel);
+	
+	
+	// TODO compile other restrictions such as maybeSame's.
+	
+	
+	// include backward links in the match.
+	for (match in rule.match) {
+		for (positiveBackward in getAllPositiveBackwardRestrictions(rule, match)) {
+			// a backward is connected to some match class that as already been transformed into a node pattern.
+			// and it is connected to some apply class, that has already been transformed into a node pattern.
+			// what is have to do now is to copy that apply node pattern class into the match pattern,
+			// connect it to the match class node pattern via a trace link and connect the two copies with a keep conection.
+			var matchClass = positiveBackward.sourceClass;
+			var applyClass = positiveBackward.targetClass;
+			
+			var matchClassOwnerPattern = matchModel2PatternTrace.get(match);
+			
+			var matchNodePattern = matchClasses2NodesTrace.get(matchClass);
+			var applyNodePattern = applyClasses2NodesTrace.get(applyClass);
+			
+			// Copy node and its attribute patterns because it might be necessary to have application conditions on those attributes
+			var applyNodePatternCopy = copyNode(applyNodePattern);
+			
+			for (attributePattern in applyNodePattern.attributes) {
+				var attributePatternCopy = copyAttributePattern(attributePattern);
+				applyNodePatternCopy.attributes.add(attributePatternCopy);
+				attributePattern2AttributePatternBackardTrace.put(attributePattern, attributePatternCopy);
+			}
+			
+			matchClassOwnerPattern.nodes.add(applyNodePatternCopy);
+			
+			connectByEdgePattern(matchNodePattern, applyNodePatternCopy, getTracePrefix(), matchClassOwnerPattern);
+			
+			connectByKeepRestriction(applyNodePatternCopy, applyNodePattern, trnetmodel);
+		}
+	}
+	
+	
+	/* evaluation of attribute match conditions
+		- Assuming there are match attributes with terms inside,
+		- add the relevant application conditions to the combinator that connects the match and apply patterns.
+	*/
+	if (thereAreApplicationConditions(rule)) {
+		// collect all relevant application conditions
+		var relevantConditions = getRelevantApplicationConditions(rule, matchAttributes2AttributePatternTrace, applyAttributes2AttributePatternTrace, attributePattern2AttributePatternBackardTrace);
+		
+		combinator.conditions.addAll(relevantConditions);
+	}
+	
+	// Create inductive constructions and destructions
+	
+	for (match in rule.match) {
+		// destruct the match pattern into several other incomming patterns and connect those atomic patterns to the relevant inputs.
+		createInductiveConstruction(rule, matchModel2PatternTrace.get(match), trnetmodel, inputPatternsSets, inputExternalOperatorsSet);
+	}
+	
+	// destruct the apply pattern into several other patterns here and add them to the OUT sets
+	//createInductiveDestruction(applyModel2PatternTrace.get(rule.apply), trnetmodel, outputPatternsSetsOUT, outputExternalOperatorsSetsOUT, externalOperator);
+	createApplyProjections(applyModel2PatternTrace.get(rule.apply), trnetmodel, outputPatternsSetsOUT, outputExternalOperatorsSetsOUT, externalOperator);
+	
+}
+
+operation getRelevantApplicationConditions(rule, matchAttributes2AttributePatternTrace, applyAttributes2AttributePatternTrace, attributePattern2AttributePatternBackardTrace) {
+	var relevantApplicationConditions = new Bag;
+	
+	/*
+	First search for match attributes in values in the match models.
+	For each match attribute found, create the relevant application condition and
+	set the match attribute's corresponding attribute pattern as a parameter.
+	Then search for apply attributes in classes that are connected by backward links.
+	For each apply attribute found, create the relevant condition and
+	set as parameter the attribute's corresponding attribute pattern. 
+	*/
+	
+	for (match in rule.match) {
+		for (matchClass in match.class) {
+			for (matchAttribute in matchClass.attribute) {
+				if (matchAttribute.attributeValue <> null) {
+					if (not matchAttributes2AttributePatternTrace.containsKey(matchAttribute)) {
+						throw "Unexpected error";
+					}
+					var externalApplicationCondition = createExternalConditionCallFromMatchAttributeValue(matchAttribute.attributeValue);
+					var matchAttributeParameter = matchAttributes2AttributePatternTrace.get(matchAttribute);
+					setParameterInExternalConditionCall(externalApplicationCondition, matchAttributeParameter, 0);
+					relevantApplicationConditions.add(externalApplicationCondition);
+				}
+			}
+		}
+	}
+	
+	for (applyClass in rule.apply.class) {
+		for (match in rule.match) {
+			for (matchClass in match.class) {
+				if (applyClassIsConnectedByBackwardLinkToMatchClass(applyClass, matchClass, rule)) {
+					for (applyAttribute in applyClass.attribute) {
+						if (applyAttribute.attributeValue <> null) {
+							// this means that an attribute pattern exist corresponding to the apply attribute
+							// and a copy of that attribute pattern also exists in the match model.
+							if (not applyAttributes2AttributePatternTrace.containsKey(applyAttribute)) {
+								throw "Unexpected error";
+							}
+							var correspondingAttributePattern = applyAttributes2AttributePatternTrace.get(applyAttribute);
+							
+							if (not attributePattern2AttributePatternBackardTrace.containsKey(correspondingAttributePattern)) {
+								throw "Unexpected error";
+							}
+							
+							var correspondingAttributePatternCopy = attributePattern2AttributePatternBackardTrace.get(correspondingAttributePattern);
+							
+							var externalApplicationCondition = createExternalConditionCallFromApplyAttributeValue(applyAttribute.attributeValue);
+							
+							setParameterInExternalConditionCall(externalApplicationCondition, correspondingAttributePatternCopy, 0);
+							relevantApplicationConditions.add(externalApplicationCondition);
+							
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	return relevantApplicationConditions;
+}
+
+operation createExternalConditionCallFromMatchAttributeValue(matchAttributeValue) {
+	if (matchAttributeValue.isKindOf(DSLTransModel!Atom)) {
+		return createExternalConditionCallFromAtom(matchAttributeValue);
+	} else {
+		throw "Unexpected kind of attribute value: " + matchAttributeValue;
+	}
+}
+
+operation createExternalConditionCallFromApplyAttributeValue(applyAttributeValue) {
+	if (applyAttributeValue.isKindOf(DSLTransModel!Atom)) {
+		return createExternalConditionCallFromAtom(applyAttributeValue);
+	} else {
+		throw "Unexpected kind of attribute value. ";
+	}
+}
+
+operation createExternalConditionCallFromAtom(atomValue) {
+	var result = createExternalConditionCall("is"+atomValue.value, "utils.Conditions." + "is"+atomValue.value);
+	return result;
+}
+
+operation thereAreApplicationConditions(rule) {
+	/*
+	First search in the match classes for match attributes with term values in them.
+	If we don't find anything there, search for apply classes that are connected with backward links and have apply attributes (since in dsltrans this counts as a match).
+	*/
+	for (match in rule.match) {
+		for (matchClass in match.class) {
+			for (matchAttribute in matchClass.attribute) {
+				if (matchAttribute.attributeValue <> null) {
+					return true;
+				}
+			}
+		}
+	}
+	
+	for (applyClass in rule.apply.class) {
+		for (match in rule.match) {
+			for (matchClass in match.class) {
+				if (applyClassIsConnectedByBackwardLinkToMatchClass(applyClass, matchClass, rule)) {
+					for (applyAttribute in applyClass.attribute) {
+						if (applyAttribute.attributeValue <> null) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+		
+	}
+	
+	return false;
+}
+
+operation getAllPositiveBackwardRestrictions(rule, match) {
+	return rule.backwards.select(restriction | restriction.isKindOf(DSLTransModel!PositiveBackwardRestriction) and restrictionBelongsToMatchModel(restriction, match));
+}
+
+operation restrictionBelongsToMatchModel(restriction, match) {
+	return match.class.includes(restriction.sourceClass);
+}
+
+operation compileApplyModel(rule, trnetmodel, inputPatternsSets, inputExternalOperatorsSet, outputPatternsSetsOUT, outputExternalOperatorsSetsOUT, applyClasses2NodesTrace, applyModel2PatternTrace, externalOperator, matchClasses2NodesTrace, matchAttributes2AttributePatternTrace, applyAttributes2AttributePatternTrace) {
+	var applyPattern = createPattern(trnetmodel);
+	
+	var apply = rule.apply;
+	
+	applyModel2PatternTrace.put(apply, applyPattern);
+	
+	for (applyClass in apply.class) {
+		compileApplyClass(applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace, applyAttributes2AttributePatternTrace);
+	}
+	
+	for (applyAssoc in apply.association) {
+		compileApplyAssoc(applyAssoc, applyPattern, applyClasses2NodesTrace);
+	}
+	
+	
+}
+
+
+
+operation compileMatch(rule, match, trnetmodel, inputPatternsSets, inputExternalOperatorsSet, outputPatternsSetsOUT, outputExternalOperatorsSetsOUT, matchClasses2NodesTrace, matchModel2PatternTrace, matchAttributes2AttributePatternTrace) {
+	var matchPattern = createPattern(trnetmodel);
+	
+	matchModel2PatternTrace.put(match, matchPattern);
+	
+	for (matchClass in match.class) {
+		compileMatchClass(matchClass, matchPattern, matchClasses2NodesTrace, matchAttributes2AttributePatternTrace);
+	}
+	
+	for (matchAssoc in match.association) {
+		compileMatchAssoc(matchAssoc, matchPattern, matchClasses2NodesTrace);
+	}
+	
+}
+
+
+operation createInductiveConstruction(rule, matchPattern, trnetmodel, inputPatternsSets, inputExternalOperatorsSet) {
+	("Constructing matchPattern: " + matchPattern).println();
+	printPattern(matchPattern);
+	
+	if (isAtomicPattern(matchPattern)) {
+		
+		"Atomic pattern reached.".println();
+		
+		("inputPatternsSets: " + inputPatternsSets).println();
+		("inputExternalOperatorsSet: " + inputExternalOperatorsSet).println();
+		
+		// if this is a trace edge, then we have to conect it to all other patterns that create that trace.
+		// if its not, then it is connected to the input ports.
+		if (isATracePattern(matchPattern)) {
+			for (inputPattern in inputPatternsSets.select(pat | patternIsEqual(pat, matchPattern))) {
+				createTrivialConnectionPatternPattern(inputPattern, matchPattern, trnetmodel);
+			}
+		} else {
+			// find external input ports and connect them here.
+			for (inputOperator in inputExternalOperatorsSet) {
+				createStandardConnectionOperatorPattern(inputOperator, matchPattern, trnetmodel);
+			}
+		}
+		
+		
+		
+		return; // We are done
+	}
+	
+	var lonelyNode = findNodeWithDegree1(matchPattern);
+	
+	("lonelyNode: " + lonelyNode).println();
+	
+	if (lonelyNode = null) {
+		
+		throw "not implemented yet!";
+		
+	} else {
+		var pivotEdge = getConnectedEdge(lonelyNode, matchPattern);
+		
+		("pivotEdge: " + pivotEdge).println();
+		
+		var oppositeNode = getOppositeNode(lonelyNode, pivotEdge);
+		var oppositeNodeSubPatternCopy;
+		
+		("oppositeNode: " + oppositeNode).println();
+		
+		// Create the subPattern without the edge
+		var subPattern = createPattern(trnetmodel);
+	
+		var mapOldNodes2NewOnes = new Map;
+		for (node in matchPattern.nodes) {
+			if (node = lonelyNode) {
+				// Does not go on the final pattern
+			} else {
+				// anything else goes on the final pattern
+				var newNode = copyNode(node);
+				mapOldNodes2NewOnes.put(node, newNode);
+				subPattern.nodes.add(newNode);
+				
+				if (node = oppositeNode) {
+					oppositeNodeSubPatternCopy = newNode;
+				}
+			}
+		}
+		for (edge in matchPattern.edges) {
+			if (edge = pivotEdge) {
+				// does not go in the final pattern
+			} else {
+				var newEdge = copyEdge(edge, mapOldNodes2NewOnes);
+				subPattern.edges.add(newEdge);
+			}
+		}
+		
+		("subPattern: " + subPattern).println();
+		printPattern(subPattern);
+		
+		// Create the other (atomic pattern)
+		var atomicPattern = createPattern(trnetmodel);
+		var atomicLonelyNode = copyNode(lonelyNode);
+		var oppositeNodeAtomicCopy = copyNode(oppositeNodeSubPatternCopy);
+		var atomicEdge = new TrNetModel!EdgePattern;
+		atomicEdge.name = pivotEdge.name;
+		if (pivotEdge.source = lonelyNode) {
+			atomicEdge.source = atomicLonelyNode;
+			atomicEdge.target = oppositeNodeAtomicCopy;
+		} else {
+			atomicEdge.target = atomicLonelyNode;
+			atomicEdge.source = oppositeNodeAtomicCopy;
+		}
+		atomicPattern.nodes.add(atomicLonelyNode);
+		atomicPattern.nodes.add(oppositeNodeAtomicCopy);
+		atomicPattern.edges.add(atomicEdge);
+		
+		("atomicPattern: " + atomicPattern).println();
+		printPattern(atomicPattern);
+		
+		
+		// create operator and relevant restrictions
+		var combinator = createCombinator(trnetmodel);
+		
+		addAsAnyOperand(combinator, subPattern, trnetmodel);
+		addAsAnyOperand(combinator, atomicPattern, trnetmodel);
+		addAsAnyResult(combinator, matchPattern, trnetmodel);
+		
+		connectBySameRestriction(oppositeNodeAtomicCopy, oppositeNodeSubPatternCopy, trnetmodel);
+		
+		for (node in matchPattern.nodes) {
+			if (mapOldNodes2NewOnes.containsKey(node)) {
+				connectByKeepRestriction(mapOldNodes2NewOnes.get(node), node, trnetmodel);
+			}
+		}
+		
+		connectByKeepRestriction(atomicLonelyNode, lonelyNode, trnetmodel);
+	
+		// recursively call for subpattern
+		createInductiveConstruction(rule, subPattern, trnetmodel, inputPatternsSets, inputExternalOperatorsSet);
+		// and for the atomic pattern, just to hit the base case.
+		createInductiveConstruction(rule, atomicPattern, trnetmodel, inputPatternsSets, inputExternalOperatorsSet);
+	}
+	
+	
+}
+
+operation createInductiveDestruction(applyPattern, trnetmodel, outputPatternsSetsOUT, outputExternalOperatorsSetsOUT, externalOperator) {
+	("Destructing applyPattern: " + applyPattern).println();
+	printPattern(applyPattern);
+	
+	if (isAtomicPattern(applyPattern)) {
+		
+		"Atomic pattern reached.".println();
+		
+		//("outputPatternsSetsOUT: " + outputPatternsSetsOUT).println();
+		//("outputExternalOperatorsSetsOUT: " + outputExternalOperatorsSetsOUT).println();
+		
+		// add this pattern as outputPatterns.
+		outputPatternsSetsOUT.add(applyPattern);
+		
+		// A trace pattern doesn need to go to the output and is not divided further.
+		if (not isATracePattern(applyPattern)) {
+			// Conect it to the output external operator
+			addAsAnyOperand(externalOperator, applyPattern, trnetmodel);
+			
+			
+			if (hasOnlyOneEdge(applyPattern)) {
+				// create two new patterns, connect them to the output external and connect them to the pattern.
+				var pat1 = createPattern(trnetmodel);
+				var pat2 = createPattern(trnetmodel);
+				var nodePat1 = copyNode(applyPattern.edges.first.source);
+				var nodePat2 = copyNode(applyPattern.edges.first.target);
+				pat1.nodes.add(nodePat1);
+				pat2.nodes.add(nodePat2);
+				connectByKeepRestriction(applyPattern.edges.first.source, nodePat1, trnetmodel);
+				connectByKeepRestriction(applyPattern.edges.first.target, nodePat2, trnetmodel);
+				
+				createConnectionPatternPattern(applyPattern, pat1, trnetmodel);
+				createConnectionPatternPattern(applyPattern, pat2, trnetmodel);
+				
+				outputPatternsSetsOUT.add(pat1);
+				outputPatternsSetsOUT.add(pat2);
+			}
+			
+		} else {
+			// if it is a trace pattern, then only the result element (the target of the trace edge) is added to external output.
+			var pat1 = createPattern(trnetmodel);
+			var nodePat1 = copyNode(applyPattern.edges.first.target);
+			pat1.nodes.add(nodePat1);
+			connectByKeepRestriction(applyPattern.edges.first.target, nodePat1, trnetmodel);
+			createConnectionPatternPattern(applyPattern, pat1, trnetmodel);
+			outputPatternsSetsOUT.add(pat1);
+			
+			addAsAnyOperand(externalOperator, pat1, trnetmodel);
+		}
+		
+		return; // We are done
+	}
+	
+	var lonelyNode = findNodeWithDegree1(applyPattern);
+	
+	("lonelyNode: " + lonelyNode).println();
+	
+	if (lonelyNode = null) {
+		
+		throw "not implemented yet!";
+		
+	} else {
+		var pivotEdge = getConnectedEdge(lonelyNode, applyPattern);
+		
+		("pivotEdge: " + pivotEdge).println();
+		
+		var oppositeNode = getOppositeNode(lonelyNode, pivotEdge);
+		var oppositeNodeSubPatternCopy;
+		
+		("oppositeNode: " + oppositeNode).println();
+		
+		// Create the subPattern without the edge
+		var subPattern = createPattern(trnetmodel);
+	
+		var mapOldNodes2NewOnes = new Map;
+		for (node in applyPattern.nodes) {
+			if (node = lonelyNode) {
+				// Does not go on the final pattern
+			} else {
+				// anything else goes on the final pattern
+				var newNode = copyNode(node);
+				mapOldNodes2NewOnes.put(node, newNode);
+				subPattern.nodes.add(newNode);
+				
+				if (node = oppositeNode) {
+					oppositeNodeSubPatternCopy = newNode;
+				}
+			}
+		}
+		for (edge in applyPattern.edges) {
+			if (edge = pivotEdge) {
+				// does not go in the final pattern
+			} else {
+				var newEdge = copyEdge(edge, mapOldNodes2NewOnes);
+				subPattern.edges.add(newEdge);
+			}
+		}
+		
+		("subPattern: " + subPattern).println();
+		printPattern(subPattern);
+		
+		// Create the other (atomic pattern)
+		var atomicPattern = createPattern(trnetmodel);
+		
+		var atomicLonelyNode = copyNode(lonelyNode);
+		var oppositeNodeAtomicCopy = copyNode(oppositeNodeSubPatternCopy);
+		var atomicEdge = new TrNetModel!EdgePattern;
+		atomicEdge.name = pivotEdge.name;
+		if (pivotEdge.source = lonelyNode) {
+			atomicEdge.source = atomicLonelyNode;
+			atomicEdge.target = oppositeNodeAtomicCopy;
+		} else {
+			atomicEdge.target = atomicLonelyNode;
+			atomicEdge.source = oppositeNodeAtomicCopy;
+		}
+		atomicPattern.nodes.add(atomicLonelyNode);
+		atomicPattern.nodes.add(oppositeNodeAtomicCopy);
+		atomicPattern.edges.add(atomicEdge);
+		
+		("atomicPattern: " + atomicPattern).println();
+		printPattern(atomicPattern);
+		
+		
+		// create operator and relevant restrictions
+		var combinatorToAtomic = createCombinator(trnetmodel);
+		
+		addAsAnyOperand(combinatorToAtomic, applyPattern, trnetmodel);
+		addAsAnyResult(combinatorToAtomic, atomicPattern, trnetmodel);
+		
+		connectByKeepRestriction(lonelyNode, atomicLonelyNode, trnetmodel);
+		connectByKeepRestriction(oppositeNode, oppositeNodeAtomicCopy, trnetmodel);
+		
+		var combinatorToSubPattern = createCombinator(trnetmodel);
+		
+		addAsAnyOperand(combinatorToSubPattern, applyPattern, trnetmodel);
+		addAsAnyResult(combinatorToSubPattern, subPattern, trnetmodel);
+		
+		for (node in applyPattern.nodes) {
+			if (mapOldNodes2NewOnes.containsKey(node)) {
+				connectByKeepRestriction(node, mapOldNodes2NewOnes.get(node), trnetmodel);
+			}
+		}
+		
+		
+		// recursively call for subpattern
+		createInductiveDestruction(subPattern, trnetmodel, outputPatternsSetsOUT, outputExternalOperatorsSetsOUT, externalOperator);
+		// and for the atomic pattern, just to hit the base case.
+		createInductiveDestruction(atomicPattern, trnetmodel, outputPatternsSetsOUT, outputExternalOperatorsSetsOUT, externalOperator);
+		
+	}
+	
+}
+
+operation createApplyProjections(applyPattern, trnetmodel, outputPatternsSetsOUT, outputExternalOperatorsSetsOUT, externalOperator) {
+	("Projecting applyPattern: " + applyPattern).println();
+	printPattern(applyPattern);
+	
+	// for each node that is new in the pattern, create a pattern with only that node and connect it to the output.
+	// then, for each association (even the traces), create a new pattern, projecting only the association and link it to the output.
+	
+	applyPattern.nodes.select(n | isANewNode(n)).println();
+	
+	for (node in applyPattern.nodes.select(n| isANewNode(n))){
+		var atomicPattern = createPattern(trnetmodel);
+		var atomicPatternNode = copyNode(node);
+		var combinatorToAtomic = createCombinator(trnetmodel);
+		atomicPattern.nodes.add(atomicPatternNode);
+		addAsAnyOperand(combinatorToAtomic, applyPattern, trnetmodel);
+		addAsAnyResult(combinatorToAtomic, atomicPattern, trnetmodel);
+		
+		connectByKeepRestriction(node, atomicPatternNode, trnetmodel);
+		outputPatternsSetsOUT.add(atomicPattern);
+		
+		addAsAnyOperand(externalOperator, atomicPattern, trnetmodel);
+		
+	}
+	
+	if (hasOnlyOneEdge(applyPattern)) {
+		// an apply pattern with only one edge does not need a projection on that edge.
+		// moreover, if it is a trace, then it does not need to be connected to the output.
+		outputPatternsSetsOUT.add(applyPattern);
+		
+		if (not isATraceEdge(applyPattern.edges.first)) {
+			addAsAnyOperand(externalOperator, applyPattern, trnetmodel);
+		}
+	} else {
+		for (edge in applyPattern.edges) {
+			var atomicPattern = createPattern(trnetmodel);
+			var atomicPatternNodeSource = copyNode(edge.source);
+			var atomicPatternNodeTarget = copyNode(edge.target);
+			var combinatorToAtomic = createCombinator(trnetmodel);
+			atomicPattern.nodes.add(atomicPatternNodeSource);
+			atomicPattern.nodes.add(atomicPatternNodeTarget);
+			connectByEdgePattern(atomicPatternNodeSource, atomicPatternNodeTarget, edge.name, atomicPattern);
+			addAsAnyOperand(combinatorToAtomic, applyPattern, trnetmodel);
+			addAsAnyResult(combinatorToAtomic, atomicPattern, trnetmodel);
+			
+			connectByKeepRestriction(edge.source, atomicPatternNodeSource, trnetmodel);
+			connectByKeepRestriction(edge.target, atomicPatternNodeTarget, trnetmodel);
+			
+			outputPatternsSetsOUT.add(atomicPattern);
+			
+			if (not isATraceEdge(edge)) { // trace edges don go to the output, they are internal stuff.
+				addAsAnyOperand(externalOperator, atomicPattern, trnetmodel);
+			}
+		}
+	}
+	
+}
+
+operation compileMatchClass(matchClass, matchPattern, matchClasses2NodesTrace, matchAttributes2AttributePatternTrace) {
+	if (matchClass.isKindOf(DSLTransModel!AnyMatchClass)) {
+		compileAnyMatchClass(matchClass, matchPattern, matchClasses2NodesTrace, matchAttributes2AttributePatternTrace);
+	} else {
+		throw "Unexpected kind of class" + matchClass;
+	}
+}
+
+
+operation compileMatchAssoc(matchAssoc, matchPattern, matchClasses2NodesTrace) {
+	if (matchAssoc.isKindOf(DSLTransModel!PositiveMatchAssociation)) {
+		compilePosMatchAssoc(matchAssoc, matchPattern, matchClasses2NodesTrace);
+	} else {
+		throw "Unexpected kind of class" + matchClass;
+	}
+}
+
+operation compileApplyAssoc(applyAssoc, applyPattern, applyClasses2NodesTrace){
+	var edge = new TrNetModel!EdgePattern;
+	
+	edge.name = applyAssoc.associationName;
+	
+	edge.source = applyClasses2NodesTrace.get(applyAssoc.source);
+	edge.target = applyClasses2NodesTrace.get(applyAssoc.target);
+	
+	applyPattern.edges.add(edge);
+}
+
+operation compilePosMatchAssoc(matchAssoc, matchPattern, matchClasses2NodesTrace) {
+	var edge = new TrNetModel!EdgePattern;
+	
+	edge.name = matchAssoc.associationName;
+	
+	edge.source = matchClasses2NodesTrace.get(matchAssoc.source);
+	edge.target = matchClasses2NodesTrace.get(matchAssoc.target);
+	
+	matchPattern.edges.add(edge);
+}
+
+operation compileApplyClass(applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace, applyAttributes2AttributePatternTrace) {
+	
+	var nodePattern = createNodePattern(applyClass.className, applyPattern); // TODO What about the package?
+
+	applyClasses2NodesTrace.put(applyClass, nodePattern);
+	
+	for (attribute in applyClass.attribute) {
+		compileApplyAttribute(attribute, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace, applyAttributes2AttributePatternTrace);
+	}
+	
+	
+	// compile backwards
+	//if (requiresTrace(applyClass)) { // For now lets assume that a trace is always created.
+		for (matchmodel in rule.match) {
+			for (matchClass in matchmodel.class) {
+				if (matchClasses2NodesTrace.get(matchClass) = null) {throw "Unexpected (since every match class is mapped to some node pattern).";}
+				// we only create this sort of traceability if there is not one already.
+				// this means that if an apply class is connected by a backward link to the match class, then no new trace should be created as we assume there is already one.
+				if (not applyClassIsConnectedByBackwardLinkToMatchClass(applyClass, matchClass, rule)) {
+					generateBackwardLinkEdge(nodePattern, applyPattern, matchClasses2NodesTrace.get(matchClass), trnetmodel, getAnonymousApplyAttributes(applyClass));
+				}
+			}
+		}
+	//}
+}
+
+operation applyClassIsConnectedByBackwardLinkToMatchClass(applyClass, matchClass, rule) {
+	var result = getPositiveBackwardRestriction(applyClass, matchClass, rule);
+	return result <> null;
+}
+
+operation getPositiveBackwardRestriction(applyClass, matchClass, rule) {
+	var results = rule.backwards.select(restriction | restriction.isKindOf(DSLTransModel!PositiveBackwardRestriction) and restriction.sourceClass == matchClass and restriction.targetClass == applyClass);
+	if (results == null) {
+		return null;
+	}
+	if (results.isEmpty()) {
+		return null;	
+	}
+	if (results.size() > 1) {
+		throw "Multiple backward links between same classes";
+	}
+	return results.first;
+}
+
+operation generateBackwardLinkEdge(nodePattern, applyPattern, matchNodePattern, trnetmodel, anonymousAttributesSet) {
+	//for (anonymousAttribute in anonymousAttributesSet) { // For now lets ignore the anonymous attributes.
+		var backwardNode = createNodePattern(matchNodePattern.name, applyPattern);
+		connectByKeepRestriction(matchNodePattern, backwardNode, trnetmodel);
+		//connectByEdgePattern(backwardNode, nodePattern, getTraceName(anonymousAttribute), applyPattern);
+		connectByEdgePattern(backwardNode, nodePattern, getTracePrefix(), applyPattern);
+	//}
+}
+
+operation getTraceName(anonymousAttribute) {
+	return getTracePrefix() + getAttributeConstant(anonymousAttribute);
+}
+
+operation isATracePattern(pattern){
+	if (hasOnlyOneEdge(pattern)) {
+		if (isATraceEdge(pattern.edges.first)) {
+			return true;
+		} else {
+			return false;
+		}
+	} else {
+		return false;
+	}
+}
+
+operation isATraceEdge(edge) {
+	return edge.name == getTracePrefix();
+}
+
+operation getTracePrefix() {
+	return "__trace__";
+}
+
+operation getAttributeConstant(attribute) {
+	if (attribute.attributeValue.isKindOf(DSLTransModel!Atom)) {
+		return attribute.attributeValue.value;
+	} else {
+		throw "Unexpected attribute kind in " + attribute;
+	}
+}
+
+
+operation requiresTrace(applyClass) {
+	return hasAnonymousApplyAttribute(applyClass);
+}
+
+operation hasAnonymousApplyAttribute(applyClass) {
+	return not getAnonymousApplyAttributes(applyClass).isEmpty();
+}
+
+operation getAnonymousApplyAttributes(applyClass) {
+	return applyClass.attribute.select( at | isAnonymousAttribute(at));
+}
+
+operation isAnonymousAttribute(attribute) {	
+	return attribute.attributeName = null  or attribute.attributeName = "";
+}
+
+operation compileAnyMatchClass(matchClass, matchPattern, matchClasses2NodesTrace, matchAttributes2AttributePatternTrace){
+	
+	
+	
+	var nodePattern = createNodePattern(matchClass.classname, matchPattern);
+	
+	matchClasses2NodesTrace.put(matchClass, nodePattern);
+	
+	/*
+	Os atributos sao compilados aqui.
+	Para cada match attribute, geramos um attribute pattern (usa-se um mapa para ficar com o trace da transformacao).
+	*/
+	for (matchAttribute in matchClass.attribute) {
+		compileMatchAttribute(matchAttribute, matchClass, matchPattern, matchClasses2NodesTrace, matchAttributes2AttributePatternTrace);
+	}
+	
+}
+
+operation compileMatchAttribute(matchAttribute, matchClass, matchPattern, matchClasses2NodesTrace, matchAttributes2AttributePatternTrace) {
+	
+	var nodePattern = matchClasses2NodesTrace.get(matchClass);
+	var attributePattern = createAttributePattern(matchAttribute.attributeName, nodePattern);
+	matchAttributes2AttributePatternTrace.put(matchAttribute, attributePattern);
+}
+
+operation compileApplyAttribute(attribute, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace, applyAttributes2AttributePatternTrace) {
+	var nodePattern = applyClasses2NodesTrace.get(applyClass);
+	
+	var attributePattern = createAttributePattern(attribute.attributeName, nodePattern);
+	
+	applyAttributes2AttributePatternTrace.put(attribute, attributePattern);
+	
+	// compile attribute calculation stuff, but only for new apply classes. For backward link connected elements nothing new is created.
+	if (attribute.attributeValue <> null and (not applyClassIsTargetOfBackwardLink(applyClass, rule))) {
+		compileApplyAttributeValue(attribute.attributeValue, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace);
+	}
+}
+
+operation applyClassIsTargetOfBackwardLink(applyClass, rule) {
+	for (match in rule.match) {
+		for (matchClass in match.class) {
+			if (applyClassIsConnectedByBackwardLinkToMatchClass(applyClass, matchClass, rule)) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+operation compileApplyAttributeValue(attributeValue, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace) {
+	if (attributeValue.isKindOf(DSLTransModel!AttributeRef)) {
+		compileApplyAttributeAttributeRef(attributeValue, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace);
+	} else if(attributeValue.isKindOf(DSLTransModel!Atom)) {
+		compileApplyAttributeAtom(attributeValue, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace);
+	} else if(attributeValue.isKindOf(DSLTransModel!Concat)) {
+		compileApplyAttributeConcat(attributeValue, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace);
+	} else {
+		throw "Not implemented yet!";
+	}
+}
+
+operation recCompileApplyAttributeTerm(term, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace) {
+	if (term.isKindOf(DSLTransModel!AttributeRef)) {
+		return recCompileApplyAttributeAttributeRef(term, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace);
+	} else if(term.isKindOf(DSLTransModel!Atom)) {
+		return recCompileApplyAttributeAtom(term, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace);
+	} else if(term.isKindOf(DSLTransModel!Concat)) {
+		return recCompileApplyAttributeConcat(term, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace);
+	} else {
+		throw "Not implemented yet!";
+	}
+}
+
+operation recCompileApplyAttributeAtom(atom, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace) {
+	/*
+	The compilation of an atom, for now, means that an external function is called that gives that constant.
+	This raises some issues but leaves the language as simple as possible.
+	*/
+	var calculation = createExternalCalculationCall("get" + atom.value, "utils.Constants." + "get" + atom.value, trnetmodel);
+	return calculation;
+}
+
+operation recCompileApplyAttributeAttributeRef(attributeRef, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace) {
+	/*
+	- Create a new external calculation
+	- Set as result the attribute we are compiling
+	- Set as parameters the source attribute since each attribute value refers to one match attribute.
+	*/
+	
+	var calculation = createExternalCalculationCall("copy", "utils.Copy.copy", trnetmodel);
+	var matchAttributeParameter = matchAttributes2AttributePatternTrace.get(attributeRef.attributeRef);
+	
+	if (matchAttributeParameter == null ) {
+		throw "AttributeRef references a different match model";
+	}
+	
+	setParameterInExternalCalculationCall(calculation, matchAttributeParameter, 0);
+	
+	return calculation;
+}
+
+operation recCompileApplyAttributeConcat(term, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace) {
+	/*
+	Creates an external calculation call that references a concat operation.
+	The parameter of this new attribute calculation call are built by calling a recursive function that calculates the other stuff.
+	*/
+	var calculation = createExternalCalculationCall("concat", "utils.Concat.concat", trnetmodel);
+	var parameter1 = recCompileApplyAttributeTerm(term.leftTerm, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace);
+	var parameter2 = recCompileApplyAttributeTerm(term.rightTerm, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace);
+	
+	setParameterInExternalCalculationCall(calculation, parameter1, 0);
+	setParameterInExternalCalculationCall(calculation, parameter2, 1);
+	
+	return calculation;
+}
+
+operation compileApplyAttributeConcat(attributeValue, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace) {
+	/*
+	Create an external attribute calculation call that references a concat operations.
+	The parameter of this new attribute calculation call are built by calling a recursive function that calculates the other stuff.
+	*/
+	
+	var attributeCalculation = createExternalAttributeCalculationCall("concat", "utils.Concat.concat", trnetmodel);
+	var parameter1 = recCompileApplyAttributeTerm(attributeValue.leftTerm, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace);
+	var parameter2 = recCompileApplyAttributeTerm(attributeValue.rightTerm, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace);
+	
+	setParameterInExternalAttributeCalculationCall(attributeCalculation, parameter1, 0);
+	setParameterInExternalAttributeCalculationCall(attributeCalculation, parameter2, 1);
+	
+	attributeCalculation.result = attributePattern;
+}
+
+operation compileApplyAttributeAttributeRef(attributeValue, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace) {
+	/*
+	- Create a new external calculation
+	- Set as result the attribute we are compiling
+	- Set as parameters the source attribute since each attribute value refers to one match attribute.
+	*/
+	
+	var attributeCalculation = createExternalAttributeCalculationCall("copy", "utils.Copy.copy", trnetmodel);
+	var matchAttributeParameter = matchAttributes2AttributePatternTrace.get(attributeValue.attributeRef);
+	
+	if (matchAttributeParameter == null ) {
+		throw "AttributeRef references a different match model";
+	}
+	
+	attributeCalculation.result = attributePattern;
+	
+	setParameterInExternalAttributeCalculationCall(attributeCalculation, matchAttributeParameter, 0);
+	
+}
+
+operation compileApplyAttributeAtom(atom, attributePattern, applyClass, applyPattern, applyClasses2NodesTrace, matchClasses2NodesTrace, rule, trnetmodel, matchAttributes2AttributePatternTrace) {
+	/*
+	The compilation of an atom, for now, means that an external function is called that gives that constant.
+	This raises some issues but leaves the language as simple as possible.
+	*/
+	var attributeCalculation = createExternalAttributeCalculationCall("get" + atom.value, "utils.Constants." + "get" + atom.value, trnetmodel);
+	attributeCalculation.result = attributePattern;
+}
+
+operation getSequentialExternalOperator(trnetmodel, source) {
+	
+	var extOp = new TrNetModel!External;
+	extOp.id = "Output" + getStringTrimmed(source.description) + extractFileName(source.outputFilePathURI);
+	trnetmodel.operators.add(extOp);
+	
+	return extOp;
+}
+
+operation getStringTrimmed(someString) {
+	// TODO implement this better.
+	return someString;
+}
+
+operation extractFileName(uri) {
+	//uri.println();
+	
+	var tokens = uri.split("\\.");
+	// last one contains extension, the previous one constains the file name;
+	// for now we neglect the path.
+	
+	//tokens.println();
+	
+	var name = tokens.at(tokens.size()-2);
+	
+	return name;
+}
+
+
+
+operation inheritAllOutputs(sequential, sequential2ExternalPortMap, trnetmodel) {
+	var externalPort = sequential2ExternalPortMap.get(sequential);
+	if (externalPort == null) {
+		throw "Unexpected usage of inheritAllOutputs";
+	}
+	for (previousSequential in sequential.previousSource.select(s | s.isKindOf(DSLTransModel!Sequential))) {
+		var previousSequentialExternalPort = sequential2ExternalPortMap.get(previousSequential);
+		if (previousSequentialExternalPort == null) {
+			throw "Unexpected error found!";
+		}
+		copyAllOperands(externalPort, previousSequentialExternalPort, trnetmodel);
+	}
+}

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+
+<!--
+-->
+
+<plugin>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated evolved_metamodel_ligh -->
+      <package
+            uri="http://uml2/3.0.0/UML"
+            class="uml.UmlPackage"
+            genModel="evolved_metamodel_ligh.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated original_minimal_metamodel -->
+      <package
+            uri="minuml1"
+            class="minuml1.Minuml1Package"
+            genModel="original_minimal_metamodel.genmodel"/>
+   </extension>
+
+</plugin>

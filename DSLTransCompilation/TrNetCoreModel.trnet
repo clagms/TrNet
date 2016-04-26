@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="ASCII"?>
+<trnet:TrNetModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:trnet="http://trnet/1.0" id="TrNetTransformation">
+  <patterns outgoingOperands="//@operators.3/@operands.0" incommingResults="//@operators.0/@results.0" id="TrNetPat1" expected_size="20">
+    <nodes xsi:type="trnet:MandatoryNode" name="CModel" id="TrNetNode1" keepOut="//@operators.3/@restrictions.0"/>
+  </patterns>
+  <patterns outgoingOperands="//@operators.2/@operands.0" incommingResults="//@operators.3/@results.0" id="TrNetPat2" expected_size="20">
+    <nodes xsi:type="trnet:MandatoryNode" incoming="//@patterns.1/@edges.0" name="Database" id="TrNetNode2" keepOut="//@operators.2/@restrictions.0"/>
+    <nodes xsi:type="trnet:MandatoryNode" outgoing="//@patterns.1/@edges.0" name="CModel" id="TrNetNode3" keepIn="//@operators.3/@restrictions.0"/>
+    <edges source="//@patterns.1/@nodes.1" target="//@patterns.1/@nodes.0" name="__trace__"/>
+  </patterns>
+  <patterns outgoingOperands="//@operators.1/@operands.0" incommingResults="//@operators.2/@results.0" id="TrNetPat3" expected_size="20">
+    <nodes xsi:type="trnet:MandatoryNode" name="Database" id="TrNetNode4" keepIn="//@operators.2/@restrictions.0"/>
+  </patterns>
+  <operators xsi:type="trnet:External" id="inputModel">
+    <results xsi:type="trnet:AnyResult" pattern="//@patterns.0"/>
+  </operators>
+  <operators xsi:type="trnet:External" id="outputModel">
+    <operands xsi:type="trnet:AnyOperand" pattern="//@patterns.2" index="1"/>
+  </operators>
+  <operators xsi:type="trnet:Combinator" id="TrNetOp2">
+    <operands xsi:type="trnet:AnyOperand" pattern="//@patterns.1" index="1"/>
+    <results xsi:type="trnet:AnyResult" pattern="//@patterns.2"/>
+    <restrictions xsi:type="trnet:Keep" source="//@patterns.1/@nodes.0" target="//@patterns.2/@nodes.0"/>
+  </operators>
+  <operators xsi:type="trnet:Combinator" id="TrNetOp1">
+    <operands xsi:type="trnet:AnyOperand" pattern="//@patterns.0" index="1"/>
+    <results xsi:type="trnet:AnyResult" pattern="//@patterns.1"/>
+    <restrictions xsi:type="trnet:Keep" source="//@patterns.0/@nodes.0" target="//@patterns.1/@nodes.1"/>
+  </operators>
+</trnet:TrNetModel>

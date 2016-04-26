@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="ASCII"?>
+<minuml1:RootActivityGraph
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:minuml1="minuml1"
+    name="graph">
+  <transitions
+      source="//@top/@subvertex.6"
+      target="//@top/@subvertex.7"/>
+  <transitions
+      source="//@top/@subvertex.7"
+      target="//@top/@subvertex.1">
+    <guard>
+      <expression
+          body="random8Bool"/>
+    </guard>
+  </transitions>
+  <transitions
+      source="//@top/@subvertex.1"
+      target="//@top/@subvertex.4">
+    <guard>
+      <expression
+          language=""
+          body="random7Bool"/>
+    </guard>
+  </transitions>
+  <transitions
+      source="//@top/@subvertex.0"
+      target="//@top/@subvertex.1"/>
+  <transitions
+      source="//@top/@subvertex.7"
+      target="//@top/@subvertex.8">
+    <guard>
+      <expression
+          body="random4Bool"/>
+    </guard>
+  </transitions>
+  <transitions
+      source="//@top/@subvertex.3"
+      target="//@top/@subvertex.8"/>
+  <transitions
+      source="//@top/@subvertex.2"
+      target="//@top/@subvertex.5"/>
+  <transitions
+      source="//@top/@subvertex.6"
+      target="//@top/@subvertex.5"/>
+  <top xsi:type="minuml1:CompositeState"
+      name="random10">
+    <subvertex
+        xsi:type="minuml1:Pseudostate"
+        name="random9"
+        outgoing="//@transitions.3"
+        kind="fork"/>
+    <subvertex
+        xsi:type="minuml1:Pseudostate"
+        name="random8"
+        outgoing="//@transitions.2"
+        incoming="//@transitions.1 //@transitions.3"
+        kind="fork"/>
+    <subvertex
+        xsi:type="minuml1:Pseudostate"
+        name="random7"
+        outgoing="//@transitions.6"
+        kind="junction"/>
+    <subvertex
+        xsi:type="minuml1:Pseudostate"
+        name="random6"
+        outgoing="//@transitions.5"
+        kind="join"/>
+    <subvertex
+        xsi:type="minuml1:ActionState"
+        name="random5"
+        incoming="//@transitions.2"/>
+    <subvertex
+        xsi:type="minuml1:ObjectFlowState"
+        name="random4"
+        incoming="//@transitions.6 //@transitions.7"/>
+    <subvertex
+        xsi:type="minuml1:Pseudostate"
+        name="random3"
+        outgoing="//@transitions.0 //@transitions.7"
+        kind="join"/>
+    <subvertex
+        xsi:type="minuml1:FinalState"
+        name="random2"
+        outgoing="//@transitions.1 //@transitions.4"
+        incoming="//@transitions.0"/>
+    <subvertex
+        xsi:type="minuml1:ObjectFlowState"
+        name="random1F"
+        incoming="//@transitions.4 //@transitions.5"/>
+  </top>
+  <partition
+      name="random1P"
+      contents="//@top/@subvertex.1 //@top/@subvertex.3 //@top/@subvertex.7 //@top/@subvertex.8"/>
+</minuml1:RootActivityGraph>

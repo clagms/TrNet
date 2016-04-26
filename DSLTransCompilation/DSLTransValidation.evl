@@ -1,0 +1,9 @@
+pre {
+"Running DSLTrans Validations...".println();
+}
+
+
+post {
+"Running DSLTrans Validations... DONE".println();
+}
+

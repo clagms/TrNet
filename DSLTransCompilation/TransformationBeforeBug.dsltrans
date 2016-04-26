@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dsltrans:TransformationModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dsltrans="http://dsltrans/2.0">
+  <source xsi:type="dsltrans:FilePort" filePathURI="inputModel.xmi">
+    <metaModelId metaModelURI="Classes.ecore" metaModelName="classes"/>
+  </source>
+  <source xsi:type="dsltrans:Sequential" description="Layer1" outputFilePathURI="outputModel.xmi" previousSource="//@source.0">
+    <metaModelId metaModelURI="DB.ecore" metaModelName="DB"/>
+    <hasRule>
+      <match>
+        <class xsi:type="dsltrans:AnyMatchClass" packageName="classdiagram" className="CModel"/>
+      </match>
+      <apply>
+        <class packageName="relational" className="Database"/>
+      </apply>
+    </hasRule>
+    <hasRule>
+      <match>
+        <class xsi:type="dsltrans:AnyMatchClass" packageName="classdiagram" className="CClass">
+          <attribute attributeName="name"/>
+        </class>
+      </match>
+      <apply>
+        <class packageName="relational" className="Table">
+          <attribute attributeName="name">
+            <attributeValue xsi:type="dsltrans:AttributeRef" attributeRef="//@source.1/@hasRule.1/@match.0/@class.0/@attribute.0"/>
+          </attribute>
+        </class>
+        <class packageName="relational" className="Column">
+          <attribute attributeName="name">
+            <attributeValue xsi:type="dsltrans:Atom" value="id"/>
+          </attribute>
+          <attribute attributeName="type">
+            <attributeValue xsi:type="dsltrans:Atom" value="INT"/>
+          </attribute>
+        </class>
+        <association associationName="columns" source="//@source.1/@hasRule.1/@apply/@class.0" target="//@source.1/@hasRule.1/@apply/@class.1"/>
+        <association associationName="primaryKeys" source="//@source.1/@hasRule.1/@apply/@class.0" target="//@source.1/@hasRule.1/@apply/@class.1"/>
+      </apply>
+    </hasRule>
+    <hasRule>
+      <match>
+        <class xsi:type="dsltrans:AnyMatchClass" packageName="classdiagram" className="Attribute">
+          <attribute attributeName="name"/>
+          <attribute attributeName="isMany">
+            <attributeValue xsi:type="dsltrans:Atom" value="false"/>
+          </attribute>
+        </class>
+      </match>
+      <apply>
+        <class packageName="relational" className="Column">
+          <attribute attributeName="name">
+            <attributeValue xsi:type="dsltrans:AttributeRef" attributeRef="//@source.1/@hasRule.2/@match.0/@class.0/@attribute.0"/>
+          </attribute>
+        </class>
+      </apply>
+    </hasRule>
+    <hasRule>
+      <match>
+        <class xsi:type="dsltrans:AnyMatchClass" packageName="classdiagram" className="Attribute">
+          <attribute attributeName="name"/>
+          <attribute attributeName="isMany">
+            <attributeValue xsi:type="dsltrans:Atom" value="true"/>
+          </attribute>
+        </class>
+      </match>
+      <apply>
+        <class packageName="relational" className="Table">
+          <attribute attributeName="name">
+            <attributeValue xsi:type="dsltrans:AttributeRef" attributeRef="//@source.1/@hasRule.3/@match.0/@class.0/@attribute.0"/>
+          </attribute>
+        </class>
+        <class packageName="relational" className="Column">
+          <attribute attributeName="name">
+            <attributeValue xsi:type="dsltrans:Atom" value="id"/>
+          </attribute>
+        </class>
+        <class packageName="relational" className="Column">
+          <attribute attributeName="name">
+            <attributeValue xsi:type="dsltrans:Atom" value="value"/>
+          </attribute>
+        </class>
+        <association associationName="columns" source="//@source.1/@hasRule.3/@apply/@class.0" target="//@source.1/@hasRule.3/@apply/@class.1"/>
+        <association associationName="primaryKeys" source="//@source.1/@hasRule.3/@apply/@class.0" target="//@source.1/@hasRule.3/@apply/@class.1"/>
+        <association associationName="columns" source="//@source.1/@hasRule.3/@apply/@class.0" target="//@source.1/@hasRule.3/@apply/@class.2"/>
+      </apply>
+    </hasRule>
+  </source>
+  <source xsi:type="dsltrans:Sequential" description="Layer2" outputFilePathURI="outputModel.xmi" previousSource="//@source.1">
+    <metaModelId metaModelURI="DB.ecore" metaModelName="DB"/>
+    <hasRule>
+      <match>
+        <class xsi:type="dsltrans:AnyMatchClass" packageName="classdiagram" className="CModel"/>
+      </match>
+      <match>
+        <class xsi:type="dsltrans:AnyMatchClass" packageName="classdiagram" className="CClass"/>
+      </match>
+      <apply>
+        <class packageName="relational" className="Database"/>
+        <class packageName="relational" className="Table"/>
+        <association associationName="contents" source="//@source.2/@hasRule.0/@apply/@class.0" target="//@source.2/@hasRule.0/@apply/@class.1"/>
+      </apply>
+      <backwards xsi:type="dsltrans:PositiveBackwardRestriction" targetClass="//@source.2/@hasRule.0/@apply/@class.1" sourceClass="//@source.2/@hasRule.0/@match.1/@class.0"/>
+      <backwards xsi:type="dsltrans:PositiveBackwardRestriction" targetClass="//@source.2/@hasRule.0/@apply/@class.0" sourceClass="//@source.2/@hasRule.0/@match.0/@class.0"/>
+    </hasRule>
+    <hasRule>
+      <match>
+        <class xsi:type="dsltrans:AnyMatchClass" packageName="classdiagram" className="CClass"/>
+        <class xsi:type="dsltrans:AnyMatchClass" packageName="classdiagram" className="Attribute">
+          <attribute attributeName="isMany">
+            <attributeValue xsi:type="dsltrans:Atom" value="false"/>
+          </attribute>
+        </class>
+        <association xsi:type="dsltrans:PositiveMatchAssociation" associationName="features" source="//@source.2/@hasRule.1/@match.0/@class.0" target="//@source.2/@hasRule.1/@match.0/@class.1"/>
+      </match>
+      <apply>
+        <class packageName="relational" className="Table"/>
+        <class packageName="relational" className="Column"/>
+        <association associationName="columns" source="//@source.2/@hasRule.1/@apply/@class.0" target="//@source.2/@hasRule.1/@apply/@class.1"/>
+      </apply>
+      <backwards xsi:type="dsltrans:PositiveBackwardRestriction" targetClass="//@source.2/@hasRule.1/@apply/@class.1" sourceClass="//@source.2/@hasRule.1/@match.0/@class.1"/>
+      <backwards xsi:type="dsltrans:PositiveBackwardRestriction" targetClass="//@source.2/@hasRule.1/@apply/@class.0" sourceClass="//@source.2/@hasRule.1/@match.0/@class.0"/>
+    </hasRule>
+    <hasRule>
+      <match>
+        <class xsi:type="dsltrans:AnyMatchClass" packageName="classdiagram" className="CClass"/>
+        <class xsi:type="dsltrans:AnyMatchClass" packageName="classdiagram" className="Attribute">
+          <attribute attributeName="isMany">
+            <attributeValue xsi:type="dsltrans:Atom" value="true"/>
+          </attribute>
+          <attribute attributeName="name"/>
+        </class>
+        <association xsi:type="dsltrans:PositiveMatchAssociation" associationName="features" source="//@source.2/@hasRule.2/@match.0/@class.0" target="//@source.2/@hasRule.2/@match.0/@class.1"/>
+      </match>
+      <match>
+        <class xsi:type="dsltrans:AnyMatchClass" packageName="classdiagram" className="CModel"/>
+      </match>
+      <apply>
+        <class packageName="relational" className="Table"/>
+        <class packageName="relational" className="Column">
+          <attribute attributeName="name">
+            <attributeValue xsi:type="dsltrans:Atom" value="id"/>
+          </attribute>
+        </class>
+        <class packageName="relational" className="Database"/>
+        <class packageName="relational" className="Column">
+          <attribute attributeName="name">
+            <attributeValue xsi:type="dsltrans:AttributeRef" attributeRef="//@source.2/@hasRule.2/@match.0/@class.1/@attribute.1"/>
+          </attribute>
+        </class>
+        <class packageName="relational" className="ForeignKey">
+          <attribute attributeName="name">
+            <attributeValue xsi:type="dsltrans:Atom" value="id"/>
+          </attribute>
+        </class>
+        <association associationName="columns" source="//@source.2/@hasRule.2/@apply/@class.0" target="//@source.2/@hasRule.2/@apply/@class.3"/>
+        <association associationName="contents" source="//@source.2/@hasRule.2/@apply/@class.2" target="//@source.2/@hasRule.2/@apply/@class.4"/>
+        <association associationName="parent" source="//@source.2/@hasRule.2/@apply/@class.4" target="//@source.2/@hasRule.2/@apply/@class.1"/>
+        <association associationName="child" source="//@source.2/@hasRule.2/@apply/@class.4" target="//@source.2/@hasRule.2/@apply/@class.3"/>
+      </apply>
+      <backwards xsi:type="dsltrans:PositiveBackwardRestriction" targetClass="//@source.2/@hasRule.2/@apply/@class.1" sourceClass="//@source.2/@hasRule.2/@match.0/@class.1"/>
+      <backwards xsi:type="dsltrans:PositiveBackwardRestriction" targetClass="//@source.2/@hasRule.2/@apply/@class.0" sourceClass="//@source.2/@hasRule.2/@match.0/@class.0"/>
+      <backwards xsi:type="dsltrans:PositiveBackwardRestriction" targetClass="//@source.2/@hasRule.2/@apply/@class.2" sourceClass="//@source.2/@hasRule.2/@match.1/@class.0"/>
+    </hasRule>
+  </source>
+</dsltrans:TransformationModel>

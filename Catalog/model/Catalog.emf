@@ -1,0 +1,55 @@
+@namespace(uri="http://catalog/1.0", prefix="catalog")
+package catalog;
+
+class CatalogModel {
+  val TypeCatalog[*] types;
+  val ReferenceCatalog[*] references;
+}
+
+class TypeCatalog extends NamedElement {
+  val AttributeCatalog[*] attributes;
+  ref ReferenceCatalog[*]#source outgoingReferences;
+  ref ReferenceCatalog[*]#target incomingReferences;
+  ref TypeCatalog[*] ~super;
+  val TypeCatalogSample[*]#meta samples;
+  attr int aggregatedNumberOfInstances;
+}
+
+class AttributeCatalog extends NamedElement {
+  val AttributeCatalogSample[*]#meta samples;
+  attr int aggregatedNumberOfDistinctValues;
+}
+
+class ReferenceCatalog extends NamedElement {
+  ref TypeCatalog[1]#outgoingReferences source;
+  ref TypeCatalog[1]#incomingReferences target;
+  val ReferenceCatalogSample[*]#meta samples;
+  attr int aggregatedNumberOfDistinctSourceInstances;
+  attr int aggregatedNumberOfDistinctTargetInstances;
+  attr int aggregatedNumberOfInstances;
+}
+
+abstract class NamedElement {
+  attr String[1] name;
+}
+
+class TypeCatalogSample {
+  attr int[1] numberOfInstances;
+  ref TypeCatalog[1]#samples meta;
+  attr int[1] index;
+}
+
+class AttributeCatalogSample {
+  ref AttributeCatalog[1]#samples meta;
+  attr int[1] index;
+  attr int[1] numberOfDistinctValues;
+}
+
+class ReferenceCatalogSample {
+  ref ReferenceCatalog[1]#samples meta;
+  attr int[1] numberOfDistinctSourceInstances;
+  attr int[1] numberOfDistinctTargetInstances;
+  attr int[1] index;
+  attr int[1] numberOfInstances;
+}
+

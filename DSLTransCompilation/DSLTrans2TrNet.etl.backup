@@ -1,0 +1,70 @@
+pre {
+  "Running ETL...".println();
+}
+
+rule MatchAttribute2AttributePattern
+  transform eIn : DSLTransModel!MatchAttribute
+  to eOut : TrNetModel!AttributePattern{
+  eOut.name = eIn.attributeName;
+  eOut.operator = "=";
+  eOut.expression = parseExpression(eIn.attributeValue);
+}
+
+rule AnyMatchClass2MandatoryNode
+  transform eIn : DSLTransModel!AnyMatchClass
+  to eOut : TrNetModel!MandatoryNode{
+  eOut.name = eIn.className;
+  
+}
+
+rule PositiveMatchAssociation2EdgePattern
+  transform eIn : DSLTransModel!PositiveMatchAssociation
+  to eOut : TrNetModel!EdgePattern{
+  eOut.name = eIn.associationName;
+  eOut.source = eIn.source.equivalent();
+  eOut.target = eIn.target.equivalent();
+}
+
+
+rule ApplyAttribute2AttributePattern
+  transform eIn : DSLTransModel!ApplyAttribute
+  to eOut : TrNetModel!AttributePattern{
+  eOut.name = eIn.attributeName;
+}
+
+
+rule ApplyClass2MandatoryNode
+  transform eIn : DSLTransModel!ApplyClass
+  to eOut : TrNetModel!MandatoryNode{
+  eOut.name = eIn.className;
+}
+
+rule ApplyAssociation2EdgePattern
+  transform eIn : DSLTransModel!ApplyAssociation
+  to eOut : TrNetModel!EdgePattern{
+  eOut.name = eIn.associationName;
+  eOut.source = eIn.source.equivalent();
+  eOut.target = eIn.target.equivalent();
+}
+
+
+rule TransformationModel2TrNetModel
+  transform eIn : DSLTransModel!TransformationModel
+  to eOut : TrNetModel!TrNetModel{
+  eOut.id = "DSLTransformation";
+}
+
+
+post {
+  "Running ETL... DONE".println();
+}
+
+
+operation parseExpression(attributeValue) {
+	if (attributeValue.isKindOf(DSLTransModel!Atom)) {
+		return attributeValue.value;
+	} else {
+		return "";
+	}
+}
+

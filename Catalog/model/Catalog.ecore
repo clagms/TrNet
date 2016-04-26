@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="catalog" nsURI="http://catalog/1.0" nsPrefix="catalog">
+  <eClassifiers xsi:type="ecore:EClass" name="CatalogModel">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="types" upperBound="-1"
+        eType="#//TypeCatalog" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="references" upperBound="-1"
+        eType="#//ReferenceCatalog" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TypeCatalog" eSuperTypes="#//NamedElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="attributes" upperBound="-1"
+        eType="#//AttributeCatalog" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="outgoingReferences" upperBound="-1"
+        eType="#//ReferenceCatalog" eOpposite="#//ReferenceCatalog/source"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="incomingReferences" upperBound="-1"
+        eType="#//ReferenceCatalog" eOpposite="#//ReferenceCatalog/target"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="super" upperBound="-1"
+        eType="#//TypeCatalog"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="samples" upperBound="-1"
+        eType="#//TypeCatalogSample" containment="true" eOpposite="#//TypeCatalogSample/meta"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="aggregatedNumberOfInstances"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AttributeCatalog" eSuperTypes="#//NamedElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="samples" upperBound="-1"
+        eType="#//AttributeCatalogSample" containment="true" eOpposite="#//AttributeCatalogSample/meta"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="aggregatedNumberOfDistinctValues"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ReferenceCatalog" eSuperTypes="#//NamedElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="source" lowerBound="1"
+        eType="#//TypeCatalog" eOpposite="#//TypeCatalog/outgoingReferences"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="target" lowerBound="1"
+        eType="#//TypeCatalog" eOpposite="#//TypeCatalog/incomingReferences"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="samples" upperBound="-1"
+        eType="#//ReferenceCatalogSample" containment="true" eOpposite="#//ReferenceCatalogSample/meta"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="aggregatedNumberOfDistinctSourceInstances"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="aggregatedNumberOfDistinctTargetInstances"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="aggregatedNumberOfInstances"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="NamedElement" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="TypeCatalogSample">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numberOfInstances" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="meta" lowerBound="1" eType="#//TypeCatalog"
+        eOpposite="#//TypeCatalog/samples"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="index" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AttributeCatalogSample">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="meta" lowerBound="1" eType="#//AttributeCatalog"
+        eOpposite="#//AttributeCatalog/samples"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="index" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numberOfDistinctValues"
+        lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ReferenceCatalogSample">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="meta" lowerBound="1" eType="#//ReferenceCatalog"
+        eOpposite="#//ReferenceCatalog/samples"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numberOfDistinctSourceInstances"
+        lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numberOfDistinctTargetInstances"
+        lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="index" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="numberOfInstances" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+  </eClassifiers>
+</ecore:EPackage>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" copyrightText="" modelDirectory="/Catalog/src" modelPluginID="Catalog"
+    modelName="Catalog" importerID="org.eclipse.emf.importer.ecore" complianceLevel="6.0"
+    copyrightFields="false">
+  <foreignModel>Catalog.ecore</foreignModel>
+  <genPackages prefix="Catalog" disposableProviderFactory="true" ecorePackage="Catalog.ecore#/">
+    <genClasses ecoreClass="Catalog.ecore#//CatalogModel">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Catalog.ecore#//CatalogModel/types"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Catalog.ecore#//CatalogModel/references"/>
+    </genClasses>
+    <genClasses ecoreClass="Catalog.ecore#//TypeCatalog">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Catalog.ecore#//TypeCatalog/attributes"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Catalog.ecore#//TypeCatalog/outgoingReferences"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Catalog.ecore#//TypeCatalog/incomingReferences"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Catalog.ecore#//TypeCatalog/super"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Catalog.ecore#//TypeCatalog/samples"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Catalog.ecore#//TypeCatalog/aggregatedNumberOfInstances"/>
+    </genClasses>
+    <genClasses ecoreClass="Catalog.ecore#//AttributeCatalog">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Catalog.ecore#//AttributeCatalog/samples"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Catalog.ecore#//AttributeCatalog/aggregatedNumberOfDistinctValues"/>
+    </genClasses>
+    <genClasses ecoreClass="Catalog.ecore#//ReferenceCatalog">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Catalog.ecore#//ReferenceCatalog/source"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Catalog.ecore#//ReferenceCatalog/target"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Catalog.ecore#//ReferenceCatalog/samples"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Catalog.ecore#//ReferenceCatalog/aggregatedNumberOfDistinctSourceInstances"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Catalog.ecore#//ReferenceCatalog/aggregatedNumberOfDistinctTargetInstances"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Catalog.ecore#//ReferenceCatalog/aggregatedNumberOfInstances"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="Catalog.ecore#//NamedElement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Catalog.ecore#//NamedElement/name"/>
+    </genClasses>
+    <genClasses ecoreClass="Catalog.ecore#//TypeCatalogSample">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Catalog.ecore#//TypeCatalogSample/numberOfInstances"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference Catalog.ecore#//TypeCatalogSample/meta"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Catalog.ecore#//TypeCatalogSample/index"/>
+    </genClasses>
+    <genClasses ecoreClass="Catalog.ecore#//AttributeCatalogSample">
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference Catalog.ecore#//AttributeCatalogSample/meta"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Catalog.ecore#//AttributeCatalogSample/index"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Catalog.ecore#//AttributeCatalogSample/numberOfDistinctValues"/>
+    </genClasses>
+    <genClasses ecoreClass="Catalog.ecore#//ReferenceCatalogSample">
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference Catalog.ecore#//ReferenceCatalogSample/meta"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Catalog.ecore#//ReferenceCatalogSample/numberOfDistinctSourceInstances"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Catalog.ecore#//ReferenceCatalogSample/numberOfDistinctTargetInstances"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Catalog.ecore#//ReferenceCatalogSample/index"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Catalog.ecore#//ReferenceCatalogSample/numberOfInstances"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>

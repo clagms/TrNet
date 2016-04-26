@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Compile" default="main" basedir=".">
+
+	<target name="main">
+		
+		
+		<!-- Loads the transformation model. In order to compile other transformation mdoel, just specify the path to the transformation model in the modelfile attribute. Nothing else changes. -->
+		<epsilon.emf.loadModel name="VisualModel" aliases="TrNetModel,CoreModel" modelfile="model/Class2Relational.trnetvisual" metamodeluri="http://trnetvisual/1.0" read="true" store="true" />
+		
+		
+		<!-- Loads the input and output metamodels of the transformation. Change the modelfile attribute to use other metamodels. -->
+		<epsilon.emf.loadModel name="InputMetamodel" modelfile="model/Classes.ecore" metamodeluri="http://www.eclipse.org/emf/2002/Ecore" read="true" store="false" />
+		<epsilon.emf.loadModel name="OutputMetamodel" modelfile="model/DB.ecore" metamodeluri="http://www.eclipse.org/emf/2002/Ecore" read="true" store="false" />
+	
+		
+		<!-- The compilation process starts here. No more changes. -->
+	
+		
+		<!-- Generate IDs on the Visual Model -->
+		<epsilon.eol src="analysis/GenerateIds.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+
+		<!-- Generate Operand Indexes on the Visual Model-->
+		<epsilon.eol src="analysis/GenerateOperandIndexes.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol> 
+
+		<!-- Generate Expected Cardinalities on the Visual Model -->
+		<epsilon.eol src="analysis/GenerateExpectedSizes.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+
+		<!-- Validations on the Visual Model -->
+		<epsilon.evl src="validation/TrNetVisualValidation.evl">
+			<model ref="VisualModel" />
+		</epsilon.evl>
+
+		<!-- Generate the execution plan on the Visual Model -->
+		<epsilon.eol src="analysis/InferExecutionPlan.eol">
+			<model ref="VisualModel" />
+		</epsilon.eol>
+
+		<!-- Clear Generated Code -->
+		<delete quiet="true" includeEmptyDirs="true">
+			<fileset dir="./src-gen" />
+		</delete>
+
+		<!-- Generate Tranformation Code -->
+		<epsilon.egl src="generation/TrNet2Java.egl">
+			<model ref="VisualModel" />
+		</epsilon.egl>
+
+		<!-- Generate Input Visitor Code -->
+		<epsilon.egl src="generation/Ecore2InputVisitor.egl">
+			<model ref="InputMetamodel" />
+		</epsilon.egl>
+
+		<!-- Generate Output Visitor Code -->
+		<epsilon.egl src="generation/Ecore2OutputVisitor.egl">
+			<model ref="OutputMetamodel" />
+		</epsilon.egl>
+
+	</target>
+
+</project>
